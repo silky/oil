@@ -188,6 +188,11 @@ class LiteralPart(_LiteralPartBase):
   DoubleQuotedPart.  (SingleQuotedPart contains a list of Token instance, not
   WordPart instances.)
   """
+  SCHEMA = """
+  record LiteralPart extends WordPart {
+    token Token
+  }
+  """
   def __init__(self, token):
     _LiteralPartBase.__init__(self, Id.Lit_Chars, token)
 

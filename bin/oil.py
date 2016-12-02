@@ -289,6 +289,7 @@ def CompileMain(main_argv):
   #
   # And then
   from core import ast
+  from core import tokens
   from core import base
   from core import word_node
   from core import cmd_node
@@ -297,9 +298,12 @@ def CompileMain(main_argv):
   # TODO: Import all the types
   schema = ast.Schema()
   schema.Add(base._Node)
+  schema.Add(tokens.Token)
   schema.Add(cmd_node.RedirNode)
   schema.Add(cmd_node.CNode)
   schema.Add(word_node.WordPart)
+  schema.Add(word_node.LiteralPart)
+
   # NOTE: Record is called Word.  I think we should change TokenWord to
   # something else?  Would need to type check the parser though.
   schema.Add(word_node.CompoundWord)
