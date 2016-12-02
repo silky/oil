@@ -59,7 +59,6 @@ class BinOutput:
 # Then you might be able to use the schema to drive Python.  Call methods no
 # BinOutput I guess.
 
-
 def Dump(node, bin_out):
   # node.Dump(bin_out)
 
@@ -81,6 +80,17 @@ def Dump(node, bin_out):
 
   pass
 
+
+# TODO: I guess we should parse the AST here?
+
+# ParseSchema(schema.AsText())
+
+# And then tools/gen_ast.py will use this as a library?
+# Write recursive descent parser here for ASDL?
+#
+# Tokenizer is very simple: 
+# How to do comments at EOL though?
+# Borrow it from the tdop stuff
 
 class Schema:
   """
