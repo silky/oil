@@ -24,6 +24,11 @@ class BinOutput:
 
     self.f = f
 
+    self.block_size = 16  # 16 byte blocks, often organized in 1 + 5*3 fashion
+    self.ref_width = 3  # 3 byte/24 bit references
+
+    self.block_index = 0
+
   # a non-leaf node?
   def AddNode(self, node):
     pass

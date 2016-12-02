@@ -9,11 +9,10 @@ set -o nounset
 set -o pipefail
 set -o errexit
 
-# Python 3 stuff
-replace-print() {
-  #grep 'print >>' oil/*.py
-  grep 'print ' {osh,core}/*.py
-  #sed -i --regexp-extended -e 's/print (.*)/print(\1)/' {osh,core}/*.py
+# TODO: Move this to make file
+build-ast() {
+  bin/oil compile run.sh foo
+  tools/gen_ast.py
 }
 
 make-bin-links() {
