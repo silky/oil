@@ -284,6 +284,22 @@ def BoilMain(main_argv):
   raise NotImplementedError('boil')
 
 
+def CompileMain(main_argv):
+  # TODO: Parse a script.  Without executing line-by-line.
+  #
+  # And then
+  from core import ast
+
+  # TODO: Import all the types
+  schema = ast.Schema()
+
+  with open(out_path, 'w') as f:
+    bin_output = ast.BinOutput(f)
+    ast.Dump(schema, bin_output)
+
+  raise NotImplementedError('compile')
+
+
 def main(argv):
   b = os.path.basename(argv[0])
   main_name, _ = os.path.splitext(b)
@@ -303,6 +319,11 @@ def main(argv):
     return WokMain(main_argv)
   elif main_name == 'boil':
     return BoilMain(main_argv)
+
+
+  # TODO: Only allow these as oil actions, not symlinks?
+  elif main_name == 'compile':
+    return CompileMain(main_argv)
   else:
     raise UsageError('Invalid main %r' % main_name)
 
