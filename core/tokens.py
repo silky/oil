@@ -24,14 +24,14 @@ class Token(_Node):
   # But they might not be on the same line.
   SCHEMA = """
   record SourceLocation {
-    path Str
+    path Ref<Str>  # we want sharing
     line Int
     col Int
     len Int
   }
   record Token extends Node {
+    loc Ref<SourceLocation>
     val Str
-    loc SourceLocation
   }
   """
   def __init__(self, id, val):
