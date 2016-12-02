@@ -293,9 +293,16 @@ def CompileMain(main_argv):
   # TODO: Import all the types
   schema = ast.Schema()
 
-  with open(out_path, 'w') as f:
-    bin_output = ast.BinOutput(f)
-    ast.Dump(schema, bin_output)
+  in_path = main_argv[0]
+  out_path = main_argv[1]
+
+  # For now, we will have a shell script to dump it to a file.
+  # Later need some Python plumbing.  Pass byte code to the executor.
+
+  with open(in_path) as in_f, open(out_path, 'w') as out_f:
+    node = Parse(in_f)
+    bin_output = ast.BinOutput(schema, f)
+    ast.Dump(node, bin_output)
 
   raise NotImplementedError('compile')
 

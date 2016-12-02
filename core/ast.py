@@ -37,11 +37,31 @@ class BinOutput:
     pass
 
 
-# TODO: bin/oil needs
+# Vertical slice:
 #
-# oil compile foo.sh
+# 1. Parse SimpleCommandNode -- list of Words
+#    might have to simplify the tree... remove singleton nodes?
+# 2. Serialize the CompoundWord -> LiteralPart -> Token -> (SourceLocation, String)
+# 3. Write a schema for CompoundWord/LiteralPart/Token/SourceLocation/String
+#    On each of those classes.
+# 4. Then interpret the schema and write the output
+# 5. Read it in C++ manually at first?
+#    Nah actually you can just generate classes from the schema.  Just do
+#    SimpleCommandNode.words, which is a list of tokens, and then print source
+#    locations for debugging.
+# 6. And then adapt your old C++ code to execute it.
+#
+# Then you might be able to use the schema to drive Python.  Call methods no
+# BinOutput I guess.
 
-def Serialize(f, bin_out):
+
+def Dump(node, bin_out):
+  # node.Dump(bin_out)
+
+  # And then it will call it on its children for you?
+  # Hm.  Do you have to edit every node?  For now I think that is fine.
+  # Define the schema at the same time for now?
+
   pass
 
 
