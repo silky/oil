@@ -92,6 +92,8 @@ def Dump(node, bin_out):
 # How to do comments at EOL though?
 # Borrow it from the tdop stuff
 
+# TODO: Rename to ESchema?
+
 class Schema:
   """
   TODO: Collect all the nodes

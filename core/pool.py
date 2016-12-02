@@ -90,6 +90,21 @@ class Pool(object):
   The LinePool has to be passed into both the parser and executor?
   And also parts need to be able to print themselves.. hm.
   """
+
+  SCHEMA = """
+  record SourceLocation {
+    path Ref<Str>  # we want sharing
+    line Int       # index into "lines"
+    col Int
+    len Int  # is this redundant with the token length?
+             # maybe only store the start here?
+  }
+  record DebugInfo {
+    lines     Array<Str>  # significant lines only
+    locations Array<SourceLocation>
+  }
+  """
+
   def __init__(self):
     # Could be std::vector<char *> pointing into a std::string
     self.lines = []

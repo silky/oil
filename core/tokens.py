@@ -23,12 +23,6 @@ class Token(_Node):
   # Or do we need a flat list of tokens and use token IDs?
   # But they might not be on the same line.
   SCHEMA = """
-  record SourceLocation {
-    path Ref<Str>  # we want sharing
-    line Int
-    col Int
-    len Int
-  }
   record Token extends Node {
     loc Ref<SourceLocation>
     val Str

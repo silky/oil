@@ -293,10 +293,13 @@ def CompileMain(main_argv):
   from core import base
   from core import word_node
   from core import cmd_node
+  from core import pool
 
 
   # TODO: Import all the types
   schema = ast.Schema()
+  schema.Add(pool.Pool)
+
   schema.Add(base._Node)
   schema.Add(tokens.Token)
   schema.Add(cmd_node.RedirNode)
