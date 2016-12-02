@@ -42,6 +42,13 @@ EAssignScope = util.Enum('EAssignScope', 'LOCAL GLOBAL'.split())
 
 
 class WordPart(_Node):
+  """A list of things to be concatenated to form a word."""
+
+  SCHEMA = """
+  record WordPart extends Node {
+  }
+  """
+
   def __init__(self, id):
     _Node.__init__(self, id)
 
@@ -489,6 +496,12 @@ class Word(_Node, _BTokenInterface):
 
 class CompoundWord(Word):
   """A word that is a sequence of WordPart instances"""
+
+  SCHEMA = """
+  record Word extends Node {
+    parts Array<WordPart>
+  }
+  """
 
   def __init__(self, parts=None):
     Word.__init__(self)

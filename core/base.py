@@ -85,6 +85,12 @@ def MakeError(msg, *args, token=None, word=None):
 
 
 class _Node(object):
+  SCHEMA = """
+  enum Id = ...  # placeholder for a user-generated thing
+  record Node {
+    id Id
+  }
+  """
 
   def __init__(self, id):
     self.id = id  # type: Id

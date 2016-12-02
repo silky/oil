@@ -62,6 +62,18 @@ def Dump(node, bin_out):
   # Hm.  Do you have to edit every node?  For now I think that is fine.
   # Define the schema at the same time for now?
 
+  # use virtual dispatch on child type?
+  #
+  # Each node can have a 
+
+  # node.DumpBin
+  # They can call _Node.Dump(self, bin_out) oto
+
+  # Do you even need the schema then?
+  #
+  # This is dependent on the SHAPE of the data and not the ID, so I think
+  # virtual dispatch is OK?
+
   pass
 
 
@@ -70,9 +82,14 @@ class Schema:
   TODO: Collect all the nodes
   """
   def __init__(self):
-    self.node_types = []
+    self.defs = []
 
-  def AddNodeType(self, n):
+  def Defs(self):
+    return ''.join(self.defs)
+
+  def Add(self, n):
+    self.defs.append(n.SCHEMA)
+
     # TODO:
     # - Look at the doc string
     # - or look at _Schema property?

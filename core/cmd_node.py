@@ -21,6 +21,12 @@ from core.base import _Node
 class CNode(_Node):
   """Abstract base class for _CompoundCNode/SimpleCommandNode/AssignmentNode."""
 
+  SCHEMA = """
+  record CNode extends Node {
+    redirects Ref<Array<RedirNode>> 
+  }
+  """
+
   def __init__(self, id):
     _Node.__init__(self, id)
     self.redirects = []  # common to almost all nodes
@@ -68,6 +74,13 @@ class RedirNode(_Node):
   TODO: Does it need self.word_start and self.word_end?  Probably.
 
   TODO: base class _Node
+  """
+
+  SCHEMA = """
+  record RedirNode extends Node {
+    arg Word
+    fd  Int
+  }
   """
   def __init__(self, id, fd):
     """
@@ -129,6 +142,17 @@ def _GetHereDocsToFill(redirects):
 
 
 class SimpleCommandNode(CNode):
+  SCHEMA = """
+  record Binding {
+    name  Str
+    value Word
+  }
+  record SimpleCommandNode extends CNode {
+    more_env Ref<Array<Binding>>
+    words    Array<Word>
+  }
+  """
+
   def __init__(self):
     CNode.__init__(self, Id.Node_Command)
     self.words = []  # CompoundWord instances
@@ -232,7 +256,6 @@ class _CompoundCNode(CNode):
     CNode.__init__(self, id)
     # children of type CNode.
     self.children = []
-    # TODO: Add self.redirects, and remove from ListNode/FunctionDefNode
 
   def GetHereDocsToFill(self):
     """For CommandParser to fill here docs"""
@@ -310,7 +333,6 @@ class ListNode(_CompoundCNode):
   """
   def __init__(self):
     _CompoundCNode.__init__(self, Id.Op_Semi)
-    self.redirects = []
 
   def _PrintHeader(self, f):
     f.write('List')
@@ -443,7 +465,6 @@ class FunctionDefNode(_CompoundCNode):
   def __init__(self):
     _CompoundCNode.__init__(self, Id.Node_FuncDef)
     self.name = ''
-    self.redirects = []
 
   def _PrintHeader(self, f):
     f.write('FunctionDef %s %s' % (self.name, self.redirects))
