@@ -91,7 +91,22 @@ class Pool(object):
   And also parts need to be able to print themselves.. hm.
   """
 
+  # An idea here so that the deployed code can be traced back to the right
+  # input files.
+  # Also you might want build info.  But actually it would be better done as
+  # text?
+  _TODO = """
+  record InputFile {
+    path     Str
+    checksum Bytes  # sha-256 or something
+  }
+  record Provenance {
+    inputs Array<InputFile>
+  }
+  """
+
   SCHEMA = """
+
   record SourceLocation {
     path Ref<Str>  # we want sharing
     line Int       # index into "lines"
@@ -99,6 +114,7 @@ class Pool(object):
     len Int  # is this redundant with the token length?
              # maybe only store the start here?
   }
+  # Not for execution, for stack traces only?
   record DebugInfo {
     lines     Array<Str>  # significant lines only
     locations Array<SourceLocation>
