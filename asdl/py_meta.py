@@ -229,20 +229,30 @@ def MakeTypes(module, root):
           # Set a static attribute like op_id.Plus, op_id.Minus.
           setattr(cls, name, val)
       else:
+        tag_num = {}
+
         # e.g. for arith_expr
         base_class = type(defn.name, (CompoundObj, ), {})
         setattr(root, defn.name, base_class)
 
-        # Make a type for each alternative.
+        # Make a type and a enum tag for each alternative.
         for i, cons in enumerate(typ.types):
+          tag = i + 1  # zero reserved?
+          tag_num[cons.name] = tag  # for enum
+
           class_attr = _MakeFieldDescriptors(module, cons.fields)
           class_attr['DESCRIPTOR'] = cons
           # TODO: Allow setting these integers.  We're reusing ID 0 for every
           # sum type, but that's OK because fields are strongly typed.
-          class_attr['tag'] = i + 1  # zero reserved?
+          class_attr['tag'] = tag
 
           cls = type(cons.name, (base_class, ), class_attr)
           setattr(root, cons.name, cls)
+
+        # e.g. arith_expr_e.Const == 1
+        enum_name = defn.name + '_e'
+        tag_enum = type(enum_name, (), tag_num)
+        setattr(root, enum_name, tag_enum)
 
     elif isinstance(typ, asdl.Product):
       class_attr = _MakeFieldDescriptors(module, typ.fields)

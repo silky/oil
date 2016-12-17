@@ -84,6 +84,10 @@ class ArithAstTest(unittest.TestCase):
     n.right = Const(6)
     n.CheckUnassigned()
 
+    arith_expr_e = arith_ast.arith_expr_e
+    self.assertEqual(arith_expr_e.Const, c.tag)
+    self.assertEqual(arith_expr_e.ArithBinary, n.tag)
+
 
 if __name__ == '__main__':
   unittest.main()
