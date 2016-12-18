@@ -71,9 +71,16 @@ def PrintObj(obj, lines, max_col=80, indent=0):
 
   {} for words, [] for wordpart?  What about tokens?  I think each node has to
   be able to override the behavior.  How to do this though?  Free functions?
+
+  Common case:
+  ls /foo /bar -> (Com {[ls]} {[/foo]} {[/bar]})
+
+  Or use color for this?
   """
-  ind = ' ' * indent
-  line = ind + obj.__class__.__name__
+  # These lines can be possibly COMBINED all into one.  () can replace
+  # indentation?
+  child_parts = []
+
   # Reverse order since we are appending to lines and then reversing.
   for name in reversed(obj.FIELDS):
     #print(name)
@@ -81,13 +88,25 @@ def PrintObj(obj, lines, max_col=80, indent=0):
     desc = obj.DESCRIPTOR_LOOKUP[name]
     if isinstance(desc, asdl.IntType):
       # TODO: How to check for overflow?
-      line += ' %s' % field_val
+      child_parts.append(str(field_val))
+
     elif isinstance(desc, asdl.Sum) and asdl.is_simple(desc):
       pass
+
     elif isinstance(desc, asdl.StrType):
-      line += ' %s' % field_val
+      child_parts.append(field_val)
+
     elif isinstance(desc, asdl.ArrayType):
-      PrintArray(field_val, lines, max_col=max_col-INDENT, indent=indent+INDENT)
+      # Hm does an array need the field name?  I can have multiple arrays like
+      # redirects, more_env, and words.  Is there a way to make "words"
+      # special?
+      #child_parts = []
+      #PrintArray(field_val, child_parts, max_col=max_col-INDENT,
+      #    indent=indent+INDENT)
+      obj_list = field_val
+      for child_obj in reversed(obj_list):
+        PrintObj(child_obj, child_parts, max_col, indent)
+
     elif isinstance(desc, asdl.MaybeType):
       # Because it's optional, print the name.  Same with bool?
       pass
@@ -96,10 +115,19 @@ def PrintObj(obj, lines, max_col=80, indent=0):
 
       # Children can't be written directly to 'out'.  We have to know if they
       # will fit first.
-      child_lines = []
-      PrintObj(field_val, child_lines, max_col=max_col-INDENT, indent=indent+INDENT)
-      lines.extend(child_lines)
+      child_parts = []
+      PrintObj(field_val, child_parts, max_col=max_col-INDENT, indent=indent+INDENT)
+      lines.extend(child_parts)
+
+  # TODO: Add up all the length of child_parts
+  # And consolidate it into a single one if it fits in max_col?
+
+  print([len(p) for p in child_parts])
+
+  ind = ' ' * indent
+  line = ind + obj.__class__.__name__
 
   #out.Write(line)
+  lines.extend(child_parts)
   lines.append(line)
 
