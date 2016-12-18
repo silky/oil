@@ -181,8 +181,7 @@ def MakeTree(obj, max_col=80, depth=0):
 
   # All strings
   total_len = sum(len(p) for p in parts)
-  if total_len < 80:
-    # TODO: Use () here
+  if total_len < 70:  # Could use a better heuristic to account for ()
     f = io.StringIO()
     PrintSingle(parts, f)
     return f.getvalue()
@@ -195,10 +194,15 @@ def PrintTree(node, f, indent=0):
   if isinstance(node, str):
     print(ind + node, file=f)
   elif isinstance(node, list):
-    # Assume the first entry is always a string
-    print(ind + node[0], file=f)
+    # Assume the first entry is always a string.
+    # We could also insert patterns here... e.g. if it is a word, then use {},
+    # and WordPart, use [], without any qualifier?
+    # But I will have StaticWord/DynamicWord/UnsafeWord.
+
+    print(ind + '(' + node[0], file=f)
     for child in node[1:]:
       PrintTree(child, f, indent=indent+INDENT)
+    print(ind + ')', file=f)
   else:
     raise AssertionError(node)
 
