@@ -5,8 +5,6 @@ format.py
 Like encode.py, but uses text instead of binary.
 
 For pretty-printing.
-
-
 """
 
 import io
@@ -16,6 +14,18 @@ from asdl import asdl_parse as asdl
 
 
 class ColorOutput:
+  """
+  API:
+
+  PushColor() ?
+  PopColor()?
+
+  Things that should be color: raw text, like "ls" and '/foo/bar"
+
+  certain kinds of nodes.
+
+  Should we have both a background color and a foreground color?
+  """
   def __init__(self, f):
     self.f = f
     self.lines = []
@@ -31,13 +41,23 @@ class TextOutput(ColorOutput):
 
 
 class HtmlOutput(ColorOutput):
-  # This one can have wider columns
+  """
+  HTML one can have wider columns.  Maybe not even fixed-width font.
+  Hm yeah indentation should be logical then?
+
+  Color: HTML spans
+  """
   def __init__(self, f):
     ColorOutput.__init__(self, f)
 
 
 class AnsiOutput(ColorOutput):
-  # Generally 80 column output
+  """
+  Generally 80 column output
+
+  Color: html code and restore
+
+  """
 
   def __init__(self, f):
     ColorOutput.__init__(self, f)
@@ -111,7 +131,8 @@ def MakeTree(obj, max_col=80, depth=0):
       parts.append(str(field_val))
 
     elif isinstance(desc, asdl.Sum) and asdl.is_simple(desc):
-      pass
+      # Hm the second
+      parts.append(field_val.name)
 
     elif isinstance(desc, asdl.StrType):
       parts.append(field_val)
@@ -169,18 +190,20 @@ def MakeTree(obj, max_col=80, depth=0):
   return parts
 
 
-def PrintTree(node, out, indent=0):
+def PrintTree(node, f, indent=0):
   ind = ' ' * indent
   if isinstance(node, str):
-    print(ind + node)
+    print(ind + node, file=f)
   elif isinstance(node, list):
     # Assume the first entry is always a string
-    print(ind + node[0])
+    print(ind + node[0], file=f)
     for child in node[1:]:
-      PrintTree(child, out, indent=indent+INDENT)
+      PrintTree(child, f, indent=indent+INDENT)
   else:
     raise AssertionError(node)
 
+
+# TODO: Should take ColorOutput instead of a file?
 
 def PrintSingle(parts, f):
   f.write('(')
@@ -197,6 +220,3 @@ def PrintSingle(parts, f):
     if i != n - 1:
       f.write(' ')
   f.write(')')
-
-
-

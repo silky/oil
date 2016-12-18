@@ -41,12 +41,10 @@ def main(argv):
     expr = argv[2]
 
     obj = arith_parse.ParseShell(expr)
-    out = fmt.TextOutput(sys.stdout)
-    lines = []
+    #out = fmt.TextOutput(sys.stdout)
     tree = fmt.MakeTree(obj)
-
     #treee= ['hi', 'there', ['a', 'b'], 'c']
-    fmt.PrintTree(tree, out)
+    fmt.PrintTree(tree, sys.stdout)
 
     # Might need to print the output?
     # out.WriteToFile?
