@@ -34,6 +34,11 @@ asdl-arith-encode() {
   hexdump $out
 }
 
+asdl-arith-format() {
+  local expr="$1"
+  asdl/asdl_demo.py arith-format "$expr"
+}
+
 asdl-py() {
   local schema=$1
   asdl/asdl_demo.py py $schema

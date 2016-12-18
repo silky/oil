@@ -8,6 +8,7 @@ from asdl import asdl_parse
 from asdl import arith_parse
 from asdl import py_meta
 from asdl import encode
+from asdl import format as fmt
 
 
 def main(argv):
@@ -36,6 +37,15 @@ def main(argv):
       out = encode.BinOutput(f)
       encode.EncodeRoot(obj, enc, out)
 
+  elif action == 'arith-format':
+    expr = argv[2]
+
+    obj = arith_parse.ParseShell(expr)
+    out = fmt.TextOutput(sys.stdout)
+    fmt.PrintObj(obj, out)
+
+    # Might need to print the output?
+    # out.WriteToFile?
   else:
     raise RuntimeError('Invalid action %r' % action)
 
