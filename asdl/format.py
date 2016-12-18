@@ -76,6 +76,24 @@ def PrintObj(obj, lines, max_col=80, indent=0):
   ls /foo /bar -> (Com {[ls]} {[/foo]} {[/bar]})
 
   Or use color for this?
+
+  Invariant:
+    an individual field is never split up?
+
+  (ArithBinary (Plus) (ArithBinary (Plus) (Const 1) (Const 2)) (Const 3))
+
+  # If it's a simple sum, no tag
+  (ArithBinary Plus (ArithBinary Plus (Const 1) (Const 2)) (Const 3))
+
+  vs.
+
+  ArithBinary
+    Plus
+    ArithBinary
+      Plus
+      Const 1
+      Const 2
+    Const 3
   """
   # These lines can be possibly COMBINED all into one.  () can replace
   # indentation?
@@ -122,6 +140,20 @@ def PrintObj(obj, lines, max_col=80, indent=0):
   # TODO: Add up all the length of child_parts
   # And consolidate it into a single one if it fits in max_col?
 
+  # I think it should be [head, ...tail] format.  Maybe (head, ...tail)
+  # head, tail = foo[0], foo[1:]
+  #
+  # And then you CHOOSE between indentatino or parens to denote structure (())
+  #
+  # return (string or tuple)
+  # string means: I can be combined with other strings
+  # tuple: I already determined that one of my children is too long.  So the
+  # whole structure must be kept in tact.  no wrapping.
+
+  # If any part is a tuple, then put everything on its own separate line.
+
+  do_wrap = any(isinstance(p, tuple) for p in child_parts)
+  # 
   print([len(p) for p in child_parts])
 
   ind = ' ' * indent
@@ -130,4 +162,21 @@ def PrintObj(obj, lines, max_col=80, indent=0):
   #out.Write(line)
   lines.extend(child_parts)
   lines.append(line)
+
+
+def PrintTree(node, out, indent=0):
+  ind = ' ' * indent
+  if isinstance(node, str):
+    print(ind + node)
+  elif isinstance(node, tuple):
+    # Assume the first entry is always a string
+    print(ind + node[0])
+    for child in node[1:]:
+      PrintTree(child, out, indent=indent+2)
+  else:
+    raise AssertionError(node)
+
+
+
+
 

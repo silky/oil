@@ -43,9 +43,16 @@ def main(argv):
     obj = arith_parse.ParseShell(expr)
     out = fmt.TextOutput(sys.stdout)
     lines = []
-    fmt.PrintObj(obj, lines)
-    for line in reversed(lines):
-      print(line)
+    tree = fmt.PrintObj(obj, lines)
+
+    # node = fmt.Print(obj)
+    # 
+    # If it's a tup
+
+    tree = ('hi', 'there', 'a', 'b', 'c')
+    tree = ('hi', ('there', 'a', 'b', 'c'))
+    tree = ('hi', 'there', ('a', 'b'), 'c')
+    fmt.PrintTree(tree, out)
 
     # Might need to print the output?
     # out.WriteToFile?
