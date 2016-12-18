@@ -52,7 +52,8 @@ def PrintArray(obj_list, lines, max_col=80, indent=0):
 
 
 INDENT = 2
-def PrintObj(obj, lines, max_col=80, indent=0):
+
+def MakeTree(obj, max_col=80, depth=0):
   """
   Args:
     obj: py_meta.Obj
@@ -97,22 +98,22 @@ def PrintObj(obj, lines, max_col=80, indent=0):
   """
   # These lines can be possibly COMBINED all into one.  () can replace
   # indentation?
-  child_parts = []
+  parts = [obj.__class__.__name__]
 
   # Reverse order since we are appending to lines and then reversing.
-  for name in reversed(obj.FIELDS):
+  for name in obj.FIELDS:
     #print(name)
     field_val = getattr(obj, name)
     desc = obj.DESCRIPTOR_LOOKUP[name]
     if isinstance(desc, asdl.IntType):
       # TODO: How to check for overflow?
-      child_parts.append(str(field_val))
+      parts.append(str(field_val))
 
     elif isinstance(desc, asdl.Sum) and asdl.is_simple(desc):
       pass
 
     elif isinstance(desc, asdl.StrType):
-      child_parts.append(field_val)
+      parts.append(field_val)
 
     elif isinstance(desc, asdl.ArrayType):
       # Hm does an array need the field name?  I can have multiple arrays like
@@ -123,7 +124,8 @@ def PrintObj(obj, lines, max_col=80, indent=0):
       #    indent=indent+INDENT)
       obj_list = field_val
       for child_obj in reversed(obj_list):
-        PrintObj(child_obj, child_parts, max_col, indent)
+        t = MakeTree(child_obj, max_col, depth)
+        parts.append(t)
 
     elif isinstance(desc, asdl.MaybeType):
       # Because it's optional, print the name.  Same with bool?
@@ -133,9 +135,8 @@ def PrintObj(obj, lines, max_col=80, indent=0):
 
       # Children can't be written directly to 'out'.  We have to know if they
       # will fit first.
-      child_parts = []
-      PrintObj(field_val, child_parts, max_col=max_col-INDENT, indent=indent+INDENT)
-      lines.extend(child_parts)
+      t = MakeTree(field_val, max_col=max_col-INDENT, depth=depth+1)
+      parts.append(t)
 
   # TODO: Add up all the length of child_parts
   # And consolidate it into a single one if it fits in max_col?
@@ -152,27 +153,21 @@ def PrintObj(obj, lines, max_col=80, indent=0):
 
   # If any part is a tuple, then put everything on its own separate line.
 
-  do_wrap = any(isinstance(p, tuple) for p in child_parts)
-  # 
-  print([len(p) for p in child_parts])
+  do_wrap = any(isinstance(p, tuple) for p in parts)
+  print([len(p) for p in parts])
 
-  ind = ' ' * indent
-  line = ind + obj.__class__.__name__
-
-  #out.Write(line)
-  lines.extend(child_parts)
-  lines.append(line)
+  return parts
 
 
 def PrintTree(node, out, indent=0):
   ind = ' ' * indent
   if isinstance(node, str):
     print(ind + node)
-  elif isinstance(node, tuple):
+  elif isinstance(node, list):
     # Assume the first entry is always a string
     print(ind + node[0])
     for child in node[1:]:
-      PrintTree(child, out, indent=indent+2)
+      PrintTree(child, out, indent=indent+INDENT)
   else:
     raise AssertionError(node)
 
