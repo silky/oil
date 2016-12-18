@@ -117,7 +117,11 @@ def MakeTree(obj, max_col=80, depth=0):
   # Reverse order since we are appending to lines and then reversing.
   for name in obj.FIELDS:
     #print(name)
-    field_val = getattr(obj, name)
+    field_val = getattr(obj, name, None)
+    if field_val is None:
+      parts.append('%s=?' % name)
+      continue
+
     desc = obj.DESCRIPTOR_LOOKUP[name]
     if isinstance(desc, asdl.IntType):
       # TODO: How to check for overflow?

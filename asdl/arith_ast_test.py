@@ -56,6 +56,14 @@ class ArithAstTest(unittest.TestCase):
 
     #n5 = ArithVar(None)
 
+    s = source_location()
+    s.path = 'hi'
+    s.line = 1
+    s.col = 2
+    s.length = 3
+    print(s)
+
+    # Doesn't work now
     print(source_location())
     
     c = Const(66)

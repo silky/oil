@@ -86,6 +86,10 @@ module osh
 
   -- TODO: Pretty much all of these can have redirects.  Even function defs.
   -- AndOr/Pipeline/Fork are exceptions.
+  -- TODO: Redirects could be like Fork.  You pull it out into another node that
+  -- wraps a any node.  Or really this should be in OVM?  Every node should
+  -- have a fork flag then?
+
   command = 
     NoOp
   | SimpleCommand(word* words, redir* redirects, binding* more_env)
