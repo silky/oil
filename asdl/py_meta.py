@@ -171,9 +171,8 @@ class CompoundObj(Obj):
     self.__dict__[name] = value
 
   def __repr__(self):
-    import pprint
-    return '<%s %s>' % (self.__class__.__name__, pprint.pformat(self.__dict__))
-
+    #import pprint
+    #return '<%s %s>' % (self.__class__.__name__, pprint.pformat(self.__dict__))
     f = io.StringIO()
     tree = fmt.MakeTree(self)
     fmt.PrintTree(tree, f)

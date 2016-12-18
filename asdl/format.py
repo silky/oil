@@ -83,28 +83,13 @@ def MakeTree(obj, max_col=80, depth=0):
 
   NOTES:
 
-  ArithBinary
-    op_id
-    left
-    right
-
-  vs
-  (ArithBinary op_id left right)
-
   {} for words, [] for wordpart?  What about tokens?  I think each node has to
   be able to override the behavior.  How to do this though?  Free functions?
 
   Common case:
   ls /foo /bar -> (Com {[ls]} {[/foo]} {[/bar]})
-
   Or use color for this?
 
-  Invariant:
-    an individual field is never split up?
-
-  (ArithBinary (Plus) (ArithBinary (Plus) (Const 1) (Const 2)) (Const 3))
-
-  # If it's a simple sum, no tag
   (ArithBinary Plus (ArithBinary Plus (Const 1) (Const 2)) (Const 3))
 
   vs.
@@ -117,6 +102,14 @@ def MakeTree(obj, max_col=80, depth=0):
       Const 2
     Const 3
   """
+  # HACK to incorporate old AST nodes.  Remove when the whole thing is
+  # converted.
+  from asdl import py_meta
+  if not isinstance(obj, py_meta.CompoundObj):
+    #raise AssertionError(obj)
+    parts = [repr(obj)]
+    return parts
+
   # These lines can be possibly COMBINED all into one.  () can replace
   # indentation?
   parts = [obj.__class__.__name__]
@@ -152,6 +145,7 @@ def MakeTree(obj, max_col=80, depth=0):
     elif isinstance(desc, asdl.MaybeType):
       # Because it's optional, print the name.  Same with bool?
       pass
+
     else:
       # Recursive call for child records.  Write children before parents.
 
