@@ -9,6 +9,7 @@ For pretty-printing.
 
 """
 
+import io
 import sys
 
 from asdl import asdl_parse as asdl
@@ -153,8 +154,17 @@ def MakeTree(obj, max_col=80, depth=0):
 
   # If any part is a tuple, then put everything on its own separate line.
 
-  do_wrap = any(isinstance(p, tuple) for p in parts)
-  print([len(p) for p in parts])
+  has_multiline = any(isinstance(p, list) for p in parts)
+  if has_multiline:
+    return parts
+
+  # All strings
+  total_len = sum(len(p) for p in parts)
+  if total_len < 80:
+    # TODO: Use () here
+    f = io.StringIO()
+    PrintSingle(parts, f)
+    return f.getvalue()
 
   return parts
 
@@ -172,6 +182,21 @@ def PrintTree(node, out, indent=0):
     raise AssertionError(node)
 
 
+def PrintSingle(parts, f):
+  f.write('(')
+  n = len(parts)
+  for i, p in enumerate(parts):
+    if isinstance(p, str):
+      f.write(p)
+    elif isinstance(p, list):
+      # Assume the first entry is always a string
+      f.write(ind + node[0])
+      PrintSingle(node[1:], f)
+    else:
+      raise AssertionError(node)
+    if i != n - 1:
+      f.write(' ')
+  f.write(')')
 
 
 

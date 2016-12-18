@@ -45,7 +45,7 @@ def main(argv):
     lines = []
     tree = fmt.MakeTree(obj)
 
-    #tree = ['hi', 'there', ['a', 'b'], 'c']
+    #treee= ['hi', 'there', ['a', 'b'], 'c']
     fmt.PrintTree(tree, out)
 
     # Might need to print the output?
