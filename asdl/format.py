@@ -17,6 +17,10 @@ from asdl import asdl_parse as asdl
 class ColorOutput:
   def __init__(self, f):
     self.f = f
+    self.lines = []
+
+  def Write(self, line):
+    self.lines.append(line)
 
 
 class TextOutput(ColorOutput):
@@ -38,16 +42,17 @@ class AnsiOutput(ColorOutput):
     ColorOutput.__init__(self, f)
 
 
-def PrintArray(obj_list, out):
+def PrintArray(obj_list, lines, max_col=80, indent=0):
   """
   Args:
     obj_list: py_meta.Obj
   """
-  pass
+  for obj in reversed(obj_list):
+    PrintObj(obj, lines, max_col, indent)
 
 
 INDENT = 2
-def PrintObj(obj, out, max_col=80):
+def PrintObj(obj, lines, max_col=80, indent=0):
   """
   Args:
     obj: py_meta.Obj
@@ -67,22 +72,34 @@ def PrintObj(obj, out, max_col=80):
   {} for words, [] for wordpart?  What about tokens?  I think each node has to
   be able to override the behavior.  How to do this though?  Free functions?
   """
-  print(obj.__class__.__name__)
-  for name in obj.FIELDS:
+  ind = ' ' * indent
+  line = ind + obj.__class__.__name__
+  # Reverse order since we are appending to lines and then reversing.
+  for name in reversed(obj.FIELDS):
     #print(name)
     field_val = getattr(obj, name)
     desc = obj.DESCRIPTOR_LOOKUP[name]
     if isinstance(desc, asdl.IntType):
-      pass
+      # TODO: How to check for overflow?
+      line += ' %s' % field_val
     elif isinstance(desc, asdl.Sum) and asdl.is_simple(desc):
       pass
     elif isinstance(desc, asdl.StrType):
-      pass
+      line += ' %s' % field_val
     elif isinstance(desc, asdl.ArrayType):
-      pass
+      PrintArray(field_val, lines, max_col=max_col-INDENT, indent=indent+INDENT)
     elif isinstance(desc, asdl.MaybeType):
       # Because it's optional, print the name.  Same with bool?
       pass
     else:
       # Recursive call for child records.  Write children before parents.
-      PrintObj(field_val, out, max_col=max_col-INDENT)
+
+      # Children can't be written directly to 'out'.  We have to know if they
+      # will fit first.
+      child_lines = []
+      PrintObj(field_val, child_lines, max_col=max_col-INDENT, indent=indent+INDENT)
+      lines.extend(child_lines)
+
+  #out.Write(line)
+  lines.append(line)
+

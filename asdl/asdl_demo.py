@@ -42,7 +42,10 @@ def main(argv):
 
     obj = arith_parse.ParseShell(expr)
     out = fmt.TextOutput(sys.stdout)
-    fmt.PrintObj(obj, out)
+    lines = []
+    fmt.PrintObj(obj, lines)
+    for line in reversed(lines):
+      print(line)
 
     # Might need to print the output?
     # out.WriteToFile?
