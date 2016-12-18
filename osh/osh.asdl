@@ -97,18 +97,17 @@ module osh
                var_flags flags,
                word* names,  -- names mentioned without a binding
                binding* bindings)
-  | DParen(arith_expr child, redir* redirects)
-  | DBracket(bool_expr child, redir* redirects)
-  | Block(command* commands, redir* redirects)
-  | Subshell(command* commands, redir* redirects)
   | Fork(command* commands)  -- shell only allows one command
   | Pipeline(command* commands, int negated, pipe_op* op)
-  | AndOr(command* commands, and_or ops)
-  -- NOTE: Can't have multiple var length?  Maybe it's just a single command.
+  | AndOr(command* commands, and_or* ops)
+  | Block(command* commands, redir* redirects)
+  | Subshell(command* commands, redir* redirects)
+  | DParen(arith_expr child, redir* redirects)
+  | DBracket(bool_expr child, redir* redirects)
   | ForEach(string var, word* words, command* body, redir* redirects)
+  -- C-style for loop
   | ForExpr(arith_expr init, arith_expr test, arith_expr update, command* body,
             redir* redirects)
-  -- NOTE: in oil, we will have expression variants?i 
   | While(command cond, command* body, redir* redirects)
   | Until(command cond, command* body, redir* redirects)
   | If(command test, command* body, command* orelse, redir* redirects)
