@@ -22,6 +22,10 @@ from core.util import cast
 from core.util import log
 from core.value import TValue
 
+from osh import ast 
+
+bool_expr_e = ast.bool_expr_e  # used for dispatch
+
 #from core import word_eval
 
 
@@ -277,6 +281,18 @@ class BoolEvaluator(ExprEvaluator):
   def _Eval(self, node):
     # TODO: Switch on node.tag.
     #print('!!', node.tag)
+
+    # Backward compat for now:
+    if hasattr(node, 'id') and node.id == Id.Word_Compound:
+      s = self._EvalCompoundWord(node)
+      return bool(s)
+
+    if node.tag == bool_expr_e.LogicalNot:
+      b = self._Eval(node.child)
+      return not b
+
+    raise AssertionError
+
     if node.id == Id.Word_Compound:
       s = self._EvalCompoundWord(node)
       return bool(s)

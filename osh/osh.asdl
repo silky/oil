@@ -60,7 +60,7 @@ module osh
     WordTest(word w)  -- e.g. [[ myword ]]
   | BoolBinary(word left, word right)
   | BoolUnary(word child)
-  | LogicalNot(bool_expr b)
+  | LogicalNot(bool_expr child)
   | LogicalAnd(bool_expr left, bool_expr right)
   | LogicalOr(bool_expr left, bool_expr right)
 

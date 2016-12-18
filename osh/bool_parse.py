@@ -248,10 +248,11 @@ class BoolParser(object):
         return BinaryExprNode(op, left, right)
       else:
         # [[ foo ]] is implicit Implicit [[ -n foo ]]
-        op = Id.BoolUnary_n
+        #op = Id.BoolUnary_n
         word = self.cur_word
         if not self._Next(): return None
-        return UnaryExprNode(op, word)
+        #return UnaryExprNode(op, word)
+        return word
 
     if self.op_id == Id.Op_LParen:
       if not self._Next(): return None
