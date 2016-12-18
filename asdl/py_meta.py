@@ -134,13 +134,11 @@ class CompoundObj(Obj):
   def _Init(self, args, kwargs):
     for i, val in enumerate(args):
       name = self.FIELDS[i]
-      self._assigned[name] = True
       self.__setattr__(name, val)
 
     for name, val in kwargs.items():
       if self._assigned[name]:
         raise AssertionError('Duplicate assignment of field %r' % name)
-      self._assigned[name] = True
       self.__setattr__(name, val)
 
     for name in self.FIELDS:
