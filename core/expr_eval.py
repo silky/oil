@@ -287,11 +287,11 @@ class BoolEvaluator(ExprEvaluator):
       s = self._EvalCompoundWord(node)
       return bool(s)
 
-    if node.tag == bool_expr_e.LogicalNot:
+    if hasattr(node, 'tag') and node.tag == bool_expr_e.LogicalNot:
       b = self._Eval(node.child)
       return not b
 
-    raise AssertionError
+    #raise AssertionError
 
     if node.id == Id.Word_Compound:
       s = self._EvalCompoundWord(node)
