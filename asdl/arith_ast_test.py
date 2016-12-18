@@ -12,6 +12,17 @@ from asdl import py_meta
 
 class ArithAstTest(unittest.TestCase):
 
+  def testFieldDefaults(self):
+    s = arith_ast.Slice()
+    print(s)
+    self.assertEqual(None, s.begin)
+    self.assertEqual(None, s.end)
+    self.assertEqual(None, s.stride)
+
+    func = arith_ast.FuncCall()
+    print(func)
+    self.assertEqual([], func.args)
+
   def testTypes(self):
     ArithVar = arith_ast.ArithVar
     ArithUnary = arith_ast.ArithUnary

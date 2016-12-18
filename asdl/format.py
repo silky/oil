@@ -117,8 +117,9 @@ def MakeTree(obj, max_col=80, depth=0):
   # Reverse order since we are appending to lines and then reversing.
   for name in obj.FIELDS:
     #print(name)
-    field_val = getattr(obj, name, None)
-    if field_val is None:
+    try:
+      field_val = getattr(obj, name)
+    except AttributeError:
       parts.append('%s=?' % name)
       continue
 

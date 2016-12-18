@@ -117,11 +117,19 @@ class CompoundObj(Obj):
   def __init__(self, *args, **kwargs):
     # The user must specify ALL required fields or NONE.
     self._assigned = {f: False for f in self.FIELDS}
+    self._SetDefaults()
     if args or kwargs:
       self._Init(args, kwargs)
-    else:
-      # Set defaults here?
-      pass
+
+  def _SetDefaults(self):
+    for name in self.FIELDS:
+      #print("%r wasn't assigned" % name)
+      desc = self.DESCRIPTOR_LOOKUP[name]
+      # item_desc = desc.desc
+      if isinstance(desc, asdl.MaybeType):
+        self.__setattr__(name, None)  # Maybe values can be None
+      elif isinstance(desc, asdl.ArrayType):
+        self.__setattr__(name, [])
 
   def _Init(self, args, kwargs):
     for i, val in enumerate(args):
@@ -137,14 +145,8 @@ class CompoundObj(Obj):
 
     for name in self.FIELDS:
       if not self._assigned[name]:
-        #print("%r wasn't assigned" % name)
-        desc = self.DESCRIPTOR_LOOKUP[name]
-        if isinstance(desc, asdl.MaybeType):
-          # item_desc = desc.desc
-          self.__setattr__(name, None)  # Maybe values can be None
-        else:
-          # If anything was set, then required fields raise an error.
-          raise ValueError("Field %r is required and wasn't initialized" % name)
+        # If anything was set, then required fields raise an error.
+        raise ValueError("Field %r is required and wasn't initialized" % name)
 
   def CheckUnassigned(self):
     """See if there are unassigned fields, for later encoding."""
