@@ -84,6 +84,8 @@ module osh
 
   case_arm = (word* pat, command* action)
 
+  -- TODO: Pretty much all of these can have redirects.  Even function defs.
+  -- AndOr/Pipeline/Fork are exceptions.
   command = 
     NoOp
   | SimpleCommand(word* words, redir* redirects, binding* more_env)
@@ -91,20 +93,21 @@ module osh
                var_flags flags,
                word* names,  -- names mentioned without a binding
                binding* bindings)
-  | DParen(arith_expr a)
-  | DBracket(bool_expr b)
-  | Block(command* commands)
-  | Subshell(command* commands)
+  | DParen(arith_expr child, redir* redirects)
+  | DBracket(bool_expr child, redir* redirects)
+  | Block(command* commands, redir* redirects)
+  | Subshell(command* commands, redir* redirects)
   | Fork(command* commands)  -- shell only allows one command
   | Pipeline(command* commands, int negated, pipe_op* op)
   | AndOr(command* commands, and_or ops)
   -- NOTE: Can't have multiple var length?  Maybe it's just a single command.
-  | ForEach(string var, word* words, command* body)
-  | ForExpr(arith_expr init, arith_expr test, arith_expr update, command* body)
+  | ForEach(string var, word* words, command* body, redir* redirects)
+  | ForExpr(arith_expr init, arith_expr test, arith_expr update, command* body,
+            redir* redirects)
   -- NOTE: in oil, we will have expression variants?i 
-  | While(command cond, command* body)
-  | Until(command cond, command* body)
-  | If(command test, command* body, command* orelse)
-  | Case(string var_name, case_arm* cases)
-  | FuncDef(string name, command* body)
+  | While(command cond, command* body, redir* redirects)
+  | Until(command cond, command* body, redir* redirects)
+  | If(command test, command* body, command* orelse, redir* redirects)
+  | Case(string var_name, case_arm* cases, redir* redirects)
+  | FuncDef(string name, command* body, redir* redirects)
 }

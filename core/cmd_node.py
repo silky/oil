@@ -24,13 +24,9 @@ class CNode(_Node):
   def __init__(self, id):
     _Node.__init__(self, id)
     self.redirects = []  # common to almost all nodes
-
-    # TODO: Fill these out.  BUT: We need ordering info.  If we have < and
-    # <<EOF on the same line.
-    self.here_docs = []
-
-    self.word_start = -1  # 1-based index into words
-    self.word_end = -1
+    # TODO: Do this in ASDL.
+    #self.word_start = -1  # 1-based index into words
+    #self.word_end = -1
 
   def GetHereDocsToFill(self):
     """For CommandParser to fill here docs"""

@@ -73,8 +73,7 @@ class BoolParserTest(unittest.TestCase):
     node = p.ParseNegatedFactor()
     print(node)
     self.assertTrue(p.AtEnd())
-    self.assertEqual(Id.BoolUnary_n, node.op_id)
-    self.assertEqual(UnaryExprNode, node.__class__)
+    self.assertEqual(Id.Word_Compound, node.id)
 
     p = _MakeParser('! foo')
     node = p.ParseNegatedFactor()

@@ -20,6 +20,7 @@ from core.tokens import Token
 from core.word_node import (
     EAssignScope, EAssignFlags, LiteralPart, CompoundWord, TildeSubPart)
 
+from osh import ast 
 from osh.lex import LexMode
 from osh.bool_parse import BoolParser
 
@@ -1081,6 +1082,7 @@ class CommandParser(object):
       self.error_stack.extend(error_stack)
       self.AddErrorContext("Error parsing [[", word=maybe_error_word)
       return None
+    #return ast.DBracket(bnode)
     return DBracketNode(bnode)
 
   def ParseDParen(self):

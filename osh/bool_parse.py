@@ -193,8 +193,8 @@ class BoolParser(object):
     if self.op_id == Id.KW_Bang:
       if not self._Next(): return None
       child = self.ParseFactor()
-      #return UnaryExprNode(Id.KW_Bang, child)
-      return ast.LogicalNot(child)
+      return UnaryExprNode(Id.KW_Bang, child)
+      #return ast.LogicalNot(child)
     else:
       return self.ParseFactor()
 
