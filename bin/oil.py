@@ -78,9 +78,13 @@ def InteractiveLoop(opts, ex, c_parser, w_parser, line_reader):
         raise RuntimeError('failed parse: %s' % c_parser.Error())
 
       if opts.print_ast:
-        node.PrintTree(sys.stdout)
-        sys.stdout.write('\n\n')
-        sys.stdout.flush()
+        from asdl import py_meta
+        if isinstance(node, py_meta.Obj):
+          print(node)
+        else:
+          node.PrintTree(sys.stdout)
+          sys.stdout.write('\n\n')
+          sys.stdout.flush()
 
       status, cflow = ex.ExecuteTop(node)
 
@@ -259,9 +263,13 @@ def OshMain(argv):
       return 2  # parse error is code 2
 
     if opts.print_ast:
-      node.PrintTree(sys.stdout)
-      sys.stdout.write('\n\n')
-      sys.stdout.flush()
+      from asdl import py_meta
+      if isinstance(node, py_meta.Obj):
+        print(node)
+      else:
+        node.PrintTree(sys.stdout)
+        sys.stdout.write('\n\n')
+        sys.stdout.flush()
 
     if opts.do_exec:
       status, cflow = ex.Execute(node)

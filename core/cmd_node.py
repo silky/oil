@@ -11,6 +11,8 @@ cmd_node.py -- AST Nodes for the command language
 
 import io
 
+from osh import ast
+
 from asdl import py_meta
 from core import util
 from core.id_kind import Id, IdName
@@ -27,11 +29,6 @@ class CNode(_Node):
     # TODO: Do this in ASDL.
     #self.word_start = -1  # 1-based index into words
     #self.word_end = -1
-
-  def GetHereDocsToFill(self):
-    """For CommandParser to fill here docs"""
-    # By default, there are no here docs (e.g. AssignmentNode.)
-    return []
 
   def _PrintLineRedirects(self, f):
     if self.redirects:
@@ -130,10 +127,6 @@ class SimpleCommandNode(CNode):
     self.words = []  # CompoundWord instances
     self.more_env = {}  # binding
 
-  def GetHereDocsToFill(self):
-    """For CommandParser to fill here"""
-    return _GetHereDocsToFill(self.redirects)
-
   def PrintLine(self, f):
     f.write('(Com ')
     self._PrintLineRedirects(f)
@@ -222,27 +215,39 @@ class DParenNode(CNode):
     f.write(')')
 
 
+def GetHereDocsToFill(node):
+  """For CommandParser to fill here docs"""
+  # Has to be a POST ORDER TRAVERSAL of here docs, e.g.
+  #
+  # while read line; do cat <<EOF1; done <<EOF2
+  # body
+  # EOF1
+  # while
+  # EOF2
+  if isinstance(node, ast.DBracket):
+    return []
+
+  if isinstance(node, SimpleCommandNode):
+    return _GetHereDocsToFill(node.redirects)
+
+  if isinstance(node, _CompoundCNode):
+    here_docs = []
+    for child in node.children:
+      here_docs.extend(GetHereDocsToFill(child))
+    here_docs.extend(_GetHereDocsToFill(node.redirects))  # parent
+    return here_docs
+
+  # Default, for assignment node, etc.
+  return []
+  #raise AssertionError(node)
+
+
 # NOTE: This has N children, instead of a fixed 0, 1, or 2.
 class _CompoundCNode(CNode):
   def __init__(self, id):
     CNode.__init__(self, id)
     # children of type CNode.
     self.children = []
-
-  def GetHereDocsToFill(self):
-    """For CommandParser to fill here docs"""
-    # Has to be a POST ORDER TRAVERSAL of here docs, e.g.
-    #
-    # while read line; do cat <<EOF1; done <<EOF2
-    # body
-    # EOF1
-    # while
-    # EOF2
-    here_docs = []
-    for child in self.children:
-      here_docs.extend(child.GetHereDocsToFill())
-    here_docs.extend(_GetHereDocsToFill(self.redirects))
-    return here_docs
 
   def _PrintHeader(self, f):
     """Print node name and node-specifc values."""

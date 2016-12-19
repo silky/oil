@@ -59,7 +59,6 @@ from osh import ast
 from core import base
 from core.id_kind import Id, Kind, LookupKind, IdName
 
-from core.expr_node import UnaryExprNode, BinaryExprNode
 from osh.lex import LexMode
 try:
   from core import libc
@@ -167,7 +166,7 @@ class BoolParser(object):
     if self.op_id == Id.Op_DPipe:
       if not self._Next(): return None
       right = self.ParseExpr()
-      return BinaryExprNode(Id.Op_DPipe, left, right)
+      return ast.LogicalOr(left, right)
     else:
       return left
 
@@ -182,7 +181,7 @@ class BoolParser(object):
     if self.op_id == Id.Op_DAmp:
       if not self._Next(): return None
       right = self.ParseTerm()
-      return BinaryExprNode(Id.Op_DAmp, left, right)
+      return ast.LogicalAnd(left, right)
     else:
       return left
 
@@ -193,8 +192,8 @@ class BoolParser(object):
     if self.op_id == Id.KW_Bang:
       if not self._Next(): return None
       child = self.ParseFactor()
-      return UnaryExprNode(Id.KW_Bang, child)
-      #return ast.LogicalNot(child)
+      #return UnaryExprNode(Id.KW_Bang, child)
+      return ast.LogicalNot(child)
     else:
       return self.ParseFactor()
 
@@ -212,7 +211,7 @@ class BoolParser(object):
       if not self._Next(): return None
       word = self.cur_word
       if not self._Next(): return None
-      node = UnaryExprNode(op, word)
+      node = ast.BoolUnary(op, word)
       return node
 
     if self.b_kind == Kind.Word:
@@ -245,7 +244,7 @@ class BoolParser(object):
             return None
 
         if not self._Next(): return None
-        return BinaryExprNode(op, left, right)
+        return ast.BoolBinary(op, left, right)
       else:
         # [[ foo ]] is implicit Implicit [[ -n foo ]]
         #op = Id.BoolUnary_n

@@ -291,19 +291,28 @@ class BoolEvaluator(ExprEvaluator):
       b = self._Eval(node.child)
       return not b
 
+    if node.tag == bool_expr_e.LogicalAnd:
+      # Short-circuit evaluation
+      if self._Eval(node.left):
+        return self._Eval(node.right)
+      else:
+        return False
+
+    if node.tag == bool_expr_e.LogicalOr:
+      if self._Eval(node.left):
+        return True
+      else:
+        return self._Eval(node.right)
+
     #raise AssertionError
 
-    if node.id == Id.Word_Compound:
-      s = self._EvalCompoundWord(node)
-      return bool(s)
+    #if node.id == Id.Word_Compound:
+    #  s = self._EvalCompoundWord(node)
+    #  return bool(s)
 
-    if node.id == Id.Node_UnaryExpr:
+    #if node.id == Id.Node_UnaryExpr:
+    if node.tag == bool_expr_e.BoolUnary:
       op_id = node.op_id
-      if op_id == Id.KW_Bang:
-        # child could either be a Word, or it could be a BNode
-        b = self._Eval(node.child)
-        return not b
-
       s = self._EvalCompoundWord(node.child)
 
       # Now dispatch on arg type
@@ -329,21 +338,9 @@ class BoolEvaluator(ExprEvaluator):
 
       raise NotImplementedError(arg_type)
 
-    if node.id == Id.Node_BinaryExpr:
+    #if node.id == Id.Node_BinaryExpr:
+    if node.tag == bool_expr_e.BoolBinary:
       op_id = node.op_id
-
-      # Short-circuit evaluation
-      if op_id == Id.Op_DAmp:
-        if self._Eval(node.left):
-          return self._Eval(node.right)
-        else:
-          return False
-
-      if op_id == Id.Op_DPipe:
-        if self._Eval(node.left):
-          return True
-        else:
-          return self._Eval(node.right)
 
       s1 = self._EvalCompoundWord(node.left)
       # Whehter to glob escape

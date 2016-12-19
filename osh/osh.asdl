@@ -58,8 +58,8 @@ module osh
 
   bool_expr =
     WordTest(word w)  -- e.g. [[ myword ]]
-  | BoolBinary(word left, word right)
-  | BoolUnary(word child)
+  | BoolBinary(int op_id, word left, word right)
+  | BoolUnary(int op_id, word child)
   | LogicalNot(bool_expr child)
   | LogicalAnd(bool_expr left, bool_expr right)
   | LogicalOr(bool_expr left, bool_expr right)

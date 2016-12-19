@@ -10,6 +10,7 @@ cmd_parse.py - Parse high level shell commands.
 """
 
 from core import base
+from core import cmd_node
 from core.cmd_node import (
     RedirNode, HereDocNode, 
     SimpleCommandNode, NoOpNode, AssignmentNode, DBracketNode, DParenNode,
@@ -23,23 +24,6 @@ from core.word_node import (
 from osh import ast 
 from osh.lex import LexMode
 from osh.bool_parse import BoolParser
-
-
-def _GetHereDocsToFill(node):
-  """For CommandParser to fill here docs"""
-  # Has to be a POST ORDER TRAVERSAL of here docs, e.g.
-  #
-  # while read line; do cat <<EOF1; done <<EOF2
-  # body
-  # EOF1
-  # while
-  # EOF2
-
-  if isinstance(node, ast.DBracket):
-    return []
-  else:
-    # Old-style nodes
-    return node.GetHereDocsToFill()
 
 
 class CommandParser(object):
@@ -260,7 +244,7 @@ class CommandParser(object):
     return new_words
 
   def _MaybeReadHereDocs(self, node):
-    here_docs = _GetHereDocsToFill(node)
+    here_docs = cmd_node.GetHereDocsToFill(node)
     #print('')
     #print('--> FILLING', here_docs)
     #print('')
