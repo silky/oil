@@ -11,8 +11,8 @@ cmd_node.py -- AST Nodes for the command language
 
 import io
 
+from asdl import py_meta
 from core import util
-
 from core.id_kind import Id, IdName
 from core.word_node import CompoundWord
 from core.base import _Node
@@ -253,8 +253,11 @@ class _CompoundCNode(CNode):
     self._PrintHeader(f)
     f.write('\n')
     for c in self.children:
-      c.PrintTree(f, indent=indent + 2)
-      f.write('\n')
+      if isinstance(c, py_meta.Obj):
+        f.write(str(c))
+      else:
+        c.PrintTree(f, indent=indent + 2)
+        f.write('\n')
     f.write(indent * ' ' + ')')
 
   def PrintLine(self, f):

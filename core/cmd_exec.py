@@ -75,6 +75,8 @@ from core.process import (
 from core.word_node import EAssignScope
 from core.value import Value
 
+from osh import ast
+
 
 log = util.log
 
@@ -639,9 +641,18 @@ class Executor(object):
     # and exits 1, and shows traceback.
     cflow = EBuiltin.NONE
 
+    command_e = ast.command_e
+    if hasattr(node, 'tag') and node.tag == command_e.DBracket:
+      bool_ev = expr_eval.BoolEvaluator(self.mem, self.ev)
+      ok = bool_ev.Eval(node.child)
+      if ok:
+        status = 0 if bool_ev.Result() else 1
+      else:
+        raise AssertionError('Error evaluating boolean: %s' % bool_ev.Error())
+
     # TODO: Only eval argv[0] once.  It can have side effects!
 
-    if node.id == Id.Node_Command:
+    elif node.id == Id.Node_Command:
       argv = self.ev.EvalWords(node.words)
       if argv is None:
         err = self.ev.Error()

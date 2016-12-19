@@ -25,6 +25,23 @@ from osh.lex import LexMode
 from osh.bool_parse import BoolParser
 
 
+def _GetHereDocsToFill(node):
+  """For CommandParser to fill here docs"""
+  # Has to be a POST ORDER TRAVERSAL of here docs, e.g.
+  #
+  # while read line; do cat <<EOF1; done <<EOF2
+  # body
+  # EOF1
+  # while
+  # EOF2
+
+  if isinstance(node, ast.DBracket):
+    return []
+  else:
+    # Old-style nodes
+    return node.GetHereDocsToFill()
+
+
 class CommandParser(object):
   """
   Args:
@@ -243,7 +260,7 @@ class CommandParser(object):
     return new_words
 
   def _MaybeReadHereDocs(self, node):
-    here_docs = node.GetHereDocsToFill()
+    here_docs = _GetHereDocsToFill(node)
     #print('')
     #print('--> FILLING', here_docs)
     #print('')
@@ -1082,8 +1099,8 @@ class CommandParser(object):
       self.error_stack.extend(error_stack)
       self.AddErrorContext("Error parsing [[", word=maybe_error_word)
       return None
-    #return ast.DBracket(bnode)
-    return DBracketNode(bnode)
+    return ast.DBracket(bnode)
+    #return DBracketNode(bnode)
 
   def ParseDParen(self):
     maybe_error_word = self.cur_word
