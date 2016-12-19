@@ -264,6 +264,7 @@ def OshMain(argv):
 
     if opts.print_ast:
       from asdl import py_meta
+      print('!!!!!', node.__class__)
       if isinstance(node, py_meta.Obj):
         print(node)
       else:

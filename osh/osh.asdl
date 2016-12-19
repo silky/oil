@@ -47,12 +47,16 @@ module osh
   word = Word(word_part* parts)
   -- NOTE: Could put | Token(token t) as an optimization.
 
-  arith_expr =
-    ArithVar(string name)  -- eval variable 
-  | ArithWord(word w)  -- word to be evaluated as a constant 
+  lvalue = 
+    LeftVar(string name)
+  | LeftIndex(string name, arith_expr index)
 
-  | ArithUnary(id op_id, arith_expr a)
-  | ArithBinary(id op_id, arith_expr left, arith_expr right)
+  arith_expr =
+    RightVar(string name)  -- eval variable 
+  | ArithWord(word w)  -- a string expression
+  | ArithUnary(int op_id, arith_expr child)
+  | ArithBinary(int op_id, arith_expr left, arith_expr right)
+  | ArithAssign(int op_id, lvalue left, arith_expr right)
   | TernaryOp(arith_expr cond, arith_expr true_expr, arith_expr false_expr)
   | FuncCall(arith_expr func, arith_expr* args)
 
@@ -69,10 +73,6 @@ module osh
   redir = 
     HereDoc(id op_id, word arg_word, int fd, int do_expansion)
   | Redirect(id op_id, word arg_word, int fd)
-
-  lvalue = 
-    LeftVar(string name)
-  | LeftIndex(string name, arith_expr index)
 
   scope = Global | Local
   var_flags = Export | Readonly

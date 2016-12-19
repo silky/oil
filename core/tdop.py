@@ -4,10 +4,10 @@ tdop.py - Library for expression parsing.
 """
 
 from core import base
-from core.expr_node import UnaryExprNode, BinaryExprNode, VarExprNode
 from core.id_kind import Id, IdName
 from core.util import cast
 
+from osh import ast 
 from osh.lex import LexMode
 
 
@@ -70,7 +70,7 @@ def NullConstant(p, word, bp):
   if word.id == Id.Word_Compound:
     var_name = word.AsArithVarName()
     if var_name:
-      return VarExprNode(var_name)
+      return ast.RightVar(var_name)
   return word
 
 
@@ -91,7 +91,7 @@ def NullPrefixOp(p, t, bp):
     !x && y is (!x) && y, not !(x && y)
   """
   right = p.ParseUntil(bp)
-  return UnaryExprNode(t.ArithId(), right)
+  return ast.ArithUnary(t.ArithId(), right)
 
 
 #
@@ -105,7 +105,7 @@ def LeftError(p, t, left, rbp):
 
 def LeftBinaryOp(p, t, left, rbp):
   """ Normal binary operator like 1+2 or 2*3, etc. """
-  return BinaryExprNode(t.ArithId(), left, p.ParseUntil(rbp))
+  return ast.ArithBinary(t.ArithId(), left, p.ParseUntil(rbp))
 
 
 def LeftAssign(p, t, left, rbp):
@@ -114,7 +114,7 @@ def LeftAssign(p, t, left, rbp):
 
   if not IsLValue(left):
     raise ParseError("Can't assign to %r (%s)" % (left, IdName(left.id)))
-  return BinaryExprNode(t.ArithId(), left, p.ParseUntil(rbp))
+  return ast.ArithAssign(t.ArithId(), left, p.ParseUntil(rbp))
 
 
 #
