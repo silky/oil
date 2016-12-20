@@ -16,7 +16,6 @@ try:
 except ImportError:
   from core import fake_libc as libc
 
-#from core.expr_node import _ExprNode, TernaryExprNode
 from core.id_kind import BOOL_OPS, OperandType, Id, IdName
 from core.util import cast
 from core.util import log

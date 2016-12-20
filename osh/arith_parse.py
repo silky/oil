@@ -10,8 +10,6 @@ import sys
 
 from core import tdop
 from core.id_kind import Id
-#from core.expr_node import (
-#    UnaryExprNode, BinaryExprNode, TernaryExprNode, FuncCallNode)
 from osh import ast
 
 
