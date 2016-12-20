@@ -728,21 +728,21 @@ fi
 
   def testParseDBracketRegex(self):
     node = assertParseCommandList(self, '[[ foo =~ foo ]]')
-    self.assertEqual(Id.BoolBinary_EqualTilde, node.bnode.op_id)
+    self.assertEqual(Id.BoolBinary_EqualTilde, node.child.op_id)
 
     node = assertParseCommandList(self, '[[ foo =~ (foo|bar) ]]')
-    self.assertEqual(Id.BoolBinary_EqualTilde, node.bnode.op_id)
-    right = node.bnode.right
+    self.assertEqual(Id.BoolBinary_EqualTilde, node.child.op_id)
+    right = node.child.right
     self.assertEqual(5, len(right.parts))
     self.assertEqual('(', right.parts[0].token.val)
 
     # TODO: Implement BASH_REGEX_CHARS
     return
     node = assertParseCommandList(self, '[[ "< >" =~ (< >) ]]')
-    self.assertEqual(Id.BoolBinary_EqualTilde, node.bnode.op_id)
+    self.assertEqual(Id.BoolBinary_EqualTilde, node.child.op_id)
 
     node = assertParseCommandList(self, '[[ "ba ba" =~ ([a b]+) ]]')
-    self.assertEqual(Id.BoolBinary_EqualTilde, node.bnode.op_id)
+    self.assertEqual(Id.BoolBinary_EqualTilde, node.child.op_id)
 
   def testParseIf(self):
     node = assertParseCommandList(self, 'if true; then echo yes; fi')
