@@ -14,7 +14,7 @@ from core.word_node import (
     CompoundWord, TokenWord,
     LiteralPart, EscapedLiteralPart, SingleQuotedPart, DoubleQuotedPart,
     VarSubPart, CommandSubPart, ArithSubPart, ArrayLiteralPart,
-    VarOp0, VarOp1, SliceVarOp, PatSubVarOp)
+    VarOp0, VarOp1)
 
 from core.id_kind import Id, Kind, IdName
 from core.tokens import Token
@@ -23,6 +23,7 @@ from core.cmd_node import ForExpressionNode
 
 from osh import arith_parse
 from osh.lex import LexMode
+from osh import ast
 
 # Substitutions can be nested, but which inner subs are allowed depends on the
 # outer sub.  See _ReadLeftParts vs. _ReadDoubleQuotedLeftParts.
@@ -164,7 +165,7 @@ class WordParser(object):
       #print('BVS2', self.cur_token)
 
     if self.token_type == Id.Arith_RBrace:
-      return SliceVarOp(begin, None)  # No length specified
+      return ast.Slice(begin, None)  # No length specified
 
     # Id.Arith_Colon is a pun for Id.VOp2_Colon
     elif self.token_type == Id.Arith_Colon:
@@ -173,7 +174,7 @@ class WordParser(object):
       if not length: return None
 
       #print('after colon', self.cur_token)
-      return SliceVarOp(begin, length)
+      return ast.Slice(begin, length)
 
     else:
       self.AddErrorContext("Unexpected token in slice: %s", self.cur_token)
@@ -214,7 +215,7 @@ class WordParser(object):
 
     #self._Peek()
     if self.token_type == Id.Right_VarSub:
-      return PatSubVarOp(pat, None, do_all, do_prefix, do_suffix)
+      return ast.PatSub(pat, None, do_all, do_prefix, do_suffix)
 
     elif self.token_type == Id.Lit_Slash:
       replace = self._ReadVarOpArg(lex_mode)  # do not stop at /
@@ -222,7 +223,7 @@ class WordParser(object):
 
       self._Peek()
       if self.token_type == Id.Right_VarSub:
-        return PatSubVarOp(pat, replace, do_all, do_prefix, do_suffix)
+        return ast.PatSub(pat, replace, do_all, do_prefix, do_suffix)
 
       else:
         self._BadToken("Expected } after pat sub, got %s", self.cur_token)
