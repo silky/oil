@@ -16,7 +16,7 @@ try:
 except ImportError:
   from core import fake_libc as libc
 
-from core.expr_node import _ExprNode, TernaryExprNode
+#from core.expr_node import _ExprNode, TernaryExprNode
 from core.id_kind import BOOL_OPS, OperandType, Id, IdName
 from core.util import cast
 from core.util import log
@@ -59,7 +59,7 @@ class ExprEvaluator:
   def Result(self):
     return self.result
 
-  def Eval(self, node: _ExprNode):
+  def Eval(self, node):
     try:
       result = self._Eval(node)
     except ExprEvalError as e:
@@ -144,7 +144,7 @@ class ArithEvaluator(ExprEvaluator):
       return False, 0
     return True, integer
 
-  def _Eval(self, node: _ExprNode):
+  def _Eval(self, node):
     """
     Args:
       node: _ExprNode
