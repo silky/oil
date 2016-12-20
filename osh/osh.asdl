@@ -22,13 +22,13 @@ module osh
   -- arith_op_id, bool_op_id, vpre_op_id, array_op_id, vpost_op_id
 
   bracket_op = 
-    ArrayOp(id op_id)  -- * or @
+    ArrayOp(int op_id)  -- * or @
   | ArrayIndex(arith_expr a)
 
   suffix_op = 
-    VarUnary(id op_id, word arg)
-  | VarReplace(word pat, word? replace)
-  | VarSlice(arith_expr start, arith_expr? len)
+    VarUnary(int op_id, word arg_word)
+  | PatSub(word pat, word? replace, int do_all, int do_prefix, int do_suffix)
+  | Slice(arith_expr start, arith_expr? len)
 
   word_part = 
     ArrayLiteralPart(word* words)
@@ -36,7 +36,7 @@ module osh
   | EscapedLiteralPart(token t)
   | DoubleQuotedPart(word_part* parts)
   | VarSubPart(string name,
-               id prefix_op,
+               int prefix_op,  -- prefix # or ! operators
                bracket_op bracket_op
                suffix_op suffix_op)
   | TildeSubPart(string prefix)
