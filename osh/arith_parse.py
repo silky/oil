@@ -65,8 +65,7 @@ def LeftTernary(p, t, left, bp):
   true_expr = p.ParseUntil(bp)
   p.Eat(Id.Arith_Colon)
   false_expr = p.ParseUntil(bp)
-  children = [left, true_expr, false_expr]
-  return ast.TernaryOp(t.ArithId(), left, true_expr, false_expr)
+  return ast.TernaryOp(left, true_expr, false_expr)
 
 
 # For overloading of , inside function calls

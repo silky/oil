@@ -12,11 +12,11 @@
 
 module osh
 {
-  source_location = (string path, int line, int col, int length)
-  token = (string value, source_location loc)
-
   id = Foo | Bar -- TODO: you need a placeholder to say this is generated
                  -- by another tool.  Suppress the error.
+
+  source_location = (string path, int line, int col, int length)
+  token = (id id, string value, source_location loc)
 
   -- TODO: generate the following:
   -- arith_op_id, bool_op_id, vpre_op_id, array_op_id, vpost_op_id
