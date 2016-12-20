@@ -35,7 +35,10 @@ def IsCallable(node):
   # f(x), or f[1](x)
   # I guess function calls can be callable?  Return a function later.  Not
   # sure.  Python allows f(3)(4).
-  return node.op_id in (Id.Node_ArithVar, Id.Arith_LBracket)
+  if node.tag == arith_expr_e.RightVar:
+    return True
+  if node.tag == arith_expr_e.ArithBinary:
+    return node.op_id == Id.Arith_LBracket
 
 
 def IsIndexable(node):
@@ -45,7 +48,10 @@ def IsIndexable(node):
     node: ExprNode
   """
   # f[1], or f(x)[1], or f[1][1]
-  return node.op_id in (Id.Node_ArithVar, Id.Arith_LBracket, Id.Node_FuncCall)
+  if node.tag == arith_expr_e.RightVar:
+    return True
+  if node.tag == arith_expr_e.ArithBinary:
+    return node.op_id in (Id.Arith_LBracket, Id.Node_FuncCall)
 
 
 def IsLValue(node):

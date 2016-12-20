@@ -15,9 +15,12 @@ from core.word_node import LiteralPart, CompoundWord, TokenWord
 from core.id_kind import Id, IdName
 from core.tokens import Token
 
+from osh import ast
 from osh import parse_lib
 from osh.lex import LexMode
 from osh.word_parse import WordParser  # module under test
+
+arith_expr_e = ast.arith_expr_e
 
 
 def InitWordParser(s):
@@ -366,13 +369,13 @@ class WordParserTest(unittest.TestCase):
 
   def testReadArithWord(self):
     w = _assertReadWord(self, '$(( f(x) ))')
-    anode = w.parts[0].anode
-    self.assertEqual(Id.Node_FuncCall, anode.id)
+    child = w.parts[0].anode
+    self.assertEqual(arith_expr_e.FuncCall, child.tag)
 
     w = _assertReadWord(self, '$(( f(1, 2, 3, 4) ))')
-    anode = w.parts[0].anode
-    self.assertEqual(Id.Node_FuncCall, anode.id)
-    self.assertEqual(4, len(anode.args))
+    child = w.parts[0].anode
+    self.assertEqual(arith_expr_e.FuncCall, child.tag)
+    self.assertEqual(4, len(child.args))
 
   def testReadArith(self):
     CASES = [
