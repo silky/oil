@@ -6,6 +6,8 @@ cmd_parse_test.py: Tests for cmd_parse.py
 import sys
 import unittest
 
+from asdl import py_meta
+
 from core import ui
 from core.word_node import DoubleQuotedPart
 from core.id_kind import Id
@@ -29,7 +31,10 @@ def _assertParseMethod(test, code_str, method, expect_success=True):
   node = m()
 
   if node:
-    print(node.DebugString())
+    if isinstance(node, py_meta.Obj):
+      print(node)
+    else:
+      print(node.DebugString())
     if not expect_success:
       test.fail('Expected %r to fail ' % code_str)
   else:

@@ -11,6 +11,9 @@ from osh import ast
 from osh.lex import LexMode
 
 
+arith_expr_e = ast.arith_expr_e
+
+
 class ParseError(Exception):
   pass
 
@@ -46,13 +49,16 @@ def IsIndexable(node):
 
 
 def IsLValue(node):
-  """Determine if a node is a valid L-value by whitelisting Ids.
+  """Determine if a node is a valid L-value by whitelisting tags.
 
   Args:
     node: ExprNode (could be VarExprNode or BinaryExprNode)
   """
   # foo = bar, foo[1] = bar
-  return node.op_id in (Id.Node_ArithVar, Id.Arith_LBracket)
+  if node.tag == arith_expr_e.RightVar:
+    return True
+  if node.tag == arith_expr_e.ArithBinary:
+    return node.op_id == Id.Arith_LBracket
 
 
 #
