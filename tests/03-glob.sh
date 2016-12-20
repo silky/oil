@@ -37,3 +37,7 @@ tests/echo.s[[:alpha:]]
 # +(pattern-list): Matches at least one occurrences of the patterns
 # @(pattern-list): Matches exactly one of the patterns
 # !(pattern-list): Matches anything EXCEPT any of the patterns
+
+shopt -s extglob
+echo */*.py!(*_test.py)
+
