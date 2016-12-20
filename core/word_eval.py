@@ -314,7 +314,7 @@ class _Evaluator(object):
     index_error = False  # test_op can suppress this
 
     if defined and part.bracket_op:
-      id = part.bracket_op.id
+      id = part.bracket_op.op_id
 
       # TODO: Change this to array_op instead of bracket_op?
       if id == Id.Lit_At:
@@ -368,11 +368,11 @@ class _Evaluator(object):
     # if the op does NOT have colon
     #use_default = not defined
 
-    if part.suffix_op and LookupKind(part.suffix_op.id) == Kind.VTest:
+    if part.suffix_op and LookupKind(part.suffix_op.op_id) == Kind.VTest:
       op = part.suffix_op
 
       # TODO: Change this to a bit test.
-      if op.id in (
+      if op.op_id in (
           Id.VTest_ColonHyphen, Id.VTest_ColonEquals, Id.VTest_ColonQMark,
           Id.VTest_ColonPlus):
         is_falsey = not defined or val.IsEmptyString()
@@ -381,7 +381,7 @@ class _Evaluator(object):
 
       #print('!!',id, is_falsey)
 
-      if op.id in (Id.VTest_ColonHyphen, Id.VTest_Hyphen):
+      if op.op_id in (Id.VTest_ColonHyphen, Id.VTest_Hyphen):
         if is_falsey:
           argv = []
           ok, val2 = self.EvalCompoundWord(op.arg_word)
@@ -417,9 +417,9 @@ class _Evaluator(object):
         return True, Value.FromString('')
 
     if part.prefix_op:
-      op = part.prefix_op
+      op_id = part.prefix_op
 
-      if op.id == Id.VSub_Pound:
+      if op_id == Id.VSub_Pound:
         # LENGTH
         if val.IsArray():
           #print("ARRAY LENGTH", len(val.a))
@@ -430,7 +430,7 @@ class _Evaluator(object):
         val = Value.FromString(str(length))
 
     # NOTE: You could have both prefix and suffix
-    if part.suffix_op and LookupKind(part.suffix_op.id) in (
+    if part.suffix_op and LookupKind(part.suffix_op.op_id) in (
         Kind.VOp1, Kind.VOp2):
       op = part.suffix_op
 
@@ -459,13 +459,13 @@ class _Evaluator(object):
       # And then pat_subst() does some special cases.  Geez.
 
       # prefix strip
-      if op.id == Id.VOp1_DPound:
+      if op.op_id == Id.VOp1_DPound:
         pass
-      elif op.id == Id.VOp1_Pound:
+      elif op.op_id == Id.VOp1_Pound:
         pass
 
       # suffix strip
-      elif op.id == Id.VOp1_Percent:
+      elif op.op_id == Id.VOp1_Percent:
         print(op.words)
         argv = []
         for w in op.words:
@@ -488,18 +488,18 @@ class _Evaluator(object):
             s = s[:-len(suffix)]
             val = Value.FromString(s)
 
-      elif op.id == Id.VOp1_DPercent:
+      elif op.op_id == Id.VOp1_DPercent:
         pass
 
       # Patsub, vectorized
-      elif op.id == Id.VOp2_Slash:
+      elif op.op_id == Id.VOp2_Slash:
         pass
 
       # Either string slicing or array slicing.  However string slicing has a
       # unicode problem?  TODO: Test bash out.  We need utf-8 parsing in C++?
       #
       # Or maybe have a different operator for byte slice and char slice.
-      elif op.id == Id.VOp2_Colon:
+      elif op.op_id == Id.VOp2_Colon:
         pass
 
       else:
