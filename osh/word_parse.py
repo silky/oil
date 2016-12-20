@@ -13,8 +13,7 @@ from core import base
 from core.word_node import (
     CompoundWord, TokenWord,
     LiteralPart, EscapedLiteralPart, SingleQuotedPart, DoubleQuotedPart,
-    VarSubPart, CommandSubPart, ArithSubPart, ArrayLiteralPart,
-    VarOp0, VarOp1)
+    VarSubPart, CommandSubPart, ArithSubPart, ArrayLiteralPart)
 
 from core.id_kind import Id, Kind, IdName
 from core.tokens import Token
@@ -240,7 +239,7 @@ class WordParser(object):
     # expression.
     t2 = self.lexer.LookAhead(LexMode.ARITH)
     if t2.id in (Id.Lit_At, Id.Arith_Star):
-      op = VarOp0(t2.id)
+      op = ast.ArrayOp(t2.id)
 
       self._Next(LexMode.ARITH)  # skip past [
       self._Peek()  
@@ -250,7 +249,7 @@ class WordParser(object):
       anode = self._ReadArithExpr()
       if not anode:
         return None
-      op = VarOp1(Id.VOp2_LBracket, anode)
+      op = ast.ArrayIndex(anode)
     #print('AFTER', IdName(self.token_type))
 
     #self._Peek()    # Can't do this here.  Should the test go elsewhere?
@@ -311,7 +310,7 @@ class WordParser(object):
         self._BadToken('Unexpected token after test arg: %s', self.cur_token)
         return None
 
-      part.suffix_op = VarOp1(id, arg_word)
+      part.suffix_op = ast.StringUnary(id, arg_word)
 
     elif op_kind == Kind.VOp1:
       id = self.token_type
@@ -320,7 +319,7 @@ class WordParser(object):
         self._BadToken('Unexpected token after unary op: %s', self.cur_token)
         return None
 
-      op = VarOp1(id, arg_word)
+      op = ast.StringUnary(id, arg_word)
       part.suffix_op = op
 
     elif op_kind == Kind.VOp2:
@@ -430,7 +429,7 @@ class WordParser(object):
               self.cur_token)
           return None
 
-        part.prefix_op = VarOp0(Id.VSub_Pound)  # length
+        part.prefix_op = Id.VSub_Pound  # length
 
       else:  # not a prefix, '#' is the variable
         part = self._ParseVarExpr(arg_lex_mode)
@@ -450,7 +449,7 @@ class WordParser(object):
         part = self._ParseVarExpr(arg_lex_mode)
         if not part: return None
 
-        part.prefix_op = VarOp0(Id.VSub_Bang)
+        part.prefix_op = Id.VSub_Bang
 
       else:  # not a prefix, '!' is the variable
         part = self._ParseVarExpr(arg_lex_mode)

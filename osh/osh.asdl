@@ -26,9 +26,9 @@ module osh
   | ArrayIndex(arith_expr a)
 
   suffix_op = 
-    VarUnary(int op_id, word arg_word)
+    StringUnary(int op_id, word arg_word)
   | PatSub(word pat, word? replace, int do_all, int do_prefix, int do_suffix)
-  | Slice(arith_expr start, arith_expr? len)
+  | Slice(arith_expr begin, arith_expr? length)
 
   word_part = 
     ArrayLiteralPart(word* words)
