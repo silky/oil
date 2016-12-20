@@ -210,17 +210,14 @@ class ArithEvaluator(ExprEvaluator):
 
     #elif node.id == Id.Node_TernaryExpr:
     elif node.tag == arith_expr_e.TernaryOp:
-      if node.op_id == Id.Arith_QMark:
-        node = cast(TernaryExprNode, node)
+      node = cast(ast.TernaryOp, node)
 
-        lhs = self._Eval(node.cond)
-        if lhs != 0:
-          ret = self._Eval(node.true_expr)
-        else:
-          ret = self._Eval(node.false_expr)
-        return ret
+      lhs = self._Eval(node.cond)
+      if lhs != 0:
+        ret = self._Eval(node.true_expr)
       else:
-        raise ExprEvalError("%s not implemented" % IdName(node.op_id))
+        ret = self._Eval(node.false_expr)
+      return ret
 
     #elif node.id == Id.Node_BinaryExpr:
     elif node.tag == arith_expr_e.ArithBinary:
