@@ -5,6 +5,10 @@ word.py
 
 import sys
 
+from osh import ast
+
+word_e = ast.word_e
+
 
 def AsFuncName(w):
   pass
@@ -47,5 +51,24 @@ def AssignmentBuiltinId(w):
 
 # Polymorphic between TokenWord and CompoundWord
 
+def ArithId(node):
+  if node.tag == word_e.TokenWord:
+    return node.token.id
+
+  assert node.tag == word_e.CompoundWord
 
 
+def BooldId(node):
+  if node.tag == word_e.TokenWord:
+    return node.token.id
+
+  # Assume it's a CompoundWord
+  assert node.tag == word_e.CompoundWord
+
+
+def CommandId(node):
+  if node.tag == word_e.TokenWord:
+    return node.token.id
+
+  # Assume it's a CompoundWord
+  assert node.tag == word_e.CompoundWord

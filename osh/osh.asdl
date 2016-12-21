@@ -36,8 +36,8 @@ module osh
 
   word_part = 
     ArrayLiteralPart(word* words)
-  | LiteralPart(token t)
-  | EscapedLiteralPart(token t)
+  | LiteralPart(token token)
+  | EscapedLiteralPart(token token)
   | DoubleQuotedPart(word_part* parts)
   | VarSubPart(string name,
                id prefix_op,  -- prefix # or ! operators
@@ -48,7 +48,7 @@ module osh
   | ArithSubPart(arith_expr a)
 
   word = 
-    TokenWord(token t)
+    TokenWord(token token)
   | CompoundWord(word_part* parts)
  
   lvalue = 
