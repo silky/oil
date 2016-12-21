@@ -43,6 +43,7 @@ from core import cmd_exec
 from core.pool import Pool
 from core import reader
 from core.id_kind import Id
+from core import word
 from core import word_eval
 from core import ui
 from core import util
@@ -62,7 +63,7 @@ def InteractiveLoop(opts, ex, c_parser, w_parser, line_reader):
 
     if w is None:
       raise RuntimeError('Failed parse: %s' % c_parser.Error())
-    c_id = w.CommandId()
+    c_id = word.CommandId(w)
     if c_id == Id.Op_Newline:
       print('nothing to execute')
     elif c_id == Id.Eof_Real:

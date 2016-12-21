@@ -322,7 +322,7 @@ class WordParserTest(unittest.TestCase):
 
         print(w)
 
-        if w.CommandId() == Id.Eof_Real:
+        if word.CommandId(w) == Id.Eof_Real:
           break
 
   def testReadComment(self):
@@ -423,7 +423,7 @@ class WordParserTest(unittest.TestCase):
           self.fail(err)
           break
         print(w)
-        if w.CommandId() in (Id.Eof_Real, Id.Unknown_Tok):
+        if word.CommandId(w) in (Id.Eof_Real, Id.Unknown_Tok):
           break
 
   def testMultiLine(self):

@@ -272,8 +272,11 @@ def BoolId(node):
 
 
 def CommandId(node):
-  if node.tag == word_e.TokenWord:
+  from core.word_node import TokenWord
+  if isinstance(node, TokenWord):
     return node.token.id
 
   # Assume it's a CompoundWord
-  assert node.tag == word_e.CompoundWord
+  #assert node.tag == word_e.CompoundWord
+
+  return node.CommandId()

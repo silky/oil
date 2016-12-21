@@ -82,7 +82,7 @@ class CommandParser(object):
       self.cur_word = w
 
       self.c_kind = self.cur_word.CommandKind()
-      self.c_id = self.cur_word.CommandId()
+      self.c_id = word.CommandId(self.cur_word)
       self.next_lex_mode = LexMode.NONE
     #print('_Peek', self.cur_word)
     return True

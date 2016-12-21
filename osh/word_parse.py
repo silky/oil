@@ -858,10 +858,10 @@ class WordParser(object):
     # MUST use a new word parser (with same lexer).
     w_parser = WordParser(self.lexer, self.line_reader)
     while True:
-      word = w_parser.ReadWord(LexMode.OUTER)
-      if word.CommandId() == Id.Right_ArrayLiteral:
+      w = w_parser.ReadWord(LexMode.OUTER)
+      if word.CommandId(w) == Id.Right_ArrayLiteral:
         break
-      array_part.words.append(word)
+      array_part.words.append(w)
 
     return array_part
 
@@ -1105,26 +1105,26 @@ class WordParser(object):
     while True:
       if lex_mode == LexMode.ARITH:
         # TODO: Can this be unified?
-        word, need_more = self._ReadArithWord()
+        w, need_more = self._ReadArithWord()
       elif lex_mode in (LexMode.OUTER, LexMode.DBRACKET, LexMode.BASH_REGEX):
-        word, need_more = self._ReadWord(lex_mode)
+        w, need_more = self._ReadWord(lex_mode)
       else:
         raise AssertionError('Invalid lex state %s' % lex_mode)
       if not need_more:
         break
 
-    if not word:
+    if not w:
       return None
 
     if self.words_out is not None:
-      self.words_out.append(word)
-    self.cursor = word
+      self.words_out.append(w)
+    self.cursor = w
 
     # TODO: Do consolidation of newlines in the lexer?
     # Note that there can be an infinite (Id.Ignored_Comment Id.Op_Newline
     # Id.Ignored_Comment Id.Op_Newline) sequence, so we have to keep track of
     # the last non-ignored token.
-    self.cursor_was_newline = (self.cursor.CommandId() == Id.Op_Newline)
+    self.cursor_was_newline = (word.CommandId(self.cursor) == Id.Op_Newline)
     return self.cursor
 
   def ReadHereDocBody(self):
