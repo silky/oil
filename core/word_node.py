@@ -66,10 +66,6 @@ class WordPart(_Node):
     """
     raise NotImplementedError(self.__class__.__name__)
 
-  def VarLikeName(self):
-    """Return the var name string, or False."""
-    return False
-
   def ArithVarLikeName(self):
     """Return the var name string, or False.
 
@@ -143,13 +139,6 @@ class LiteralPart(_LiteralPartBase):
         IdName(self.token.id), EncodeTokenVal(self.token.val),
         newline)
 
-  def VarLikeName(self):
-    if self.token.id == Id.Lit_VarLike:
-      assert self.token.val.endswith('=')
-      return self.token.val[:-1]
-    else:
-      return False
-
   def ArithVarLikeName(self):
     if self.token.id == Id.Lit_ArithVarLike:
       return self.token.val
@@ -170,8 +159,6 @@ class EscapedLiteralPart(_LiteralPartBase):
     # Quoted part.  TODO: Get rid of \ ?
     return '[\ %s %s]' % (
         IdName(self.token.id), EncodeTokenVal(self.token.val))
-
-  # VarLikeName, LiteralId: default values.
 
 
 class SingleQuotedPart(WordPart):
