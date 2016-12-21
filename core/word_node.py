@@ -20,6 +20,7 @@ from core.base import _Node
 from core.id_kind import Id, Kind, IdName, LookupKind
 from core.tokens import EncodeTokenVal
 from core.value import Value
+from core import static_eval
 
 from core import util
 
@@ -64,22 +65,6 @@ class WordPart(_Node):
       Leftmost token and rightmost token.
     """
     raise NotImplementedError(self.__class__.__name__)
-
-  def EvalStatic(self):
-    """Evaluate a word at PARSE TIME.
-
-    Used for here doc delimiters, function names, and for loop variable names.
-
-    The first step is to follow the normal rules of parsing, but then we
-    disallow var sub, command sub, arith sub, etc.
-
-    Returns:
-      3-tuple of
-        ok: bool, success
-        value: a string (not Value)
-        quoted: whether any part of the word was quoted
-    """
-    raise NotImplementedError
 
   def VarLikeName(self):
     """Return the var name string, or False."""
@@ -190,9 +175,6 @@ class LiteralPart(_LiteralPartBase):
         IdName(self.token.id), EncodeTokenVal(self.token.val),
         newline)
 
-  def EvalStatic(self):
-    return True, self.token.val, False
-
   def VarLikeName(self):
     if self.token.id == Id.Lit_VarLike:
       assert self.token.val.endswith('=')
@@ -231,10 +213,6 @@ class EscapedLiteralPart(_LiteralPartBase):
     return '[\ %s %s]' % (
         IdName(self.token.id), EncodeTokenVal(self.token.val))
 
-  def EvalStatic(self):
-    # I guess escaped literal is fine, like \E ?
-    return True, self.token.val[1:], True
-
   # VarLikeName, TestLiteralForSlash, LiteralId: default values.  SplitAtIndex?
   # Only exists on regular LiteralPart
 
@@ -255,14 +233,6 @@ class SingleQuotedPart(WordPart):
 
   def __repr__(self):
     return '[SQ %s]' % (' '.join(repr(t) for t in self.tokens))
-
-  def _Eval(self):
-    """Shared between Eval and EvalStatic."""
-    return ''.join(t.val for t in self.tokens)
-
-  def EvalStatic(self):
-    # Single quoted literal can be here delimiter!  Like 'EOF'.
-    return True, self._Eval(), True
 
 
 class DoubleQuotedPart(WordPart):
@@ -287,16 +257,6 @@ class DoubleQuotedPart(WordPart):
     else:
       return None, None
 
-  def EvalStatic(self):
-    ret = ''
-    for p in self.parts:
-      ok, s, _ = p.EvalStatic()
-      if not ok:
-        return False, '', True
-      ret += s
-
-    return True, ret, True  # At least one part was quoted!
-
 
 class CommandSubPart(WordPart):
   def __init__(self, token, command_list):
@@ -311,9 +271,6 @@ class CommandSubPart(WordPart):
     f = io.StringIO()
     self.command_list.PrintLine(f)  # print(on a single line)
     return '[ComSub %s]' % f.getvalue()
-
-  def EvalStatic(self):
-    return False, '', False
 
   def IsSubst(self):
     return True
@@ -353,9 +310,6 @@ class VarSubPart(WordPart):
     else:
       return None, None
 
-  def EvalStatic(self):
-    return False, '', False
-
   def IsSubst(self):
     return True
 
@@ -374,10 +328,6 @@ class TildeSubPart(WordPart):
   def __repr__(self):
     return '[TildeSub %r]' % self.prefix
 
-  def EvalStatic(self):
-    print('~ is not allowed')
-    return False, '', False
-
 
 class ArithSubPart(WordPart):
 
@@ -390,10 +340,6 @@ class ArithSubPart(WordPart):
 
   def __repr__(self):
     return '[ArithSub %r]' % self.anode
-
-  def EvalStatic(self):
-    print('$(()) is not allowed)')
-    return False, '', False
 
   def IsSubst(self):
     return True
@@ -558,21 +504,6 @@ class CompoundWord(Word):
     # Kind.KW (or Kind.Lit).  But the CommandParser is easier to write this way.
     return Kind.Word
 
-  def EvalStatic(self):
-    """
-    Returns a string, and whether any part was quoted.
-    """
-    ret = ''
-    quoted = False
-    for p in self.parts:
-      ok, s, q = p.EvalStatic()
-      if not ok:
-        return False, '', quoted
-      if q:
-        quoted = True
-      ret += s
-    return True, ret, quoted
-
   def HasArrayPart(self):
     for part in self.parts:
       if part.id == Id.Right_ArrayLiteral:
@@ -610,7 +541,7 @@ class CompoundWord(Word):
     return self.parts[0].ArithVarLikeName()  # may be empty
 
   def AsFuncName(self):
-    ok, s, quoted = self.EvalStatic()
+    ok, s, quoted = static_eval.EvalWord(self)
     if not ok:
       return False, ''
     if quoted:

@@ -57,6 +57,7 @@ import sys
 from osh import ast
 
 from core import base
+from core import static_eval
 from core.id_kind import Id, Kind, LookupKind, IdName
 
 from osh.lex import LexMode
@@ -237,7 +238,7 @@ class BoolParser(object):
 
         right = self.cur_word
         if is_regex:
-          ok, regex_str, unused_quoted = right.EvalStatic()
+          ok, regex_str, unused_quoted = static_eval.EvalWord(right)
           # doesn't contain $foo, etc.
           if ok and not libc.regex_parse(regex_str):
             self.AddErrorContext("Invalid regex: %r" % regex_str, word=right)

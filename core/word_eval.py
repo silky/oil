@@ -671,7 +671,7 @@ class _Evaluator(object):
 
     elif part.id == Id.Left_SingleQuote:
       part = cast(SingleQuotedPart, part)
-      s = part._Eval()  # shared with EvalStatic.  TODO: Consolidate
+      s = ''.join(t.val for t in part.tokens)
       return True, Value.FromString(s)
 
     elif part.id == Id.Left_DoubleQuote:
@@ -847,7 +847,8 @@ class CompletionEvaluator(_Evaluator):
   TODO: Also disable side effects!  Like ${a:=b} rather than ${a:-b}
   And also $(( a+=1 ))
 
-  TODO: Unify with EvalStatic() methods on Word and WordPart?
+  TODO: Unify with static_eval?  Completion allows more stuff like var names,
+  and maybe words within arrays as well.
   """
   def __init__(self, mem, exec_opts):
     _Evaluator.__init__(self, mem, exec_opts)
@@ -855,3 +856,4 @@ class CompletionEvaluator(_Evaluator):
   def EvalCommandSub(self, node):
     # Just  return a dummy string?
     return True, Value.FromString('__COMMAND_SUB_NOT_EXECUTED__')
+

@@ -17,6 +17,7 @@ from core.word_node import (
 
 from core.id_kind import Id, Kind, IdName
 from core.tokens import Token
+from core import static_eval
 from core import tdop
 from core.cmd_node import ForExpressionNode
 
@@ -193,7 +194,7 @@ class WordParser(object):
     if not pat: return None
 
     if len(pat.parts) == 1:
-      ok, s, quoted = pat.EvalStatic()
+      ok, s, quoted = static_eval.EvalWord(pat)
       if ok and s == '/' and not quoted:  # Looks like ${a////c}, read again
         self._Next(lex_mode)
         self._Peek()
