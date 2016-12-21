@@ -113,12 +113,6 @@ def LooksLikeAssignment(w):
   pass
 
 
-# Used in word_eval
-# Maybe move it there, just like _GlobsAreExpanded
-def IsSubst(w):
-  pass
-
-
 def AssignmentBuiltinId(w):
   #assert isinstance(w, ast.CompoundWord)
   pass

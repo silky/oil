@@ -186,6 +186,22 @@ def _GlobsAreExpanded(p):
 """
 
 
+# TODO: Turn this into an ASDL predicate?  Fast table lookup for C++.
+def _IsSubst(p):
+  """
+  Returns:
+    Is the part an substitution?  (If called
+    This is used:
+
+    1) To determine whether result of evaluation of the part should be split
+    in a unquoted context.
+    2) To determine whether an empty string can be elided.
+    3) To do globbing.  If we are NOT in a substitution or literal.
+  """
+  return p.id in (
+      Id.Left_CommandSub, Id.Left_VarSub, Id.Left_ArithSub, Id.Left_ArithSub2)
+
+
 class _Evaluator(object):
   """Abstract base class."""
 
@@ -566,7 +582,7 @@ class _Evaluator(object):
       glob_escape = do_glob and not _GlobsAreExpanded(p)
 
       if is_str:
-        if p.IsSubst():  # Split substitutions
+        if _IsSubst(p):  # Split substitutions
           # NOTE: Splitting is the same whether we are glob escaping or not
           split_parts = _IfsSplit(s, ifs)
           empty = _AppendArray(strs, split_parts, glob_escape=glob_escape)

@@ -105,19 +105,6 @@ class WordPart(_Node):
     """
     return Id.Undefined_Tok  # unequal to any other Id
 
-  def IsSubst(self):
-    """
-    Returns:
-      Is the part an substitution?  (If called
-      This is used:
-
-      1) To determine whether result of evaluation of the part should be split
-      in a unquoted context.
-      2) To determine whether an empty string can be elided.
-      3) To do globbing.  If we are NOT in a substitution or literal.
-    """
-    return False
-
 
 class ArrayLiteralPart(WordPart):
   """An Array literal is WordPart that contains other Words.
@@ -272,9 +259,6 @@ class CommandSubPart(WordPart):
     self.command_list.PrintLine(f)  # print(on a single line)
     return '[ComSub %s]' % f.getvalue()
 
-  def IsSubst(self):
-    return True
-
 
 class VarSubPart(WordPart):
 
@@ -310,12 +294,8 @@ class VarSubPart(WordPart):
     else:
       return None, None
 
-  def IsSubst(self):
-    return True
-
 
 class TildeSubPart(WordPart):
-  # NOTE: NOT IsSubst
 
   def __init__(self, prefix):
     """
@@ -340,9 +320,6 @@ class ArithSubPart(WordPart):
 
   def __repr__(self):
     return '[ArithSub %r]' % self.anode
-
-  def IsSubst(self):
-    return True
 
 
 class _BTokenInterface(object):
