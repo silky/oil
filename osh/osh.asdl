@@ -26,8 +26,8 @@ module osh
   token = (id id, string value, source_location loc)
 
   bracket_op = 
-    ArrayOp(id op_id)  -- * or @
-  | ArrayIndex(arith_expr a)
+    WholeArray(id op_id)  -- * or @
+  | ArrayIndex(arith_expr expr)
 
   suffix_op = 
     StringUnary(id op_id, word arg_word)

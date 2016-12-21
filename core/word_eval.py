@@ -22,6 +22,8 @@ from core.value import Value
 from core.util import cast
 from osh import ast
 
+bracket_op_e = ast.bracket_op_e
+
 
 # Glob Helpers for WordParts.
 # ! : - are metachars within character classes
@@ -348,30 +350,34 @@ class _Evaluator(object):
     index_error = False  # test_op can suppress this
 
     if defined and part.bracket_op:
-      id = part.bracket_op.op_id
+      if part.bracket_op.tag == bracket_op_e.WholeArray:
+        op_id = part.bracket_op.op_id
 
-      # TODO: Change this to array_op instead of bracket_op?
-      if id == Id.Lit_At:
-        if val.IsArray():
-          array_ok = True
+        # TODO: Change this to array_op instead of bracket_op?
+        if op_id == Id.Lit_At:
+          if val.IsArray():
+            array_ok = True
+          else:
+            self._AddErrorContext("Can't index non-array with @")
+            return False, None
+
+        elif op_id == Id.Arith_Star:
+          if val.IsArray():
+            array_ok = True
+          else:
+            self._AddErrorContext("Can't index non-array with *")
+            return False, None
+
         else:
-          self._AddErrorContext("Can't index non-array with @")
-          return False, None
+          raise AssertionError(op_id)
 
-      elif id == Id.Arith_Star:
-        if val.IsArray():
-          array_ok = True
-        else:
-          self._AddErrorContext("Can't index non-array with *")
-          return False, None
-
-      elif id == Id.VOp2_LBracket:
+      elif part.bracket_op.tag == bracket_op_e.ArrayIndex:
         array_ok = True
         is_array, a = val.AsArray()
         if is_array:
-          anode = part.bracket_op.arg_word
+          anode = part.bracket_op.expr
           # TODO: This should propagate errors
-          arith_ev = expr_eval.ArithEvaluator(self)
+          arith_ev = expr_eval.ArithEvaluator(self.mem, self)
           ok = arith_ev.Eval(anode)
           if not ok:
             self._AddErrorContext(
@@ -389,8 +395,9 @@ class _Evaluator(object):
 
         else:  # it's a string
           raise NotImplementedError("String indexing not implemented")
+
       else:
-        raise AssertionError(id)
+        raise AssertionError(part.bracket_op.tag)
 
     if defined and val.IsArray():
       if not array_ok:

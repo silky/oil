@@ -423,12 +423,6 @@ class CompoundWord(Word):
     # Kind.KW (or Kind.Lit).  But the CommandParser is easier to write this way.
     return Kind.Word
 
-  def HasArrayPart(self):
-    for part in self.parts:
-      if part.id == Id.Right_ArrayLiteral:
-        return True
-    return False
-
   def LooksLikeAssignment(self):
     """
     Returns:

@@ -240,7 +240,7 @@ class WordParser(object):
     # expression.
     t2 = self.lexer.LookAhead(LexMode.ARITH)
     if t2.id in (Id.Lit_At, Id.Arith_Star):
-      op = ast.ArrayOp(t2.id)
+      op = ast.WholeArray(t2.id)
 
       self._Next(LexMode.ARITH)  # skip past [
       self._Peek()  

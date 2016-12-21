@@ -377,7 +377,7 @@ class CommandParser(object):
 
   def _MakeSimpleCommand(self, prefix_bindings, suffix_words, redirects):
     for k, v in prefix_bindings:  # FOO=(1 2 3) ls is not allowed
-      if v.HasArrayPart():
+      if word.HasArrayPart(v):
         self.AddErrorContext('Unexpected array literal in binding: %s', v)
         return None
 
@@ -389,7 +389,7 @@ class CommandParser(object):
         k, v = kv
         # Normal assign words like foo=bar are just literal.  But array words
         # foo=(1 2) don't belong.  They can only be prefixes.
-        if v.HasArrayPart():
+        if word.HasArrayPart(v):
           self.AddErrorContext('Unexpected array literal: %s', v)
           return None
 
@@ -547,7 +547,7 @@ class CommandParser(object):
       return None
 
     for k, v in prefix_bindings:  # FOO=(1 2 3) ls is not allowed
-      if v.HasArrayPart():
+      if word.HasArrayPart(v):
         self.AddErrorContext('Unexpected array literal in binding: %s', v)
         return None
 
