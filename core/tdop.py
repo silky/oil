@@ -6,6 +6,7 @@ tdop.py - Library for expression parsing.
 from core import base
 from core.id_kind import Id, IdName
 from core.util import cast
+from core import word
 
 from osh import ast 
 from osh.lex import LexMode
@@ -77,13 +78,13 @@ def NullError(p, t, bp):
   raise ParseError("Token %s can't be used in prefix position" % t)
 
 
-def NullConstant(p, word, bp):
+def NullConstant(p, w, bp):
   # The word itself is a node
-  if word.id == Id.Word_Compound:
-    var_name = word.AsArithVarName()
+  if w.id == Id.Word_Compound:
+    var_name = word.AsArithVarName(w)
     if var_name:
       return ast.RightVar(var_name)
-  return word
+  return w
 
 
 def NullParen(p, t, bp):

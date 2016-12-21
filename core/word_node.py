@@ -66,15 +66,6 @@ class WordPart(_Node):
     """
     raise NotImplementedError(self.__class__.__name__)
 
-  def ArithVarLikeName(self):
-    """Return the var name string, or False.
-
-    NOTE: This can't be combined with the above because the tokens have to be
-    different.  Otherwise _ReadCompoundWord will be confused between array
-    assigments foo=(1 2) and function calls foo(1, 2).
-    """
-    return False
-
   def LiteralId(self):
     """
     If the WordPart consists of a single literal token, return its Id.  Used
@@ -138,12 +129,6 @@ class LiteralPart(_LiteralPartBase):
     return '[%s %s]%s' % (
         IdName(self.token.id), EncodeTokenVal(self.token.val),
         newline)
-
-  def ArithVarLikeName(self):
-    if self.token.id == Id.Lit_ArithVarLike:
-      return self.token.val
-    else:
-      return False
 
   def LiteralId(self):
     return self.token.id
@@ -453,13 +438,6 @@ class CompoundWord(Word):
     TODO:  probably needs a different interface.
     """
     return word.LooksLikeAssignment(self)
-
-  def AsArithVarName(self):
-    """Returns a string if this word looks like an arith var; otherwise False."""
-    if len(self.parts) != 1:
-      return ""
-
-    return self.parts[0].ArithVarLikeName()  # may be empty
 
   def AsFuncName(self):
     ok, s, quoted = word.StaticEval(self)

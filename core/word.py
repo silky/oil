@@ -165,11 +165,23 @@ def AsFuncName(w):
 
 
 def AsArithVarName(w):
-  """Returns a string if this word looks like an arith var; otherwise False."""
+  """Returns a string if this word looks like an arith var; otherwise False.
+
+  NOTE: This can't be combined with LooksLikeAssignment because VarLike and
+  ArithVarLike must be different tokens.  Otherwise _ReadCompoundWord will be
+  confused between array assigments foo=(1 2) and function calls foo(1, 2).
+  """
   if len(w.parts) != 1:
     return ""
 
-  return PartArithVarLikeName(w.parts[0])
+  part0 = w.parts[0]
+  if part0.id != Id.Lit_Chars:  # TODO: change to tag
+    return False
+
+  if part0.token.id != Id.Lit_ArithVarLike:
+    return False
+
+  return part0.token.val
 
 
 def HasArrayPart(w):
