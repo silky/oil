@@ -319,9 +319,6 @@ class Word(_Node, _BTokenInterface):
     """
     raise NotImplementedError
 
-  def BoolId(self):
-    raise NotImplementedError
-
   def CommandId(self):
     raise NotImplementedError
 
@@ -370,24 +367,6 @@ class CompoundWord(Word):
 
     return Id.Undefined_Tok
 
-  def BoolId(self):
-    if len(self.parts) != 1:
-      return Id.Word_Compound
-
-    token_type = self.parts[0].LiteralId()
-    if token_type == Id.Undefined_Tok:
-      return Id.Word_Compound
-
-    # This is outside the BoolUnary/BoolBinary namespace, but works the same.
-    if token_type in (Id.KW_Bang, Id.Lit_DRightBracket):
-      return token_type
-
-    token_kind = LookupKind(token_type)
-    if token_kind in (Kind.BoolUnary, Kind.BoolBinary):
-      return token_type
-
-    return Id.Word_Compound
-
   def CommandId(self):
     # has to be a single literal part
     if len(self.parts) != 1:
@@ -435,9 +414,6 @@ class TokenWord(Word):
 
   def TokenPair(self):
     return self.token, self.token
-
-  def BoolId(self):
-    return self.token.id
 
   def CommandId(self):
     return self.token.id

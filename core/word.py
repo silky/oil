@@ -6,7 +6,7 @@ word.py
 import sys
 
 from osh import ast
-from core.id_kind import Id
+from core.id_kind import Id, Kind, LookupKind
 from core.tokens import Token
 
 word_e = ast.word_e
@@ -243,12 +243,32 @@ def ArithId(node):
   return Id.Word_Compound
 
 
-def BooldId(node):
-  if node.tag == word_e.TokenWord:
+def BoolId(node):
+  from core.word_node import TokenWord
+  if isinstance(node, TokenWord):
     return node.token.id
+  #if node.tag == word_e.TokenWord:
+  #  return node.token.id
 
   # Assume it's a CompoundWord
-  assert node.tag == word_e.CompoundWord
+  #assert node.tag == word_e.CompoundWord
+
+  if len(node.parts) != 1:
+    return Id.Word_Compound
+
+  token_type = node.parts[0].LiteralId()
+  if token_type == Id.Undefined_Tok:
+    return Id.Word_Compound  # It's a regular word
+
+  # This is outside the BoolUnary/BoolBinary namespace, but works the same.
+  if token_type in (Id.KW_Bang, Id.Lit_DRightBracket):
+    return token_type  # special boolean "tokens"
+
+  token_kind = LookupKind(token_type)
+  if token_kind in (Kind.BoolUnary, Kind.BoolBinary):
+    return token_type  # boolean operators
+
+  return Id.Word_Compound
 
 
 def CommandId(node):

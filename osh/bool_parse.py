@@ -112,7 +112,7 @@ class BoolParser(object):
         self.words[0] = w
       self.cur_word = w
 
-    self.op_id = self.cur_word.BoolId()
+    self.op_id = word.BoolId(self.cur_word)
     self.b_kind = LookupKind(self.op_id)
     #print('---- word', self.cur_word, 'op_id', self.op_id, self.b_kind, lex_mode)
     return True
@@ -218,7 +218,7 @@ class BoolParser(object):
     if self.b_kind == Kind.Word:
       # Peek ahead another token.
       t2 = self._LookAhead()
-      t2_op_id = t2.BoolId()
+      t2_op_id = word.BoolId(t2)
       t2_b_kind = LookupKind(t2_op_id)
 
       # Redir PUN for < and >
