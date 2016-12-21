@@ -52,68 +52,6 @@ class CNode(_Node):
       f.write('>\n')
 
 
-class RedirNode(_Node):
-  """
-  SimpleCommandNode and _CompoundCNode (function body or compound command) can
-  have non-NULL redirect nodes.
-
-  This is not an CNode since it can't be executed directly.
-  TODO: Does it need self.word_start and self.word_end?  Probably.
-
-  TODO: base class _Node
-  """
-  def __init__(self, id, fd):
-    """
-    Args:
-      id: The actual ID
-      fd: the fd that occurs before the operator, e.g. 1 in 1>&2.
-        DescriptorRedirNode has another descriptor AFTER the operator.
-    """
-    _Node.__init__(self, id)
-    self.fd = fd
-    self.arg_word = None  # CompoundWord
-
-  def DebugString(self):
-    return repr(self)
-
-  def __repr__(self):
-    f = io.StringIO()
-    self.Print(f)
-    return f.getvalue()
-
-  def _PrintHeader(self, f):
-    # No extra metadata?
-    pass
-
-  def Print(self, f):
-    f.write('(%s ' % self.__class__.__name__)
-    self._PrintHeader(f)
-
-    # TODO: This word can be huge
-    f.write(' %s' % self.arg_word)
-
-    #if self.fd != -1:
-    f.write(' %s' % self.fd)
-    f.write(')')
-
-
-class HereDocNode(RedirNode):
-  """ << and <<- cause pipe()
-  """
-  def __init__(self, id, fd):
-    # stdin by default
-    RedirNode.__init__(self, id, fd)
-    self.do_expansion = False
-    # NOTE: These two can be dropped for execution.  here_end and was_filled
-    # not needed after parsing. 
-    self.here_end = None  # CompoundWord
-    self.was_filled = False  # STATE: whether we read lines for this node yet
-
-  def _PrintHeader(self, f):
-    f.write('here_end=%r do_expansion=%r' % (
-      self.here_end, self.do_expansion))
-
-
 def _GetHereDocsToFill(redirects):
   return [
       r for r in redirects
