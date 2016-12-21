@@ -465,20 +465,7 @@ class CompoundWord(Word):
 
     TODO:  probably needs a different interface.
     """
-    if len(self.parts) == 0:
-      return False
-    name = self.parts[0].VarLikeName()
-    rhs = CompoundWord()
-    if name:
-      if len(self.parts) == 1:
-        # NOTE: This is necesssary so that EmptyUnquoted elision isn't
-        # applied.  EMPTY= is like EMPTY=''.
-        rhs.parts.append(SingleQuotedPart())
-      else:
-        for p in self.parts[1:]:
-          rhs.parts.append(p)
-      return name, rhs
-    return False
+    return word.LooksLikeAssignment(self)
 
   def AsArithVarName(self):
     """Returns a string if this word looks like an arith var; otherwise False."""

@@ -70,7 +70,7 @@ def _EvalWordPart(part):
 
 
 def StaticEval(w):
-  """Evaluate a Word at PARSE TIME.
+  """Evaluate a CompoundWord at PARSE TIME.
   """
   ret = ''
   quoted = False
@@ -85,9 +85,10 @@ def StaticEval(w):
 
 
 def TildeDetect(word):
-  """
-  Return a new word if it needs to include a TildeSub, or None to leave it
-  alone.
+  """Detect tilde expansion.
+
+  If it needs to include a TildeSubPart, return a new word.  Otherwise return
+  None.
 
   NOTE: This algorithm would be a simpler if
   1. We could assume some regex for user names.
@@ -180,7 +181,31 @@ def HasArrayPart(w):
 
 
 def LooksLikeAssignment(w):
-  pass
+  from core.word_node import CompoundWord, SingleQuotedPart
+  assert isinstance(w, CompoundWord)
+  print(w.parts)
+  if len(w.parts) == 0:
+    return False
+
+  part0 = w.parts[0]
+  if part0.id != Id.Lit_Chars:  # TODO: Turn this into a tag test
+    return False
+
+  if part0.token.id != Id.Lit_VarLike:
+    return False
+
+  assert part0.token.val.endswith('=')
+  name = part0.token.val[:-1]
+
+  rhs = CompoundWord()
+  if len(w.parts) == 1:
+    # NOTE: This is necesssary so that EmptyUnquoted elision isn't
+    # applied.  EMPTY= is like EMPTY=''.
+    rhs.parts.append(SingleQuotedPart())
+  else:
+    for p in w.parts[1:]:
+      rhs.parts.append(p)
+  return name, rhs
 
 
 def AssignmentBuiltinId(w):
