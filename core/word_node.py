@@ -319,9 +319,6 @@ class Word(_Node, _BTokenInterface):
     """
     raise NotImplementedError
 
-  def CommandId(self):
-    raise NotImplementedError
-
   def CommandKind(self):
     """Returns: Kind"""
     raise NotImplementedError
@@ -367,24 +364,6 @@ class CompoundWord(Word):
 
     return Id.Undefined_Tok
 
-  def CommandId(self):
-    # has to be a single literal part
-    if len(self.parts) != 1:
-      return Id.Word_Compound
-
-    token_type = self.parts[0].LiteralId()
-    if token_type == Id.Undefined_Tok:
-      return Id.Word_Compound
-
-    elif token_type in (Id.Lit_LBrace, Id.Lit_RBrace):
-      return token_type
-
-    token_kind = LookupKind(token_type)
-    if token_kind == Kind.KW:
-      return token_type
-
-    return Id.Word_Compound
-
   def CommandKind(self):
     # NOTE: This is a bit inconsistent with CommandId, because we never retur
     # Kind.KW (or Kind.Lit).  But the CommandParser is easier to write this way.
@@ -414,9 +393,6 @@ class TokenWord(Word):
 
   def TokenPair(self):
     return self.token, self.token
-
-  def CommandId(self):
-    return self.token.id
 
   def CommandKind(self):
     return self.token.Kind()

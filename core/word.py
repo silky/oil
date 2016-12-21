@@ -279,4 +279,19 @@ def CommandId(node):
   # Assume it's a CompoundWord
   #assert node.tag == word_e.CompoundWord
 
-  return node.CommandId()
+  # Has to be a single literal part
+  if len(node.parts) != 1:
+    return Id.Word_Compound
+
+  token_type = node.parts[0].LiteralId()
+  if token_type == Id.Undefined_Tok:
+    return Id.Word_Compound
+
+  elif token_type in (Id.Lit_LBrace, Id.Lit_RBrace):
+    return token_type
+
+  token_kind = LookupKind(token_type)
+  if token_kind == Kind.KW:
+    return token_type
+
+  return Id.Word_Compound
