@@ -114,28 +114,31 @@ def TildeDetect(word):
 
   if not word.parts:
     return None
-  if word.parts[0].LiteralId() != Id.Lit_Tilde:
+  part0 = word.parts[0]
+  if part0.id != Id.Lit_Chars:
+    return None
+  if part0.token.id != Id.Lit_Tilde:
     return None
 
   prefix = ''
   found_slash = False
   # search for the next /
   for i in range(1, len(word.parts)):
-    p = word.parts[i].TestLiteralForSlash()
-
     # Not a literal part, and we did NOT find a slash.  So there is no
     # TildeSub applied.  This would be something like ~X$var, ~$var,
     # ~$(echo), etc..  The slash is necessary.
-    if p == -2:
+    if word.parts[i].id != Id.Lit_Chars:
       return None
+    val = word.parts[i].token.val
+    p = val.find('/')
 
-    elif p == -1:  # no slash yet
-      prefix += word.parts[i].UnquotedLiteralValue()
+    if p == -1:  # no slash yet
+      prefix += val
 
     elif p >= 0:
       # e.g. for ~foo!bar/baz, extract "bar"
       # NOTE: requires downcast to LiteralPart
-      pre, post = word.parts[i].SplitAtIndex(p)
+      pre, post = val[:p], val[p:]
       prefix += pre
       tilde_part = TildeSubPart(prefix)
       remainder_part = LiteralPart(Token(Id.Lit_Chars, post))

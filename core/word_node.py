@@ -79,25 +79,6 @@ class WordPart(_Node):
     """
     return False
 
-  def UnquotedLiteralValue(self):
-    """
-    Returns a StringPiece value if it's a literal token, otherwise the empty
-    string.
-    Used only for Tilde detection.  TODO: Might want to reconsider that.
-    """
-    return ""
-
-  def TestLiteralForSlash(self):
-    """
-    Returns:
-      -2  : Not a literal part
-      -1  : It is a literal, but no slash
-       0- : position of the slash that is found
-
-    Used for tilde expansion.
-    """
-    return -2
-
   def LiteralId(self):
     """
     If the WordPart consists of a single literal token, return its Id.  Used
@@ -178,16 +159,6 @@ class LiteralPart(_LiteralPartBase):
   def LiteralId(self):
     return self.token.id
 
-  def UnquotedLiteralValue(self):
-    return self.token.val
-
-  def TestLiteralForSlash(self):
-    return self.token.val.find('/')
-
-  def SplitAtIndex(self, i):
-    s = self.token.val
-    return s[:i], s[i:]
-
 
 class EscapedLiteralPart(_LiteralPartBase):
   """e.g. \* or \$."""
@@ -200,8 +171,7 @@ class EscapedLiteralPart(_LiteralPartBase):
     return '[\ %s %s]' % (
         IdName(self.token.id), EncodeTokenVal(self.token.val))
 
-  # VarLikeName, TestLiteralForSlash, LiteralId: default values.  SplitAtIndex?
-  # Only exists on regular LiteralPart
+  # VarLikeName, LiteralId: default values.
 
 
 class SingleQuotedPart(WordPart):
