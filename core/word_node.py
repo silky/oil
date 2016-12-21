@@ -439,16 +439,6 @@ class CompoundWord(Word):
     """
     return word.LooksLikeAssignment(self)
 
-  def AsFuncName(self):
-    ok, s, quoted = word.StaticEval(self)
-    if not ok:
-      return False, ''
-    if quoted:
-      if len(self.parts) != 1:
-        raise RuntimeError(
-            "Function names should not have quotes, got: %s", self.parts)
-    return True, s
-
 
 class TokenWord(Word):
   """A word that is just a token.

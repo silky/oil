@@ -161,7 +161,15 @@ def TildeDetect(word):
 
 
 def AsFuncName(w):
-  pass
+  ok, s, quoted = StaticEval(w)
+  if not ok:
+    return False, ''
+  if quoted:
+    # TODO: Return False with error string
+    if len(self.parts) != 1:
+      raise RuntimeError(
+          "Function names should not have quotes, got: %s", self.parts)
+  return True, s
 
 
 def AsArithVarName(w):

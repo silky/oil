@@ -935,7 +935,7 @@ class CommandParser(object):
 
     Bash only accepts the latter, though it doesn't really follow a grammar.
     """
-    ok, name = self.cur_word.AsFuncName()
+    ok, name = word.AsFuncName(self.cur_word)
     if not ok:
       self.AddErrorContext("Invalid function name: %r", self.cur_word)
       return None
@@ -966,7 +966,7 @@ class CommandParser(object):
     self._Next()  # skip past 'function'
 
     if not self._Peek(): return None
-    ok, name = self.cur_word.AsFuncName()
+    ok, name = word.AsFuncName(self.cur_word)
     if not ok:
       self.AddErrorContext("Invalid function name: %r", self.cur_word)
       return None
