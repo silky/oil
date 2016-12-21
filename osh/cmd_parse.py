@@ -361,7 +361,7 @@ class CommandParser(object):
         suffix_words.append(w)
         continue
 
-      kv = w.LooksLikeAssignment()
+      kv = word.LooksLikeAssignment(w)
       if kv:
         k, v = kv
         t = word.TildeDetect(v)
@@ -384,7 +384,7 @@ class CommandParser(object):
     # NOTE: Here is the place to check validity of words at parse time.  Can
     # resolve against builtins, functions, aliases, static PATH, etc.
     for w in suffix_words:  # ls FOO=(1 2 3) is not allowed
-      kv = w.LooksLikeAssignment()
+      kv = word.LooksLikeAssignment(w)
       if kv:
         k, v = kv
         # Normal assign words like foo=bar are just literal.  But array words
@@ -411,7 +411,7 @@ class CommandParser(object):
     for i, w in enumerate(suffix_words):
       if i == 0:
         continue  # skip over local, export, etc.
-      kv = w.LooksLikeAssignment()
+      kv = word.LooksLikeAssignment(w)
       if kv:
         k, v = kv
         t = word.TildeDetect(v)
@@ -1089,7 +1089,7 @@ class CommandParser(object):
 
     if self.c_kind == Kind.Word:
       if self.w_parser.LookAhead() == Id.Op_LParen:  # (
-        kv = self.cur_word.LooksLikeAssignment()
+        kv = word.LooksLikeAssignment(self.cur_word)
         if kv:
           return self.ParseSimpleCommand()  # f=(a b c)  # array
         else:

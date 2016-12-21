@@ -345,12 +345,7 @@ class CompoundWord(Word):
     return self.parts == other.parts
 
   def PrintLine(self, f):
-    # TODO: Consider indenting parts if they are complex, like a command sub
-    # part.
-    # NOTE: Is the K needed?  It's nice for human readability, but programs
-    # might not need it.
-    suffix = ' =' if self.LooksLikeAssignment() else ''
-    s = '{' + ' '.join(repr(p) for p in self.parts) + ('%s}' % suffix)
+    s = '{' + ' '.join(repr(p) for p in self.parts) + '}'
     f.write(s)
 
   def TokenPair(self):
@@ -422,16 +417,6 @@ class CompoundWord(Word):
     # NOTE: This is a bit inconsistent with CommandId, because we never retur
     # Kind.KW (or Kind.Lit).  But the CommandParser is easier to write this way.
     return Kind.Word
-
-  def LooksLikeAssignment(self):
-    """
-    Returns:
-      String lhs, Word RHS
-      or False
-
-    TODO:  probably needs a different interface.
-    """
-    return word.LooksLikeAssignment(self)
 
 
 class TokenWord(Word):
