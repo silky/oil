@@ -59,6 +59,36 @@ def _GetHereDocsToFill(redirects):
   ]
 
 
+def GetHereDocsToFill(node):
+  """For CommandParser to fill here docs"""
+  # Has to be a POST ORDER TRAVERSAL of here docs, e.g.
+  #
+  # while read line; do cat <<EOF1; done <<EOF2
+  # body
+  # EOF1
+  # while
+  # EOF2
+  if isinstance(node, ast.DBracket):
+    return []
+
+  if isinstance(node, SimpleCommandNode):
+    return _GetHereDocsToFill(node.redirects)
+
+  if isinstance(node, _CompoundCNode):
+    # TODO: This must dispatch on the individual heterogeneous children.
+    # Some nodes don't have redirects.
+
+    here_docs = []
+    for child in node.children:
+      here_docs.extend(GetHereDocsToFill(child))
+    here_docs.extend(_GetHereDocsToFill(node.redirects))  # parent
+    return here_docs
+
+  # Default, for assignment node, etc.
+  return []
+  #raise AssertionError(node)
+
+
 class SimpleCommandNode(CNode):
   def __init__(self):
     CNode.__init__(self, Id.Node_Command)
@@ -153,33 +183,6 @@ class DParenNode(CNode):
     f.write(')')
 
 
-def GetHereDocsToFill(node):
-  """For CommandParser to fill here docs"""
-  # Has to be a POST ORDER TRAVERSAL of here docs, e.g.
-  #
-  # while read line; do cat <<EOF1; done <<EOF2
-  # body
-  # EOF1
-  # while
-  # EOF2
-  if isinstance(node, ast.DBracket):
-    return []
-
-  if isinstance(node, SimpleCommandNode):
-    return _GetHereDocsToFill(node.redirects)
-
-  if isinstance(node, _CompoundCNode):
-    here_docs = []
-    for child in node.children:
-      here_docs.extend(GetHereDocsToFill(child))
-    here_docs.extend(_GetHereDocsToFill(node.redirects))  # parent
-    return here_docs
-
-  # Default, for assignment node, etc.
-  return []
-  #raise AssertionError(node)
-
-
 # NOTE: This has N children, instead of a fixed 0, 1, or 2.
 class _CompoundCNode(CNode):
   def __init__(self, id):
@@ -218,30 +221,6 @@ class _CompoundCNode(CNode):
     # type.
     return self.id == other.id and self.children == other.children
 
-
-# TODO:
-# - Where does & for async go?  # Can you make whole functions async.  Yes.  I
-# guess pipelines and AND_OR can be too?
-#   - you could have an entire ASYNC node, which is different than the parse
-#     tree.  Hm.  Sort of like a separate BANG node?  Might be easier for
-#     execution this way.
-#
-# Unary nodes, that operate on lists...
-#   BANG
-#   ASYNC -- fork interpreter for composite, and don't wait.
-#   REDIRECT -- does this require forking for compound commands?
-#     - or does it just require state before and after?
-#     - Because ANY compound command can have redirects.  for/while/if/{}
-#
-# Problem: What's convenient for execution is inconvenient for shell -> oil
-# translation.
-# - Well I think losing "until" loops might actually be OK!
-#
-# - Write __repr__ and __eq__ for every node, for testing
-#   - in C++, the debug string will serve as the tests!  multi-language tests.
-
-# NOTE: The ANTLR book has all nodes of separate types, but ALSO separate token
-# types.  There are two ways to switch on it.
 
 class ListNode(_CompoundCNode):
   """
