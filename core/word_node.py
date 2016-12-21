@@ -527,30 +527,6 @@ class CompoundWord(Word):
             "Function names should not have quotes, got: %s", self.parts)
     return True, s
 
-  def BraceExpand(self):
-    """
-    Returns:
-      A list of new Word instances, or None if there was no brace expansion
-      detected.
-    """
-    # Algorithm:
-    #
-    # Look for patterns like LBRACE COMMA RBRACE
-    # And then form cross product somehow.
-
-    # "A correctly-formed brace expansion must contain unquoted opening and
-    # closing braces, and at least one unquoted comma or a valid sequence
-    # expression.  Any incorrectly formed brace expansion is left unchanged. "
-
-    # Could this be recursive?  preamble,options,postscript
-    #
-    # Hm bash also has integer expressions!  {1..3} => {1,2,3}
-    # {1..5..2} => {1,3,5}
-    # - mksh doesn't have it.
-
-    # look for subseqeuence like '{' ','+ '}'
-    # And then make a data structure for this.
-
 
 class TokenWord(Word):
   """A word that is just a token.

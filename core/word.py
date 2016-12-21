@@ -5,8 +5,9 @@ word.py
 
 import sys
 
-from core.id_kind import Id
 from osh import ast
+from core.id_kind import Id
+from core.tokens import Token
 
 word_e = ast.word_e
 
@@ -83,10 +84,76 @@ def StaticEval(w):
   return True, ret, quoted
 
 
+def TildeDetect(word):
+  """
+  Return a new word if it needs to include a TildeSub, or None to leave it
+  alone.
 
-# Move from cmd_parse
-def TildeDetect(w):
-  pass
+  NOTE: This algorithm would be a simpler if
+  1. We could assume some regex for user names.
+  2. We didn't need to do brace expansion first, like {~foo,~bar}
+  OR
+  - If Lit_Slash were special (it is in the VAROP states, but not OUTER
+  state).  We could introduce another lexer mode after you hit Lit_Tilde?
+
+  So we have to scan all LiteralPart instances until they contain a '/'.
+
+  http://unix.stackexchange.com/questions/157426/what-is-the-regex-to-validate-linux-users
+  "It is usually recommended to only use usernames that begin with a lower
+  case letter or an underscore, followed by lower case letters, digits,
+  underscores, or dashes. They can end with a dollar sign. In regular
+  expression terms: [a-z_][a-z0-9_-]*[$]?
+
+  On Debian, the only constraints are that usernames must neither start with
+  a dash ('-') nor contain a colon (':') or a whitespace (space: ' ', end
+  of line: '\n', tabulation: '\t', etc.). Note that using a slash ('/') may
+  break the default algorithm for the definition of the user's home
+  directory.
+  """
+  from core.word_node import CompoundWord, TildeSubPart, LiteralPart
+
+  if not word.parts:
+    return None
+  if word.parts[0].LiteralId() != Id.Lit_Tilde:
+    return None
+
+  prefix = ''
+  found_slash = False
+  # search for the next /
+  for i in range(1, len(word.parts)):
+    p = word.parts[i].TestLiteralForSlash()
+
+    # Not a literal part, and we did NOT find a slash.  So there is no
+    # TildeSub applied.  This would be something like ~X$var, ~$var,
+    # ~$(echo), etc..  The slash is necessary.
+    if p == -2:
+      return None
+
+    elif p == -1:  # no slash yet
+      prefix += word.parts[i].UnquotedLiteralValue()
+
+    elif p >= 0:
+      # e.g. for ~foo!bar/baz, extract "bar"
+      # NOTE: requires downcast to LiteralPart
+      pre, post = word.parts[i].SplitAtIndex(p)
+      prefix += pre
+      tilde_part = TildeSubPart(prefix)
+      remainder_part = LiteralPart(Token(Id.Lit_Chars, post))
+      found_slash = True
+      break
+
+  w = CompoundWord()
+  if found_slash:
+    w.parts.append(tilde_part)
+    w.parts.append(remainder_part)
+    j = i + 1
+    while j < len(word.parts):
+      w.parts.append(word.parts[j])
+      j += 1
+  else:
+    # The whole thing is a tilde sub, e.g. ~foo or ~foo!bar
+    w.parts.append(TildeSubPart(prefix))
+  return w
 
 
 def AsFuncName(w):

@@ -152,95 +152,38 @@ class CommandParser(object):
       return None
 
   def _BraceExpand(self, words):
-    # NOTE: In C++ this will use swap() of vector<Word*> on each iteration.
-    while True:
-      new_words = self._BraceExpandIter(words)
-      if new_words is None:
-        return words
+    """
+    Returns:
+      A list of new Word instances, or None if there was no brace expansion
+      detected.
+    """
+    # Algorithm:
+    #
+    # Look for patterns like LBRACE COMMA RBRACE
+    # And then form cross product somehow.
 
-    return new_words
+    # "A correctly-formed brace expansion must contain unquoted opening and
+    # closing braces, and at least one unquoted comma or a valid sequence
+    # expression.  Any incorrectly formed brace expansion is left unchanged. "
 
-  def _BraceExpand2(self, words):
-    # Dummy
+    # Could this be recursive?  preamble,options,postscript
+    #
+    # Hm bash also has integer expressions!  {1..3} => {1,2,3}
+    # {1..5..2} => {1,3,5}
+    # - mksh doesn't have it.
+
+    # look for subseqeuence like '{' ','+ '}'
+    # And then make a data structure for this.
     return words
-
-  def _TildeDetect(self, word):
-    """
-    Return a new word if it needs to include a TildeSub, or None to leave it
-    alone.
-
-    NOTE: This algorithm would be a simpler if
-    1. We could assume some regex for user names.
-    2. We didn't need to do brace expansion first, like {~foo,~bar}
-    OR
-    - If Lit_Slash were special (it is in the VAROP states, but not OUTER
-    state).  We could introduce another lexer mode after you hit Lit_Tilde?
-
-    So we have to scan all LiteralPart instances until they contain a '/'.
-
-    http://unix.stackexchange.com/questions/157426/what-is-the-regex-to-validate-linux-users
-    "It is usually recommended to only use usernames that begin with a lower
-    case letter or an underscore, followed by lower case letters, digits,
-    underscores, or dashes. They can end with a dollar sign. In regular
-    expression terms: [a-z_][a-z0-9_-]*[$]?
-
-    On Debian, the only constraints are that usernames must neither start with
-    a dash ('-') nor contain a colon (':') or a whitespace (space: ' ', end
-    of line: '\n', tabulation: '\t', etc.). Note that using a slash ('/') may
-    break the default algorithm for the definition of the user's home
-    directory.
-    """
-    if not word.parts:
-      return None
-    if word.parts[0].LiteralId() != Id.Lit_Tilde:
-      return None
-
-    prefix = ''
-    found_slash = False
-    # search for the next /
-    for i in range(1, len(word.parts)):
-      p = word.parts[i].TestLiteralForSlash()
-
-      # Not a literal part, and we did NOT find a slash.  So there is no
-      # TildeSub applied.  This would be something like ~X$var, ~$var,
-      # ~$(echo), etc..  The slash is necessary.
-      if p == -2:
-        return None
-
-      elif p == -1:  # no slash yet
-        prefix += word.parts[i].UnquotedLiteralValue()
-
-      elif p >= 0:
-        # e.g. for ~foo!bar/baz, extract "bar"
-        # NOTE: requires downcast to LiteralPart
-        pre, post = word.parts[i].SplitAtIndex(p)
-        prefix += pre
-        tilde_part = TildeSubPart(prefix)
-        remainder_part = LiteralPart(Token(Id.Lit_Chars, post))
-        found_slash = True
-        break
-
-    w = CompoundWord()
-    if found_slash:
-      w.parts.append(tilde_part)
-      w.parts.append(remainder_part)
-      j = i + 1
-      while j < len(word.parts):
-        w.parts.append(word.parts[j])
-        j += 1
-    else:
-      # The whole thing is a tilde sub, e.g. ~foo or ~foo!bar
-      w.parts.append(TildeSubPart(prefix))
-    return w
 
   def _TildeDetectAll(self, words):
     new_words = []
-    for word in words:
-      t = self._TildeDetect(word)
+    for w in words:
+      t = word.TildeDetect(w)
       if t:
         new_words.append(t)
       else:
-        new_words.append(word)
+        new_words.append(w)
     return new_words
 
   def _MaybeReadHereDocs(self, node):
@@ -421,7 +364,7 @@ class CommandParser(object):
       kv = w.LooksLikeAssignment()
       if kv:
         k, v = kv
-        t = self._TildeDetect(v)
+        t = word.TildeDetect(v)
         if t:
           # t is an unevaluated word with TildeSubPart
           prefix_bindings.append((k, t))
@@ -450,7 +393,7 @@ class CommandParser(object):
           self.AddErrorContext('Unexpected array literal: %s', v)
           return None
 
-    words2 = self._BraceExpand2(suffix_words)
+    words2 = self._BraceExpand(suffix_words)
     # NOTE: Must do tilde detection after brace expansion, e.g.
     # {~bob,~jane}/src should work, even though ~ isn't the leading character
     # of the initial word.
@@ -471,7 +414,7 @@ class CommandParser(object):
       kv = w.LooksLikeAssignment()
       if kv:
         k, v = kv
-        t = self._TildeDetect(v)
+        t = word.TildeDetect(v)
         if t:
           # t is an unevaluated word with TildeSubPart
           bindings.append((k, t))
