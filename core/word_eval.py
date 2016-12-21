@@ -20,6 +20,7 @@ from core.word_node import (
 from core.id_kind import Id, Kind, IdName, LookupKind
 from core.value import Value
 from core.util import cast
+from osh import ast
 
 
 # Glob Helpers for WordParts.
@@ -166,6 +167,23 @@ def _AppendArray(strs, array, glob_escape=False):
     else:
       strs.append(s)
   return empty
+
+
+word_part_e = ast.word_part_e
+
+def _GlobsAreExpanded(p):
+  """
+  Are globs expanded at the top level?  Yes for LiteralPart, and all the var
+  sub parts.
+  No for TildeSubPart, and all the quoted parts.
+  """
+  return p.id in (Id.Lit_Chars, Id.Left_CommandSub, Id.Left_VarSub)
+
+"""
+  return p.tag in (
+      word_part_e.LiteralPart, word_part_e.CommandSubPart,
+      word_part_e.VarSubPart)
+"""
 
 
 class _Evaluator(object):
@@ -545,7 +563,7 @@ class _Evaluator(object):
       is_str, s = val.AsString()
       #print('-VAL', val, is_str)
 
-      glob_escape = do_glob and not p.GlobsAreExpanded()
+      glob_escape = do_glob and not _GlobsAreExpanded(p)
 
       if is_str:
         if p.IsSubst():  # Split substitutions

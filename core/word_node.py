@@ -133,15 +133,6 @@ class WordPart(_Node):
     """
     return False
 
-  def GlobsAreExpanded(self):
-    """
-    Are globs expanded at the top level?  Yes for LiteralPart, and all the var
-    sub parts.
-
-    No for TildeSubPart, and all the quoted parts.
-    """
-    return False
-
 
 class ArrayLiteralPart(WordPart):
   """An Array literal is WordPart that contains other Words.
@@ -227,9 +218,6 @@ class LiteralPart(_LiteralPartBase):
   def SplitAtIndex(self, i):
     s = self.token.val
     return s[:i], s[i:]
-
-  def GlobsAreExpanded(self):
-    return True
 
 
 class EscapedLiteralPart(_LiteralPartBase):
@@ -330,9 +318,6 @@ class CommandSubPart(WordPart):
   def IsSubst(self):
     return True
 
-  def GlobsAreExpanded(self):
-    return True
-
 
 class VarSubPart(WordPart):
 
@@ -372,9 +357,6 @@ class VarSubPart(WordPart):
     return False, '', False
 
   def IsSubst(self):
-    return True
-
-  def GlobsAreExpanded(self):
     return True
 
 
