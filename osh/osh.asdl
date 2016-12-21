@@ -20,6 +20,9 @@ module osh
                  -- by another tool.  Suppress the error.
 
   source_location = (string path, int line, int col, int length)
+  -- Does the token hold the location, or do nodes?  I think we need to
+  -- annotate most nodes with source_location, but token is only for TokenWord,
+  -- LiteralPart, etc.
   token = (id id, string value, source_location loc)
 
   bracket_op = 
@@ -43,11 +46,11 @@ module osh
   | TildeSubPart(string prefix)
   | CommandSubPart(command c)
   | ArithSubPart(arith_expr a)
-  -- NOTE: Could put | Token(token t) as an optimization.
 
-  word = Word(word_part* parts)
-  -- NOTE: Could put | Token(token t) as an optimization.
-
+  word = 
+    TokenWord(token t)
+  | CompoundWord(word_part* parts)
+ 
   lvalue = 
     LeftVar(string name)
   | LeftIndex(string name, arith_expr index)
