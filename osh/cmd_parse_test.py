@@ -11,7 +11,7 @@ from asdl import py_meta
 from core import ui
 from core.word_node import DoubleQuotedPart
 from core.id_kind import Id
-from core import static_eval
+from core import word
 
 from osh import parse_lib
 from osh.cmd_parse import CommandParser  # module under test
@@ -1024,7 +1024,7 @@ echo foo#bar
 """)
     self.assertEqual(Id.Node_Command, node.id)
     self.assertEqual(2, len(node.words))
-    _, s, _ = static_eval.EvalWord(node.words[1])
+    _, s, _ = word.StaticEval(node.words[1])
     self.assertEqual('foo#bar', s)
 
     # This is a comment
@@ -1033,7 +1033,7 @@ echo foo #comment
 """)
     self.assertEqual(Id.Node_Command, node.id)
     self.assertEqual(2, len(node.words))
-    _, s, _ = static_eval.EvalWord(node.words[1])
+    _, s, _ = word.StaticEval(node.words[1])
     self.assertEqual('foo', s)
 
     # Empty comment
@@ -1042,7 +1042,7 @@ echo foo #
 """)
     self.assertEqual(Id.Node_Command, node.id)
     self.assertEqual(2, len(node.words))
-    _, s, _ = static_eval.EvalWord(node.words[1])
+    _, s, _ = word.StaticEval(node.words[1])
     self.assertEqual('foo', s)
 
   def testChromeIfSubshell(self):

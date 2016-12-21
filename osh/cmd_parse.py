@@ -11,7 +11,7 @@ cmd_parse.py - Parse high level shell commands.
 
 from core import base
 from core import cmd_node
-from core import static_eval
+from core import word
 from core.cmd_node import (
     SimpleCommandNode, NoOpNode, AssignmentNode, DBracketNode, DParenNode,
     ListNode, SubshellNode, ForkNode, PipelineNode, AndOrNode, ForNode,
@@ -340,7 +340,7 @@ class CommandParser(object):
       # performing quote removal on word, and the here-document lines shall not
       # be expanded. Otherwise, the delimiter shall be the word itself."
       # NOTE: \EOF counts, or even E\OF
-      ok, node.here_end, quoted = static_eval.EvalWord(self.cur_word)
+      ok, node.here_end, quoted = word.StaticEval(self.cur_word)
       if not ok:
         self.AddErrorContext(
             'Error evaluating here doc delimiter: %s', self.cur_word)
@@ -690,7 +690,7 @@ class CommandParser(object):
   def _ParseCommandForLoop(self):
     node = ForNode()
 
-    ok, value, quoted = static_eval.EvalWord(self.cur_word)
+    ok, value, quoted = word.StaticEval(self.cur_word)
     if not ok or quoted:
       self.AddErrorContext("Invalid for loop variable: %s", self.cur_word)
       return None

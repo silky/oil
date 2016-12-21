@@ -14,7 +14,7 @@ import unittest
 from core.word_node import LiteralPart, CompoundWord, TokenWord
 from core.id_kind import Id, IdName
 from core.tokens import Token
-from core import static_eval
+from core import word
 
 from osh import ast
 from osh import parse_lib
@@ -83,7 +83,7 @@ class WordParserTest(unittest.TestCase):
     w_parser = InitWordParser(expr)
     w = w_parser.ReadWord(LexMode.OUTER)
     print(w)
-    ok, s, quoted = static_eval.EvalWord(w)
+    ok, s, quoted = word.StaticEval(w)
     self.assertEqual(True, ok)
     self.assertEqual('EOF', s)
     self.assertEqual(True, quoted)
@@ -148,8 +148,8 @@ class WordParserTest(unittest.TestCase):
     # Should be DISALLOWED!
     #w = _assertReadWord(self, '${11[@]}')
 
-  def assertUnquoted(self, expected, word):
-    ok, s, quoted = static_eval.EvalWord(word)
+  def assertUnquoted(self, expected, w):
+    ok, s, quoted = word.StaticEval(w)
     self.assertTrue(ok)
     self.assertEqual(expected, s)
     self.assertFalse(quoted)
@@ -205,7 +205,7 @@ class WordParserTest(unittest.TestCase):
     op = _GetSuffixOp(self, w)
     self.assertUnquoted('pat', op.pat)
 
-    ok, s, quoted = static_eval.EvalWord(op.replace)
+    ok, s, quoted = word.StaticEval(op.replace)
     self.assertTrue(ok)
     self.assertEqual('//', s)
     self.assertTrue(quoted)
@@ -218,7 +218,7 @@ class WordParserTest(unittest.TestCase):
 
     self.assertUnquoted('/', op.pat)
 
-    ok, s, quoted = static_eval.EvalWord(op.replace)
+    ok, s, quoted = word.StaticEval(op.replace)
     self.assertTrue(ok)
     self.assertEqual(r'\/', s)
 

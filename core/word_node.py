@@ -20,7 +20,7 @@ from core.base import _Node
 from core.id_kind import Id, Kind, IdName, LookupKind
 from core.tokens import EncodeTokenVal
 from core.value import Value
-from core import static_eval
+from core import word
 
 from core import util
 
@@ -541,7 +541,7 @@ class CompoundWord(Word):
     return self.parts[0].ArithVarLikeName()  # may be empty
 
   def AsFuncName(self):
-    ok, s, quoted = static_eval.EvalWord(self)
+    ok, s, quoted = word.StaticEval(self)
     if not ok:
       return False, ''
     if quoted:

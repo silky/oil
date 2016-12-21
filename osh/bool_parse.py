@@ -57,7 +57,7 @@ import sys
 from osh import ast
 
 from core import base
-from core import static_eval
+from core import word
 from core.id_kind import Id, Kind, LookupKind, IdName
 
 from osh.lex import LexMode
@@ -210,9 +210,9 @@ class BoolParser(object):
       # Just save the type and not the token itself?
       op = self.op_id
       if not self._Next(): return None
-      word = self.cur_word
+      w = self.cur_word
       if not self._Next(): return None
-      node = ast.BoolUnary(op, word)
+      node = ast.BoolUnary(op, w)
       return node
 
     if self.b_kind == Kind.Word:
@@ -238,7 +238,7 @@ class BoolParser(object):
 
         right = self.cur_word
         if is_regex:
-          ok, regex_str, unused_quoted = static_eval.EvalWord(right)
+          ok, regex_str, unused_quoted = word.StaticEval(right)
           # doesn't contain $foo, etc.
           if ok and not libc.regex_parse(regex_str):
             self.AddErrorContext("Invalid regex: %r" % regex_str, word=right)
@@ -249,10 +249,10 @@ class BoolParser(object):
       else:
         # [[ foo ]] is implicit Implicit [[ -n foo ]]
         #op = Id.BoolUnary_n
-        word = self.cur_word
+        w = self.cur_word
         if not self._Next(): return None
         #return UnaryExprNode(op, word)
-        return word
+        return w
 
     if self.op_id == Id.Op_LParen:
       if not self._Next(): return None
