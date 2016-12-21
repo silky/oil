@@ -235,10 +235,12 @@ def AssignmentBuiltinId(w):
 # Polymorphic between TokenWord and CompoundWord
 
 def ArithId(node):
-  if node.tag == word_e.TokenWord:
+  from core.word_node import TokenWord
+  if isinstance(node, TokenWord):
     return node.token.id
 
-  assert node.tag == word_e.CompoundWord
+  #assert node.tag == word_e.CompoundWord
+  return Id.Word_Compound
 
 
 def BooldId(node):

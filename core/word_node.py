@@ -319,10 +319,6 @@ class Word(_Node, _BTokenInterface):
     """
     raise NotImplementedError
 
-  # Interpret a word as an Id in three contexts.
-  def ArithId(self):
-    raise NotImplementedError
-
   def BoolId(self):
     raise NotImplementedError
 
@@ -373,9 +369,6 @@ class CompoundWord(Word):
       return token_type
 
     return Id.Undefined_Tok
-
-  def ArithId(self):
-    return Id.Word_Compound
 
   def BoolId(self):
     if len(self.parts) != 1:
@@ -442,9 +435,6 @@ class TokenWord(Word):
 
   def TokenPair(self):
     return self.token, self.token
-
-  def ArithId(self):
-    return self.token.id  # e.g. AS_PLUS
 
   def BoolId(self):
     return self.token.id

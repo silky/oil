@@ -94,7 +94,7 @@ def NullParen(p, t, bp):
   return r
 
 
-def NullPrefixOp(p, t, bp):
+def NullPrefixOp(p, w, bp):
   """Prefix operator.
 
   Low precedence:  return, raise, etc.
@@ -104,7 +104,7 @@ def NullPrefixOp(p, t, bp):
     !x && y is (!x) && y, not !(x && y)
   """
   right = p.ParseUntil(bp)
-  return ast.ArithUnary(t.ArithId(), right)
+  return ast.ArithUnary(word.ArithId(w), right)
 
 
 #
@@ -116,18 +116,18 @@ def LeftError(p, t, left, rbp):
   raise ParseError("Token %s can't be used in infix position" % t)
 
 
-def LeftBinaryOp(p, t, left, rbp):
+def LeftBinaryOp(p, w, left, rbp):
   """ Normal binary operator like 1+2 or 2*3, etc. """
-  return ast.ArithBinary(t.ArithId(), left, p.ParseUntil(rbp))
+  return ast.ArithBinary(word.ArithId(w), left, p.ParseUntil(rbp))
 
 
-def LeftAssign(p, t, left, rbp):
+def LeftAssign(p, w, left, rbp):
   """ Normal binary operator like 1+2 or 2*3, etc. """
   # x += 1, or a[i] += 1
 
   if not IsLValue(left):
     raise ParseError("Can't assign to %r (%s)" % (left, IdName(left.id)))
-  return ast.ArithAssign(t.ArithId(), left, p.ParseUntil(rbp))
+  return ast.ArithAssign(word.ArithId(w), left, p.ParseUntil(rbp))
 
 
 #
@@ -249,7 +249,7 @@ class TdopParser(object):
           word=self.cur_word)
       #return False
       raise ParseError()  # use exceptions for now
-    self.op_id = self.cur_word.ArithId()
+    self.op_id = word.ArithId(self.cur_word)
     return True
 
   def ParseUntil(self, rbp):
@@ -264,13 +264,13 @@ class TdopParser(object):
     t = self.cur_word
     self.Next()  # skip over the token, e.g. ! ~ + -
 
-    null_info = self.spec.LookupNud(t.ArithId())
+    null_info = self.spec.LookupNud(word.ArithId(t))
     node = null_info.nud(self, t, null_info.bp)
 
     while True:
       t = self.cur_word
       try:
-        left_info = self._Led(t.ArithId())
+        left_info = self._Led(word.ArithId(t))
       except KeyError:
         raise ParseError('Invalid token %s' % t)
 
