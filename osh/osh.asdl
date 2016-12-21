@@ -68,11 +68,15 @@ module osh
   | LogicalAnd(bool_expr left, bool_expr right)
   | LogicalOr(bool_expr left, bool_expr right)
 
-  -- NOTE: To reprint the here doc, I guess we need the whole delimiter?  And
-  -- then do_expansion is calculated from that.
+  -- To reprint the here doc, we need the here_end delimiter.  But it 
+  -- doesn't matter at runtime.  do_expansion is calculated from it.
+  -- TODO: was_filled should be ELIMINATED from serialization format.  It's
+  -- only for use at parse time.
+  -- arg_word uses the same name for Here word and here doc.
   redir = 
     Redirect(id op_id, word arg_word, int fd)
-  | HereDoc(id op_id, word arg_word, int fd, int do_expansion)
+  | HereDoc(id op_id, word arg_word, int fd, int do_expansion,
+            string here_end, int? was_filled)  -- default was_filled None
 
   scope = Global | Local
   var_flags = Export | Readonly

@@ -117,7 +117,7 @@ class HereDocNode(RedirNode):
 def _GetHereDocsToFill(redirects):
   return [
       r for r in redirects
-      if r.id in (Id.Redir_DLess, Id.Redir_DLessDash) and not r.was_filled
+      if r.op_id in (Id.Redir_DLess, Id.Redir_DLessDash) and not r.was_filled
   ]
 
 

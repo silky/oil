@@ -12,7 +12,6 @@ cmd_parse.py - Parse high level shell commands.
 from core import base
 from core import cmd_node
 from core.cmd_node import (
-    RedirNode, HereDocNode, 
     SimpleCommandNode, NoOpNode, AssignmentNode, DBracketNode, DParenNode,
     ListNode, SubshellNode, ForkNode, PipelineNode, AndOrNode, ForNode,
     ForExpressionNode, WhileNode, UntilNode, FunctionDefNode, IfNode, CaseNode)
@@ -261,7 +260,7 @@ class CommandParser(object):
           print('WARNING: unterminated here doc', file=sys.stderr)
           break
 
-        if h.id == Id.Redir_DLessDash:
+        if h.op_id == Id.Redir_DLessDash:
           line = line.lstrip('\t')
         if line.rstrip() == h.here_end:
           break
@@ -330,7 +329,9 @@ class CommandParser(object):
       fd = REDIR_DEFAULT_FD[self.c_id]
 
     if self.c_id in (Id.Redir_DLess, Id.Redir_DLessDash):  # here
-      node = HereDocNode(self.c_id, fd)
+      node = ast.HereDoc()
+      node.op_id = self.c_id
+      node.fd = fd
       self._Next()
 
       if not self._Peek(): return None
@@ -347,7 +348,9 @@ class CommandParser(object):
       self._Next()
 
     else:
-      node = RedirNode(self.c_id, fd)
+      node = ast.Redirect()
+      node.op_id = self.c_id
+      node.fd = fd
       self._Next()
 
       if not self._Peek(): return None

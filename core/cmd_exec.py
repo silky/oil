@@ -536,7 +536,7 @@ class Executor(object):
     """
     redirects = []
     for n in nodes:
-      redir_type = REDIR_TYPE[n.id]
+      redir_type = REDIR_TYPE[n.op_id]
       if redir_type == RedirType.Path:
         # NOTE: no globbing.  You can write to a file called '*.py'.
         ok, val = self.ev.EvalCompoundWord(n.arg_word)
@@ -550,7 +550,7 @@ class Executor(object):
           self._AddErrorContext("filename can't be empty")
           return False
 
-        redirects.append(FilenameRedirect(n.id, n.fd, filename))
+        redirects.append(FilenameRedirect(n.op_id, n.fd, filename))
 
       elif redir_type == RedirType.Desc:  # e.g. 1>&2
         ok, val = self.ev.EvalCompoundWord(n.arg_word)
@@ -570,7 +570,7 @@ class Executor(object):
           self._AddErrorContext(
               "descriptor to redirect to should be an integer, not string")
           return False
-        redirects.append(DescriptorRedirect(n.id, n.fd, target_fd))
+        redirects.append(DescriptorRedirect(n.op_id, n.fd, target_fd))
 
       elif redir_type == RedirType.Str:
         ok, val = self.ev.EvalCompoundWord(n.arg_word)
@@ -578,7 +578,7 @@ class Executor(object):
           return False
         is_str, body = val.AsString()
         assert is_str, val  # here doc body can only be parsed as a string!
-        redirects.append(HereDocRedirect(n.id, n.fd, body))
+        redirects.append(HereDocRedirect(n.op_id, n.fd, body))
 
       else:
         raise AssertionError
