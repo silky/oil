@@ -1,14 +1,18 @@
 -- ASDL's six builtin types are identifier, int, string, bytes, object, singleton
+
 -- NOTE we're not using identifier/object/singleton/bytes
 -- Python only uses bytes/object/singleton once.
 -- identifier is used all over.  Why?  I have different rules for
--- for functions and vars.  case/for/assign have vars.
+-- functions and vars.  case/for/assign have vars.
 
 -- TODO:
 -- How to encode position information?
+-- Add bool, for C++ encoding
 -- FuncCall inside ${}, in addition to arithmetic context?
 --   Well I guess you can do this: echo $(( f(x,y) ))a.  It is a little more
 --   annoying.
+-- Do we need stricter ID types?
+--   arith_op_id, bool_op_id, vpre_op_id, array_op_id, vpost_op_id
 
 module osh
 {
@@ -17,9 +21,6 @@ module osh
 
   source_location = (string path, int line, int col, int length)
   token = (id id, string value, source_location loc)
-
-  -- TODO: generate the following:
-  -- arith_op_id, bool_op_id, vpre_op_id, array_op_id, vpost_op_id
 
   bracket_op = 
     ArrayOp(id op_id)  -- * or @
@@ -88,11 +89,11 @@ module osh
 
   case_arm = (word* pat, command* action)
 
-  -- TODO: Pretty much all of these can have redirects.  Even function defs.
+  -- Almost all of these can have redirects, even function defs.
   -- AndOr/Pipeline/Fork are exceptions.
-  -- TODO: Redirects could be like Fork.  You pull it out into another node that
-  -- wraps a any node.  Or really this should be in OVM?  Every node should
-  -- have a fork flag then?
+  -- Fork is in its own wrapper node because it's easy to translate.
+  -- Redirects are easier to translate as well if they are WITHIN each command
+  -- node.
 
   command = 
     NoOp
