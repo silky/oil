@@ -22,11 +22,11 @@ module osh
   -- arith_op_id, bool_op_id, vpre_op_id, array_op_id, vpost_op_id
 
   bracket_op = 
-    ArrayOp(int op_id)  -- * or @
+    ArrayOp(id op_id)  -- * or @
   | ArrayIndex(arith_expr a)
 
   suffix_op = 
-    StringUnary(int op_id, word arg_word)
+    StringUnary(id op_id, word arg_word)
   | PatSub(word pat, word? replace, int do_all, int do_prefix, int do_suffix)
   | Slice(arith_expr begin, arith_expr? length)
 
@@ -36,7 +36,7 @@ module osh
   | EscapedLiteralPart(token t)
   | DoubleQuotedPart(word_part* parts)
   | VarSubPart(string name,
-               int prefix_op,  -- prefix # or ! operators
+               id prefix_op,  -- prefix # or ! operators
                bracket_op bracket_op
                suffix_op suffix_op)
   | TildeSubPart(string prefix)
@@ -54,16 +54,16 @@ module osh
   arith_expr =
     RightVar(string name)  -- eval variable 
   | ArithWord(word w)  -- a string expression
-  | ArithUnary(int op_id, arith_expr child)
-  | ArithBinary(int op_id, arith_expr left, arith_expr right)
-  | ArithAssign(int op_id, lvalue left, arith_expr right)
+  | ArithUnary(id op_id, arith_expr child)
+  | ArithBinary(id op_id, arith_expr left, arith_expr right)
+  | ArithAssign(id op_id, lvalue left, arith_expr right)
   | TernaryOp(arith_expr cond, arith_expr true_expr, arith_expr false_expr)
   | FuncCall(arith_expr func, arith_expr* args)
 
   bool_expr =
     WordTest(word w)  -- e.g. [[ myword ]]
-  | BoolBinary(int op_id, word left, word right)
-  | BoolUnary(int op_id, word child)
+  | BoolBinary(id op_id, word left, word right)
+  | BoolUnary(id op_id, word child)
   | LogicalNot(bool_expr child)
   | LogicalAnd(bool_expr left, bool_expr right)
   | LogicalOr(bool_expr left, bool_expr right)
@@ -71,8 +71,8 @@ module osh
   -- NOTE: To reprint the here doc, I guess we need the whole delimiter?  And
   -- then do_expansion is calculated from that.
   redir = 
-    HereDoc(id op_id, word arg_word, int fd, int do_expansion)
-  | Redirect(id op_id, word arg_word, int fd)
+    Redirect(id op_id, word arg_word, int fd)
+  | HereDoc(id op_id, word arg_word, int fd, int do_expansion)
 
   scope = Global | Local
   var_flags = Export | Readonly

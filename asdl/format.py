@@ -129,8 +129,11 @@ def MakeTree(obj, max_col=80, depth=0):
       parts.append(str(field_val))
 
     elif isinstance(desc, asdl.Sum) and asdl.is_simple(desc):
-      # Hm the second
-      parts.append(field_val.name)
+      # HACK for now to reflect that Id is an integer.
+      if isinstance(field_val, int):
+        parts.append(str(field_val))
+      else:
+        parts.append(field_val.name)
 
     elif isinstance(desc, asdl.StrType):
       parts.append(field_val)
