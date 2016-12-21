@@ -183,7 +183,6 @@ def HasArrayPart(w):
 def LooksLikeAssignment(w):
   from core.word_node import CompoundWord, SingleQuotedPart
   assert isinstance(w, CompoundWord)
-  print(w.parts)
   if len(w.parts) == 0:
     return False
 
