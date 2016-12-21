@@ -295,3 +295,13 @@ def CommandId(node):
     return token_type
 
   return Id.Word_Compound
+
+
+def CommandKind(w):
+  from core.word_node import TokenWord
+  if isinstance(w, TokenWord):
+    return w.token.Kind()
+
+  # NOTE: This is a bit inconsistent with CommandId, because we never retur
+  # Kind.KW (or Kind.Lit).  But the CommandParser is easier to write this way.
+  return Kind.Word

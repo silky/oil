@@ -319,10 +319,6 @@ class Word(_Node, _BTokenInterface):
     """
     raise NotImplementedError
 
-  def CommandKind(self):
-    """Returns: Kind"""
-    raise NotImplementedError
-
 
 class CompoundWord(Word):
   """A word that is a sequence of WordPart instances"""
@@ -364,11 +360,6 @@ class CompoundWord(Word):
 
     return Id.Undefined_Tok
 
-  def CommandKind(self):
-    # NOTE: This is a bit inconsistent with CommandId, because we never retur
-    # Kind.KW (or Kind.Lit).  But the CommandParser is easier to write this way.
-    return Kind.Word
-
 
 class TokenWord(Word):
   """A word that is just a token.
@@ -393,6 +384,3 @@ class TokenWord(Word):
 
   def TokenPair(self):
     return self.token, self.token
-
-  def CommandKind(self):
-    return self.token.Kind()
