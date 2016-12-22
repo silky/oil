@@ -519,7 +519,7 @@ class CommandParser(object):
       node.bindings = prefix_bindings
       return node
 
-    assign_kw = suffix_words[0].AssignmentBuiltinId()
+    assign_kw = word.AssignmentBuiltinId(suffix_words[0])
 
     assign_flags = 0
     assign_scope = EAssignScope.GLOBAL

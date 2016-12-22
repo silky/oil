@@ -305,3 +305,25 @@ def CommandKind(w):
   # NOTE: This is a bit inconsistent with CommandId, because we never retur
   # Kind.KW (or Kind.Lit).  But the CommandParser is easier to write this way.
   return Kind.Word
+
+
+# Interpret the words as 4 kinds of ID: Assignment, Arith, Bool, Command.
+# TODO: Might need other builtins.
+def AssignmentBuiltinId(w):
+  """Tests if word is an assignment builtin."""
+  from core.word_node import CompoundWord
+  assert isinstance(w, CompoundWord), w
+
+  # has to be a single literal part
+  if len(w.parts) != 1:
+    return Id.Undefined_Tok
+
+  token_type = w.parts[0].LiteralId()
+  if token_type == Id.Undefined_Tok:
+    return Id.Undefined_Tok
+
+  token_kind = LookupKind(token_type)
+  if token_kind == Kind.Assign:
+    return token_type
+
+  return Id.Undefined_Tok
