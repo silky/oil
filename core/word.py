@@ -161,6 +161,9 @@ def TildeDetect(word):
 
 
 def AsFuncName(w):
+  from core.word_node import CompoundWord
+  assert isinstance(w, CompoundWord), w
+
   ok, s, quoted = StaticEval(w)
   if not ok:
     return False, ''
@@ -179,6 +182,9 @@ def AsArithVarName(w):
   ArithVarLike must be different tokens.  Otherwise _ReadCompoundWord will be
   confused between array assigments foo=(1 2) and function calls foo(1, 2).
   """
+  from core.word_node import CompoundWord
+  assert isinstance(w, CompoundWord), w
+
   if len(w.parts) != 1:
     return ""
 
@@ -194,6 +200,9 @@ def AsArithVarName(w):
 
 def HasArrayPart(w):
   """Used in cmd_parse."""
+  from core.word_node import CompoundWord
+  assert isinstance(w, CompoundWord), w
+
   for part in w.parts:
     if part.id == Id.Right_ArrayLiteral:
       return True
@@ -227,12 +236,31 @@ def LooksLikeAssignment(w):
   return name, rhs
 
 
+# Interpret the words as 4 kinds of ID: Assignment, Arith, Bool, Command.
+# TODO: Might need other builtins.
 def AssignmentBuiltinId(w):
-  #assert isinstance(w, ast.CompoundWord)
-  pass
+  """Tests if word is an assignment builtin."""
+  from core.word_node import CompoundWord
+  assert isinstance(w, CompoundWord), w
+
+  # has to be a single literal part
+  if len(w.parts) != 1:
+    return Id.Undefined_Tok
+
+  token_type = w.parts[0].LiteralId()
+  if token_type == Id.Undefined_Tok:
+    return Id.Undefined_Tok
+
+  token_kind = LookupKind(token_type)
+  if token_kind == Kind.Assign:
+    return token_type
+
+  return Id.Undefined_Tok
 
 
+#
 # Polymorphic between TokenWord and CompoundWord
+#
 
 def ArithId(node):
   from core.word_node import TokenWord
@@ -305,25 +333,3 @@ def CommandKind(w):
   # NOTE: This is a bit inconsistent with CommandId, because we never retur
   # Kind.KW (or Kind.Lit).  But the CommandParser is easier to write this way.
   return Kind.Word
-
-
-# Interpret the words as 4 kinds of ID: Assignment, Arith, Bool, Command.
-# TODO: Might need other builtins.
-def AssignmentBuiltinId(w):
-  """Tests if word is an assignment builtin."""
-  from core.word_node import CompoundWord
-  assert isinstance(w, CompoundWord), w
-
-  # has to be a single literal part
-  if len(w.parts) != 1:
-    return Id.Undefined_Tok
-
-  token_type = w.parts[0].LiteralId()
-  if token_type == Id.Undefined_Tok:
-    return Id.Undefined_Tok
-
-  token_kind = LookupKind(token_type)
-  if token_kind == Kind.Assign:
-    return token_type
-
-  return Id.Undefined_Tok
