@@ -37,8 +37,9 @@ module osh
   -- A unit is a single file.
   unit = (string path, command root, debug_info info)
 
+  -- The top level structure of multiple pre-compiled modules.
+  -- The standard library can use this I guess.
   package = (unit* units)
-
 
   -- Does the token hold the location, or do nodes?  I think we need to
   -- annotate most nodes with source_location, but token is only for TokenWord,

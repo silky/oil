@@ -54,16 +54,6 @@ class Token(_Node):
   def __repr__(self):
     return '<%s %s>' % (id_kind.IdName(self.id), EncodeTokenVal(self.val))
 
-  def Val(self, pool):
-    """Given a pool of lines, return the value of this token.
-
-    NOTE: Not used right now because we haven't threaded 'pool' through
-    everything.
-    """
-    line = pool.GetLine(self.pool_index)
-    c = self.col
-    return line[c : c+self.length]
-
   def Kind(self):
     return id_kind.LookupKind(self.id)
 
@@ -78,3 +68,41 @@ def EncodeTokenVal(s):
     return s
   else:
     return json.dumps(s)
+
+
+class LineSpan:
+  """A part of a line associated with a token.
+
+  Location information for parse errors.
+
+  TODO: Attach to VarSubPart for beginning.  And maybe end?
+  # What about command sub part? and arith sub?  Maybe just the beginning.
+
+  TokenWord only needs the ID.  It doesn't need any value.
+
+  How to encode these as runtime errors?
+  - Instead of pool_index, you get a string.  Or you can keep pool index if you
+    save the whole thing.
+  - And you add a string path somewhere.
+
+  Line span can be passed a pool to get the value.  Combine with other line
+  spans to get a SourceRange?  SourceRange is serialized for runtime errors?
+
+  Parse errors generally occur at one location.
+
+  What about type errors?  Sometimes you have two locations.
+  """
+  def __init__(self, pool_index=-1, col=-1, length=-1):
+    self.pool_index = pool_index
+    self.col = col  # zero-indexed
+    self.length = length
+
+  def Val(self, pool):
+    """Given a pool of lines, return the value of this token.
+
+    NOTE: Not used right now because we haven't threaded 'pool' through
+    everything.
+    """
+    line = pool.GetLine(self.pool_index)
+    c = self.col
+    return line[c : c+self.length]

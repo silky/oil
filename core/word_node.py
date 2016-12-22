@@ -348,6 +348,8 @@ class TokenWord(Word):
   """
   def __init__(self, token):
     Word.__init__(self)
+    # NOTE: We don't ever use the contents.  This could be represented by ID
+    # instead.
     self.token = token
 
   def __eq__(self, other):
