@@ -20,6 +20,26 @@ module osh
                  -- by another tool.  Suppress the error.
 
   source_location = (string path, int line, int col, int length)
+
+  -- parse errors don't need to be serialized!  You just calculate them on the
+  -- fly from tokens?  VarSubPart has an extra token.  Maybe it needs a source
+  -- location.
+
+  -- these are for RUNTIME errors.  do you always use either a src_point or
+  -- src_range?  Or more likely they point to a word, which will have
+  src_point = (int line, int col)
+  src_range = (string path, src_point begin, src_point end)
+
+  -- Physical line number
+  debug_line = (int line_num, string line)
+  debug_info = (debug_line* lines)
+
+  -- A unit is a single file.
+  unit = (string path, command root, debug_info info)
+
+  package = (unit* units)
+
+
   -- Does the token hold the location, or do nodes?  I think we need to
   -- annotate most nodes with source_location, but token is only for TokenWord,
   -- LiteralPart, etc.
