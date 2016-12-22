@@ -1,6 +1,6 @@
 #!/usr/bin/python
 """
-word.py
+word.py -- Functions for using words as "tokens".
 """
 
 import sys
@@ -169,6 +169,17 @@ def TildeDetect(word):
   return w
 
 
+def HasArrayPart(w):
+  """Used in cmd_parse."""
+  from core.word_node import CompoundWord
+  assert isinstance(w, CompoundWord), w
+
+  for part in w.parts:
+    if part.id == Id.Right_ArrayLiteral:
+      return True
+  return False
+
+
 def AsFuncName(w):
   from core.word_node import CompoundWord
   assert isinstance(w, CompoundWord), w
@@ -202,17 +213,6 @@ def AsArithVarName(w):
     return False
 
   return part0.token.val
-
-
-def HasArrayPart(w):
-  """Used in cmd_parse."""
-  from core.word_node import CompoundWord
-  assert isinstance(w, CompoundWord), w
-
-  for part in w.parts:
-    if part.id == Id.Right_ArrayLiteral:
-      return True
-  return False
 
 
 def LooksLikeAssignment(w):

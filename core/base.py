@@ -76,6 +76,9 @@ def MakeError(msg, *args, token=None, word=None):
   if token:
     near_token = token
   elif word:
+    # TODO: Change this to LocationPair()?  It could be a single location or
+    # multiple locations?  Put it in word.py?  Or somewhere else?  I think you
+    # implement runtime errors in addition to parse time errors first.
     begin, end = word.TokenPair()
     near_token = begin  # for now
   else:
