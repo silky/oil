@@ -66,13 +66,6 @@ class WordPart(_Node):
     """
     raise NotImplementedError(self.__class__.__name__)
 
-  def LiteralId(self):
-    """
-    If the WordPart consists of a single literal token, return its Id.  Used
-    for Id.KW_For, or Id.RBrace, etc.
-    """
-    return Id.Undefined_Tok  # unequal to any other Id
-
 
 class ArrayLiteralPart(WordPart):
   """An Array literal is WordPart that contains other Words.

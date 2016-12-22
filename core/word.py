@@ -12,6 +12,17 @@ from core.tokens import Token
 word_e = ast.word_e
 
 
+def _LiteralPartId(p):
+  """
+  If the WordPart consists of a single literal token, return its Id.  Used for
+  Id.KW_For, or Id.RBrace, etc.
+  """
+  if p.id == Id.Lit_Chars:
+    return p.token.id
+  else:
+    return Id.Undefined_Tok  # unequal to any other Id
+
+
 def _EvalWordPart(part):
   """Evaluate a WordPart at PARSE TIME.
 
@@ -116,9 +127,7 @@ def TildeDetect(word):
   if not word.parts:
     return None
   part0 = word.parts[0]
-  if part0.id != Id.Lit_Chars:
-    return None
-  if part0.token.id != Id.Lit_Tilde:
+  if _LiteralPartId(part0) != Id.Lit_Tilde:
     return None
 
   prefix = ''
@@ -189,10 +198,7 @@ def AsArithVarName(w):
     return ""
 
   part0 = w.parts[0]
-  if part0.id != Id.Lit_Chars:  # TODO: change to tag
-    return False
-
-  if part0.token.id != Id.Lit_ArithVarLike:
+  if _LiteralPartId(part0) != Id.Lit_ArithVarLike:
     return False
 
   return part0.token.val
@@ -216,10 +222,7 @@ def LooksLikeAssignment(w):
     return False
 
   part0 = w.parts[0]
-  if part0.id != Id.Lit_Chars:  # TODO: Turn this into a tag test
-    return False
-
-  if part0.token.id != Id.Lit_VarLike:
+  if _LiteralPartId(part0) != Id.Lit_VarLike:
     return False
 
   assert part0.token.val.endswith('=')
@@ -247,7 +250,7 @@ def AssignmentBuiltinId(w):
   if len(w.parts) != 1:
     return Id.Undefined_Tok
 
-  token_type = w.parts[0].LiteralId()
+  token_type = _LiteralPartId(w.parts[0])
   if token_type == Id.Undefined_Tok:
     return Id.Undefined_Tok
 
@@ -284,7 +287,7 @@ def BoolId(node):
   if len(node.parts) != 1:
     return Id.Word_Compound
 
-  token_type = node.parts[0].LiteralId()
+  token_type = _LiteralPartId(node.parts[0])
   if token_type == Id.Undefined_Tok:
     return Id.Word_Compound  # It's a regular word
 
@@ -311,7 +314,7 @@ def CommandId(node):
   if len(node.parts) != 1:
     return Id.Word_Compound
 
-  token_type = node.parts[0].LiteralId()
+  token_type = _LiteralPartId(node.parts[0])
   if token_type == Id.Undefined_Tok:
     return Id.Word_Compound
 
