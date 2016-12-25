@@ -95,6 +95,28 @@ def StaticEval(w):
   return True, ret, quoted
 
 
+def _ParseErrorLocationForPart(p):
+  # TODO: Write unit tests in ui.py
+  pass
+
+
+def ParseErrorLocation(w):
+  # For now it returns a LineSpan.  That's all you know how to print.
+  #
+  # Runtime errors may be different.
+  #
+  # TokenWord: just use token.line_span
+  # LiteralPart: token.line_span
+  # composites: just use the first part for now, but show the stack trace:
+  #   $(( 1 +  + ))
+  #   ^~~  
+  #   In arithmetic substitution
+  #   $(( 1 +  + ))
+  #            ^
+  #            Invalid argument to + operator
+  pass
+
+
 def TildeDetect(word):
   """Detect tilde expansion.
 
