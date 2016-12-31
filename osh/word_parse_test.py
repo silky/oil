@@ -464,6 +464,36 @@ ls bar
     t = Token(Id.Eof_Real, '')
     self.assertEqual(TokenWord(t), w)
 
+  def testParseErrorLocation(self):
+    from core import word
+
+    w = _assertReadWord(self, 'a=(1 2 3)')
+    print(word.ParseErrorLocation(w))
+
+    w = _assertReadWord(self, 'foo')
+    print(word.ParseErrorLocation(w))
+
+    w = _assertReadWord(self, '\\$')
+    print(word.ParseErrorLocation(w))
+
+    w = _assertReadWord(self, "''")
+    print(word.ParseErrorLocation(w))
+
+    w = _assertReadWord(self, '""')
+    print(word.ParseErrorLocation(w))
+
+    w = _assertReadWord(self, '$(echo command sub)')
+    print(word.ParseErrorLocation(w))
+
+    w = _assertReadWord(self, '$(( 1 + 2 ))')
+    print(word.ParseErrorLocation(w))
+
+    w = _assertReadWord(self, '~user')
+    print(word.ParseErrorLocation(w))
+
+    w = _assertReadWord(self, '${var#}')
+    print(word.ParseErrorLocation(w))
+
 
 if __name__ == '__main__':
   unittest.main()

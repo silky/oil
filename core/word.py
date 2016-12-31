@@ -95,9 +95,46 @@ def StaticEval(w):
   return True, ret, quoted
 
 
-def _ParseErrorLocationForPart(p):
-  # TODO: Write unit tests in ui.py
-  pass
+def _ParseErrorLocationForPart(part):
+  # TODO: Write unit tests in ui.py for error values
+
+  if part.id == Id.Right_ArrayLiteral:
+    return ParseErrorLocation(part.words[0])  # Hm this is a=(1 2 3)
+
+  elif part.id == Id.Lit_Chars:
+    # Just use the token
+    return part.token
+
+  elif part.id == Id.Lit_EscapedChar:
+    return part.token
+
+  elif part.id == Id.Left_SingleQuote:
+    if part.tokens:
+      return part.tokens[0]
+    else:
+      return 'TODO'
+
+  elif part.id == Id.Left_DoubleQuote:
+    if part.parts:
+      return _ParseErrorLocationForPart(part.parts[0])
+    else:
+      # We need the double quote location
+      return 'TODO'
+
+  elif part.id == Id.Left_VarSub:
+    return part.token  # debug
+
+  elif part.id == Id.Left_CommandSub:
+    return 'TODO'
+
+  elif part.id == Id.Lit_Tilde:
+    return 'TODO'
+
+  elif part.id in (Id.Left_ArithSub, Id.Left_ArithSub2):
+    return 'TODO'
+
+  else:
+    raise AssertionError(part.id)
 
 
 def ParseErrorLocation(w):
@@ -114,7 +151,13 @@ def ParseErrorLocation(w):
   #   $(( 1 +  + ))
   #            ^
   #            Invalid argument to + operator
-  pass
+
+  from core.word_node import CompoundWord
+  if isinstance(w, CompoundWord):
+    return _ParseErrorLocationForPart(w.parts[0])
+
+  # It's a TokenWord?
+  return w.token
 
 
 def TildeDetect(word):
