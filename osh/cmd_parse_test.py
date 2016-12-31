@@ -11,6 +11,7 @@ from asdl import py_meta
 from core import ui
 from core.word_node import DoubleQuotedPart
 from core.id_kind import Id
+from core.pool import Pool
 from core import word
 
 from osh import parse_lib
@@ -20,14 +21,15 @@ from osh.word_parse import WordParser
 
 # TODO: Use parse_lib instead
 def InitCommandParser(code_str):
+  pool = Pool()
   line_reader, lexer = parse_lib.InitLexer(code_str)
   w_parser = WordParser(lexer, line_reader)
   c_parser = CommandParser(w_parser, lexer, line_reader)
-  return c_parser
+  return pool, c_parser  # pool is returned for printing errors
 
 
 def _assertParseMethod(test, code_str, method, expect_success=True):
-  c_parser = InitCommandParser(code_str)
+  _, c_parser = InitCommandParser(code_str)
   m = getattr(c_parser, method)
   node = m()
 
@@ -48,6 +50,18 @@ def _assertParseMethod(test, code_str, method, expect_success=True):
       test.fail('%r failed' % code_str)
   return node
 
+
+def _assertParseCommandListError(test, code_str):
+  pool, c_parser = InitCommandParser(code_str)
+  node = c_parser.ParseCommandLine()
+  if node:
+    test.fail("Exepcted %r to fail" % code_str)
+    return
+  err = c_parser.Error()
+  print(err)
+  ui.PrintError(err, pool, sys.stdout)
+
+
 #
 # Successes
 #
@@ -55,6 +69,12 @@ def _assertParseMethod(test, code_str, method, expect_success=True):
 
 def assertParseSimpleCommand(test, code_str):
   return _assertParseMethod(test, code_str, 'ParseSimpleCommand')
+
+def assertParsePipeline(test, code_str):
+  return _assertParseMethod(test, code_str, 'ParsePipeline')
+
+def assertParseAndOr(test, code_str):
+  return _assertParseMethod(test, code_str, 'ParseAndOr')
 
 def assertParseCommandLine(test, code_str):
   return _assertParseMethod(test, code_str, 'ParseCommandLine')
@@ -69,21 +89,21 @@ def assertParseRedirect(test, code_str):
 # Failures
 #
 
-def assertFailSimpleCommand(test, code_str):
-  return _assertParseMethod(test, code_str, 'ParseSimpleCommand',
-      expect_success=False)
-
-def assertFailCommandLine(test, code_str):
-  return _assertParseMethod(test, code_str, 'ParseCommandLine',
-      expect_success=False)
+#def assertFailSimpleCommand(test, code_str):
+#  return _assertParseMethod(test, code_str, 'ParseSimpleCommand',
+#      expect_success=False)
+#
+#def assertFailCommandLine(test, code_str):
+#  return _assertParseMethod(test, code_str, 'ParseCommandLine',
+#      expect_success=False)
 
 def assertFailCommandList(test, code_str):
   return _assertParseMethod(test, code_str, 'ParseCommandList',
       expect_success=False)
 
-def assertFailRedirect(test, code_str):
-  return _assertParseMethod(test, code_str, 'ParseRedirect',
-      expect_success=False)
+#def assertFailRedirect(test, code_str):
+#  return _assertParseMethod(test, code_str, 'ParseRedirect',
+#      expect_success=False)
 
 
 class SimpleCommandTest(unittest.TestCase):
@@ -435,32 +455,24 @@ EOF
 class CommandParserTest(unittest.TestCase):
 
   def testParsePipeline(self):
-    c_parser = InitCommandParser('ls foo')
-    node = c_parser.ParsePipeline()
-    print(node.DebugString())
+    node = assertParsePipeline(self, 'ls foo')
     self.assertEqual(2, len(node.words))
 
-    c_parser = InitCommandParser('ls foo|wc -l')
-    node = c_parser.ParsePipeline()
-    print(node.DebugString())
+    node = assertParsePipeline(self, 'ls foo|wc -l')
     self.assertEqual(2, len(node.children))
     self.assertEqual(Id.Op_Pipe, node.id)
 
-    c_parser = InitCommandParser('! echo foo | grep foo')
-    node = c_parser.ParsePipeline()
-    print(node.DebugString())
+    node = assertParsePipeline(self, '! echo foo | grep foo')
     self.assertEqual(2, len(node.children))
     self.assertEqual(Id.Op_Pipe, node.id)
     self.assertTrue(node.negated)
 
-    c_parser = InitCommandParser('ls foo|wc -l|less')
-    node = c_parser.ParsePipeline()
-    print(node.DebugString())
+    node = assertParsePipeline(self, 'ls foo|wc -l|less')
     self.assertEqual(3, len(node.children))
     self.assertEqual(Id.Op_Pipe, node.id)
 
     # Should be an error
-    c_parser = InitCommandParser('ls foo|')
+    _, c_parser = InitCommandParser('ls foo|')
     self.assertEqual(None, c_parser.ParsePipeline())
     print(c_parser.Error())
 
@@ -478,57 +490,49 @@ class CommandParserTest(unittest.TestCase):
     self.assertEqual([0, 1], node.stderr_indices)
 
   def testParseAndOr(self):
-    c_parser = InitCommandParser('ls foo')
-    node = c_parser.ParseAndOr()
-    print(node.DebugString())
+    node = assertParseAndOr(self, 'ls foo')
     self.assertEqual(2, len(node.words))
 
-    c_parser = InitCommandParser('ls foo|wc -l')
-    node = c_parser.ParseAndOr()
-    print(node.DebugString())
+    node = assertParseAndOr(self, 'ls foo|wc -l')
     self.assertEqual(2, len(node.children))
     self.assertEqual(Id.Op_Pipe, node.id)
 
-    c_parser = InitCommandParser('ls foo || die')
-    node = c_parser.ParseAndOr()
-    print(node.DebugString())
+    node = assertParseAndOr(self, 'ls foo || die')
     self.assertEqual(2, len(node.children))
     self.assertEqual(Id.Node_AndOr, node.id)
 
-    c_parser = InitCommandParser('ls foo|wc -l || die')
-    node = c_parser.ParseAndOr()
-    print(node.DebugString())
+    node = assertParseAndOr(self, 'ls foo|wc -l || die')
     self.assertEqual(2, len(node.children))
     self.assertEqual(Id.Node_AndOr, node.id)
 
   def testParseCommand(self):
-    c_parser = InitCommandParser('ls foo')
+    _, c_parser = InitCommandParser('ls foo')
     node = c_parser.ParseCommand()
     self.assertEqual(2, len(node.words))
     print(node.DebugString())
 
-    c_parser = InitCommandParser('func() { echo hi; }')
+    _, c_parser = InitCommandParser('func() { echo hi; }')
     node = c_parser.ParseCommand()
     print(node.DebugString())
     self.assertEqual(Id.Node_FuncDef, node.id)
 
   def testParseCommandLine(self):
-    c_parser = InitCommandParser('ls foo 2>/dev/null')
+    _, c_parser = InitCommandParser('ls foo 2>/dev/null')
     node = c_parser.ParseCommandLine()
     self.assertEqual(2, len(node.words))
     print(node.DebugString())
 
-    c_parser = InitCommandParser('ls foo|wc -l')
+    _, c_parser = InitCommandParser('ls foo|wc -l')
     node = c_parser.ParseCommandLine()
     self.assertEqual(Id.Op_Pipe, node.id)
     print(node.DebugString())
 
-    c_parser = InitCommandParser('ls foo|wc -l || die')
+    _, c_parser = InitCommandParser('ls foo|wc -l || die')
     node = c_parser.ParseCommandLine()
     self.assertEqual(Id.Node_AndOr, node.id)
     print(node.DebugString())
 
-    c_parser = InitCommandParser('ls foo|wc -l || die; ls /')
+    _, c_parser = InitCommandParser('ls foo|wc -l || die; ls /')
     node = c_parser.ParseCommandLine()
     self.assertEqual(Id.Op_Semi, node.id)
     self.assertEqual(2, len(node.children))  # two top level things
@@ -1140,6 +1144,12 @@ $'abc\ndef'
     node = assertParseCommandList(self, r"""\
 echo $(( 0x$foo ))
 """)
+
+
+class ErrorLocationsTest(unittest.TestCase):
+
+  def testNormal(self):
+    err = _assertParseCommandListError(self, 'ls <')
 
 
 if __name__ == '__main__':
