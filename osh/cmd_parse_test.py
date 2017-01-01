@@ -1219,6 +1219,10 @@ EOF
     # Invalid regex
     err = _assertParseCommandListError(self, '[[ foo =~ \( ]]')
 
+  def testArith(self):
+    """Enumerating errors in arith_parse.py."""
+    err = _assertParseCommandListError(self, '(( 1 + ))')
+
 
 if __name__ == '__main__':
   unittest.main()
