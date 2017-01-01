@@ -1179,9 +1179,7 @@ class CommandParser(object):
     have to do it iteratively, and add operators?
     """
     left = self.ParsePipeline()
-    if not left:
-      self.AddErrorContext('ParseAndOr: ParsePipeline failed')
-      return None
+    if not left: return None
 
     if not self._Peek(): return None  # because ParsePipeline need not _Peek()
     if self.c_id not in (Id.Op_DPipe, Id.Op_DAmp):
@@ -1190,13 +1188,10 @@ class CommandParser(object):
     self._Next()  # Skip past operator
 
     # cat <<EOF || <newline>
-    if not self._MaybeReadHereDocsAfterNewline(left):
-      return None
+    if not self._MaybeReadHereDocsAfterNewline(left): return None
 
     right = self.ParseAndOr()
-    if not right:
-      self.AddErrorContext('ParseAndOr: ParseAndOr failed')
-      return None
+    if not right: return None
 
     node = AndOrNode(op)
     node.children = [left, right]
@@ -1235,9 +1230,7 @@ class CommandParser(object):
     children = []
     while True:
       n = self.ParseAndOr()
-      if not n:
-        self.AddErrorContext('Error parsing AndOr in ParseCommandLine')
-        return None
+      if not n: return None
       children.append(n)
 
       if not self._Peek(): return None
