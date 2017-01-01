@@ -112,26 +112,26 @@ def _ParseErrorLocationForPart(part):
     if part.tokens:
       return part.tokens[0]
     else:
-      return 'TODO'
+      return None
 
   elif part.id == Id.Left_DoubleQuote:
     if part.parts:
       return _ParseErrorLocationForPart(part.parts[0])
     else:
       # We need the double quote location
-      return 'TODO'
+      return None
 
   elif part.id == Id.Left_VarSub:
     return part.token  # debug
 
   elif part.id == Id.Left_CommandSub:
-    return 'TODO'
+    return None
 
   elif part.id == Id.Lit_Tilde:
-    return 'TODO'
+    return None
 
   elif part.id in (Id.Left_ArithSub, Id.Left_ArithSub2):
-    return 'TODO'
+    return None  # TODO
 
   else:
     raise AssertionError(part.id)
@@ -153,8 +153,18 @@ def ParseErrorLocation(w):
   #            Invalid argument to + operator
 
   from core.word_node import CompoundWord
+  # TODO: Really we should use par
   if isinstance(w, CompoundWord):
-    return _ParseErrorLocationForPart(w.parts[0])
+    if len(w.parts) == 0:
+      return None
+    elif len(w.parts) == 1:
+      return _ParseErrorLocationForPart(w.parts[0])
+    else:
+      begin = w.parts[0]
+      end = w.parts[-1]
+      # TODO: We need to combine LineSpan()?  If they're both on the same line,
+      # return them both.  If they're not, then just use "begin"?
+      return _ParseErrorLocationForPart(begin)
 
   # It's a TokenWord?
   return w.token

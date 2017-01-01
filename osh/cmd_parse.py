@@ -286,7 +286,8 @@ class CommandParser(object):
       ok, node.here_end, quoted = word.StaticEval(self.cur_word)
       if not ok:
         self.AddErrorContext(
-            'Error evaluating here doc delimiter: %s', self.cur_word)
+            'Error evaluating here doc delimiter: %s', self.cur_word,
+            word=self.cur_word)
         return None
       node.do_expansion = not quoted
       self._Next()

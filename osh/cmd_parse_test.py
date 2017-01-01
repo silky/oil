@@ -61,7 +61,7 @@ def _assertParseCommandListError(test, code_str):
     test.fail("Exepcted %r to fail" % code_str)
     return
   err = c_parser.Error()
-  print(err)
+  #print(err)
   ui.PrintError(err, pool, sys.stdout)
 
 
@@ -1152,15 +1152,15 @@ echo $(( 0x$foo ))
 class ErrorLocationsTest(unittest.TestCase):
 
   def testNormal(self):
-    #err = _assertParseCommandListError(self, 'ls <')
+    err = _assertParseCommandListError(self, 'ls <')
 
     err = _assertParseCommandListError(self, 'ls < <')
-    return
 
     # Invalid words as here docs
     err = _assertParseCommandListError(self, 'cat << $(invalid here end)')
     err = _assertParseCommandListError(self, 'cat << $((1+2))')
     err = _assertParseCommandListError(self, 'cat << a=(1 2 3)')
+    return
 
 
 if __name__ == '__main__':
