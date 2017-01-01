@@ -121,6 +121,18 @@ class CompoundObj(Obj):
     if args or kwargs:
       self._Init(args, kwargs)
 
+  def __eq__(self, other):
+    if self.tag != other.tag:
+      return False
+
+    for name in self.FIELDS:
+      left = getattr(self, name)
+      right = getattr(other, name)
+      if left != right:
+        return False
+
+    return True
+
   def _SetDefaults(self):
     for name in self.FIELDS:
       #print("%r wasn't assigned" % name)
