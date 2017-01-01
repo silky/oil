@@ -1150,7 +1150,9 @@ echo $(( 0x$foo ))
 
 class ErrorLocationsTest(unittest.TestCase):
 
-  def testNormal(self):
+  def testCommand(self):
+    """Enumerating errors in cmd_parse.py."""
+
     err = _assertParseCommandListError(self, 'ls <')
 
     err = _assertParseCommandListError(self, 'ls < <')
@@ -1205,6 +1207,17 @@ $(echo <)
 EOF
 """)
     return
+
+  def testBool(self):
+    """Enumerating errors in bool_parse.py."""
+    err = _assertParseCommandListError(self, '[[ foo bar ]]')
+    err = _assertParseCommandListError(self, '[[ foo -eq ]]')
+
+    # error in word
+    err = _assertParseCommandListError(self, '[[ foo$(echo <) -eq foo ]]')
+
+    # Invalid regex
+    err = _assertParseCommandListError(self, '[[ foo =~ \( ]]')
 
 
 if __name__ == '__main__':
