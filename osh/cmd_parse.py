@@ -77,7 +77,6 @@ class CommandParser(object):
       if w is None:
         error_stack = self.w_parser.Error()
         self.error_stack.extend(error_stack)
-        self.AddErrorContext('Word parse error in CommandParser')
         return False
       self.cur_word = w
 
@@ -225,8 +224,7 @@ class CommandParser(object):
         w_parser = parse_lib.MakeWordParserForHereDoc(lines)
         word = w_parser.ReadHereDocBody()
         if not word:
-          self.AddErrorContext(
-              'Error reading here doc body: %s', w_parser.Error())
+          self.AddErrorContext('Error reading here doc body: %s', w_parser.Error())
           return False
         h.arg_word = word
         h.was_filled = True
@@ -379,7 +377,8 @@ class CommandParser(object):
   def _MakeSimpleCommand(self, prefix_bindings, suffix_words, redirects):
     for k, v in prefix_bindings:  # FOO=(1 2 3) ls is not allowed
       if word.HasArrayPart(v):
-        self.AddErrorContext('Unexpected array literal in binding: %s', v)
+        self.AddErrorContext(
+            'Unexpected array literal in binding: %s', v, word=v)
         return None
 
     # NOTE: Here is the place to check validity of words at parse time.  Can
@@ -391,7 +390,7 @@ class CommandParser(object):
         # Normal assign words like foo=bar are just literal.  But array words
         # foo=(1 2) don't belong.  They can only be prefixes.
         if word.HasArrayPart(v):
-          self.AddErrorContext('Unexpected array literal: %s', v)
+          self.AddErrorContext('Unexpected array literal: %s', v, word=v)
           return None
 
     words2 = self._BraceExpand(suffix_words)
@@ -542,15 +541,13 @@ class CommandParser(object):
     if redirects:
       print('WARNING: Got redirects in assignment: %s', redirects)
 
-    if prefix_bindings:  # FOO=bar local spam=eggs now allowed
-      self.AddErrorContext('Got prefix bindings in assignment: %s',
-          prefix_bindings)
+    if prefix_bindings:  # FOO=bar local spam=eggs not allowed
+      # Use the location of the first value.  TODO: Use the whole word before
+      # splitting.
+      _, v0 = prefix_bindings[0]
+      self.AddErrorContext(
+          'Got prefix bindings in assignment: %s', prefix_bindings, word=v0)
       return None
-
-    for k, v in prefix_bindings:  # FOO=(1 2 3) ls is not allowed
-      if word.HasArrayPart(v):
-        self.AddErrorContext('Unexpected array literal in binding: %s', v)
-        return None
 
     return self._MakeAssignment(assign_scope, assign_flags, suffix_words)
 

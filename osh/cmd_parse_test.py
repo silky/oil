@@ -30,7 +30,7 @@ def InitCommandParser(code_str):
 
 
 def _assertParseMethod(test, code_str, method, expect_success=True):
-  _, c_parser = InitCommandParser(code_str)
+  pool, c_parser = InitCommandParser(code_str)
   m = getattr(c_parser, method)
   node = m()
 
@@ -45,7 +45,6 @@ def _assertParseMethod(test, code_str, method, expect_success=True):
     # TODO: Could copy PrintError from pysh.py
     err = c_parser.Error()
     print(err)
-    pool = None
     ui.PrintError(err, pool, sys.stdout)
     if expect_success:
       test.fail('%r failed' % code_str)
@@ -1158,8 +1157,33 @@ class ErrorLocationsTest(unittest.TestCase):
 
     # Invalid words as here docs
     err = _assertParseCommandListError(self, 'cat << $(invalid here end)')
+
+    # TODO: Arith parser doesn't have location information
     err = _assertParseCommandListError(self, 'cat << $((1+2))')
     err = _assertParseCommandListError(self, 'cat << a=(1 2 3)')
+    err = _assertParseCommandListError(self, r'cat << \a$(invalid)')
+
+    # Actually the $invalid part should be highlighted... yeah an individual
+    # part is the problem.
+    err = _assertParseCommandListError(self, r"cat << 'single'$(invalid)")
+    err = _assertParseCommandListError(self, r'cat << "double"$(invalid)')
+    err = _assertParseCommandListError(self, r'cat << ~foo/$(invalid)')
+
+    # Word parse error in command parser
+    err = _assertParseCommandListError(self, r'echo foo$(ls <)bar')
+
+    err = _assertParseCommandListError(self, r'BAD_ENV=(1 2 3) ls')
+    err = _assertParseCommandListError(self, r'ls BAD_ENV=(1 2 3)')
+    err = _assertParseCommandListError(self, r'ENV1=A ENV2=B local foo=bar')
+
+  def testErrorInHereDoc(self):
+    return
+    # Here doc body.  Hm this should be failing.  Does it just fail to get
+    # filled?
+    err = _assertParseCommandListError(self, """cat <<EOF
+$(echo <)
+EOF
+""")
     return
 
 
