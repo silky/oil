@@ -52,8 +52,8 @@ class Token(_Node):
     return self.id == other.id and self.val == other.val
 
   def __repr__(self):
-    pos = '(%s %s %s)' % (self.pool_index, self.col, self.length)
-    return '<%s %s>' % (id_kind.IdName(self.id), EncodeTokenVal(self.val))
+    #pos = '(%s %s %s)' % (self.pool_index, self.col, self.length)
+    return ('<%s %s>' % (id_kind.IdName(self.id), EncodeTokenVal(self.val))) #+pos
 
   def Kind(self):
     return id_kind.LookupKind(self.id)

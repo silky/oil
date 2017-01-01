@@ -76,6 +76,7 @@ def InteractiveLoop(opts, ex, c_parser, w_parser, line_reader):
       # could do that in the first position?
       # ParseSimpleCommand fails with '\n' token?
       if not node:
+        # TODO: PrintError here
         raise RuntimeError('failed parse: %s' % c_parser.Error())
 
       if opts.print_ast:
@@ -265,7 +266,7 @@ def OshMain(argv):
 
     if opts.print_ast:
       from asdl import py_meta
-      print('!!!!!', node.__class__)
+      #print('!!!!!', node.__class__)
       if isinstance(node, py_meta.Obj):
         print(node)
       else:

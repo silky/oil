@@ -78,7 +78,7 @@ def MakeError(msg, *args, token=None, word=None):
   elif word:
     from core.word import ParseErrorLocation
     near_token = ParseErrorLocation(word)
-    print('NEAR TOKEN', near_token)
+    #print('NEAR TOKEN', near_token)
 
     # TODO: Change this to LocationPair()?  It could be a single location or
     # multiple locations?  Put it in word.py?  Or somewhere else?  I think you

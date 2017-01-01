@@ -22,7 +22,8 @@ from osh.word_parse import WordParser
 # TODO: Use parse_lib instead
 def InitCommandParser(code_str):
   pool = Pool()
-  line_reader, lexer = parse_lib.InitLexer(code_str)
+  pool.AddSourcePath('<unit test>')
+  line_reader, lexer = parse_lib.InitLexer(code_str, pool=pool)
   w_parser = WordParser(lexer, line_reader)
   c_parser = CommandParser(w_parser, lexer, line_reader)
   return pool, c_parser  # pool is returned for printing errors
