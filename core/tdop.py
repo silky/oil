@@ -13,6 +13,7 @@ from osh.lex import LexMode
 
 
 arith_expr_e = ast.arith_expr_e
+word_e = ast.word_e
 
 
 class ParseError(Exception):
@@ -80,7 +81,7 @@ def NullError(p, t, bp):
 
 def NullConstant(p, w, bp):
   # The word itself is a node
-  if w.id == Id.Word_Compound:
+  if w.tag == word_e.CompoundWord:
     var_name = word.AsArithVarName(w)
     if var_name:
       return ast.RightVar(var_name)

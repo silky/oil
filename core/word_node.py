@@ -313,7 +313,7 @@ class Word(_Node, _BTokenInterface):
     raise NotImplementedError
 
 
-class CompoundWord(Word):
+class XCompoundWord(Word):
   """A word that is a sequence of WordPart instances"""
 
   def __init__(self, parts=None):

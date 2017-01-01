@@ -158,9 +158,8 @@ def ParseErrorLocation(w):
   #            ^
   #            Invalid argument to + operator
 
-  from core.word_node import CompoundWord
   # TODO: Really we should use par
-  if isinstance(w, CompoundWord):
+  if w.tag == word_e.CompoundWord:
     if len(w.parts) == 0:
       return None
     elif len(w.parts) == 1:
@@ -203,7 +202,7 @@ def TildeDetect(word):
   break the default algorithm for the definition of the user's home
   directory.
   """
-  from core.word_node import CompoundWord, TildeSubPart, LiteralPart
+  from core.word_node import TildeSubPart, LiteralPart
 
   if not word.parts:
     return None
@@ -236,7 +235,7 @@ def TildeDetect(word):
       found_slash = True
       break
 
-  w = CompoundWord()
+  w = ast.CompoundWord()
   if found_slash:
     w.parts.append(tilde_part)
     w.parts.append(remainder_part)
@@ -252,8 +251,7 @@ def TildeDetect(word):
 
 def HasArrayPart(w):
   """Used in cmd_parse."""
-  from core.word_node import CompoundWord
-  assert isinstance(w, CompoundWord), w
+  assert w.tag == word_e.CompoundWord
 
   for part in w.parts:
     if part.id == Id.Right_ArrayLiteral:
@@ -262,8 +260,7 @@ def HasArrayPart(w):
 
 
 def AsFuncName(w):
-  from core.word_node import CompoundWord
-  assert isinstance(w, CompoundWord), w
+  assert w.tag == word_e.CompoundWord
 
   ok, s, quoted = StaticEval(w)
   if not ok:
@@ -283,8 +280,7 @@ def AsArithVarName(w):
   ArithVarLike must be different tokens.  Otherwise _ReadCompoundWord will be
   confused between array assigments foo=(1 2) and function calls foo(1, 2).
   """
-  from core.word_node import CompoundWord
-  assert isinstance(w, CompoundWord), w
+  assert w.tag == word_e.CompoundWord
 
   if len(w.parts) != 1:
     return ""
@@ -297,8 +293,8 @@ def AsArithVarName(w):
 
 
 def LooksLikeAssignment(w):
-  from core.word_node import CompoundWord, SingleQuotedPart
-  assert isinstance(w, CompoundWord)
+  from core.word_node import SingleQuotedPart
+  assert w.tag == word_e.CompoundWord
   if len(w.parts) == 0:
     return False
 
@@ -309,7 +305,7 @@ def LooksLikeAssignment(w):
   assert part0.token.val.endswith('=')
   name = part0.token.val[:-1]
 
-  rhs = CompoundWord()
+  rhs = ast.CompoundWord()
   if len(w.parts) == 1:
     # NOTE: This is necesssary so that EmptyUnquoted elision isn't
     # applied.  EMPTY= is like EMPTY=''.
@@ -324,8 +320,7 @@ def LooksLikeAssignment(w):
 # TODO: Might need other builtins.
 def AssignmentBuiltinId(w):
   """Tests if word is an assignment builtin."""
-  from core.word_node import CompoundWord
-  assert isinstance(w, CompoundWord), w
+  assert w.tag == word_e.CompoundWord
 
   # has to be a single literal part
   if len(w.parts) != 1:
@@ -347,20 +342,16 @@ def AssignmentBuiltinId(w):
 #
 
 def ArithId(node):
-  from core.word_node import TokenWord
-  if isinstance(node, TokenWord):
+  if node.tag == word_e.TokenWord:
     return node.token.id
 
-  #assert node.tag == word_e.CompoundWord
+  assert node.tag == word_e.CompoundWord
   return Id.Word_Compound
 
 
 def BoolId(node):
-  from core.word_node import TokenWord
-  if isinstance(node, TokenWord):
+  if node.tag == word_e.TokenWord:
     return node.token.id
-  #if node.tag == word_e.TokenWord:
-  #  return node.token.id
 
   # Assume it's a CompoundWord
   #assert node.tag == word_e.CompoundWord
@@ -384,12 +375,11 @@ def BoolId(node):
 
 
 def CommandId(node):
-  from core.word_node import TokenWord
-  if isinstance(node, TokenWord):
+  if node.tag == word_e.TokenWord:
     return node.token.id
 
   # Assume it's a CompoundWord
-  #assert node.tag == word_e.CompoundWord
+  assert node.tag == word_e.CompoundWord
 
   # Has to be a single literal part
   if len(node.parts) != 1:
@@ -410,8 +400,7 @@ def CommandId(node):
 
 
 def CommandKind(w):
-  from core.word_node import TokenWord
-  if isinstance(w, TokenWord):
+  if w.tag == word_e.TokenWord:
     return w.token.Kind()
 
   # NOTE: This is a bit inconsistent with CommandId, because we never retur

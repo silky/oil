@@ -14,7 +14,6 @@ try:
 except ImportError:
   from core import fake_libc as libc
 from core.word_node import (
-    CompoundWord,
     ArrayLiteralPart, LiteralPart, EscapedLiteralPart, SingleQuotedPart,
     DoubleQuotedPart, CommandSubPart, VarSubPart, TildeSubPart, ArithSubPart)
 from core.id_kind import Id, Kind, IdName, LookupKind
@@ -571,7 +570,7 @@ class _Evaluator(object):
     Returns:
       Value -- empty unquoted, string, or array
     """
-    assert isinstance(word, CompoundWord), "Exected CompoundWord, got %s" % word
+    assert isinstance(word, ast.CompoundWord), "Expected CompoundWord, got %s" % word
     # assume we elide, unless we get something "significant"
     is_empty_unquoted = True
     ev = self

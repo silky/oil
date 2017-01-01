@@ -16,7 +16,6 @@ from osh import ast
 from asdl import py_meta
 from core import util
 from core.id_kind import Id, IdName
-from core.word_node import CompoundWord
 from core.base import _Node
 
 
@@ -104,7 +103,8 @@ class SimpleCommandNode(CNode):
     for i, w in enumerate(self.words):
       if i != 0:
         f.write(' ')
-      w.PrintLine(f)
+      #w.PrintLine(f)
+      print(repr(w), file=f)
     f.write(')')
 
   def PrintTree(self, f, indent=0):
@@ -115,7 +115,8 @@ class SimpleCommandNode(CNode):
     for i, w in enumerate(self.words):
       if i != 0:
         f.write(' ')
-      w.PrintLine(f)  # PrintTree for ComSub and so forth?  nodes?
+      #w.PrintLine(f)  # PrintTree for ComSub and so forth?  nodes?
+      print(repr(w), file=f)
     if self.redirects:
       f.write('\n')
       self._PrintTreeRedirects(f, indent=indent + 2)

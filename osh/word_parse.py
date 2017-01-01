@@ -11,7 +11,6 @@ word_parse.py - Parse the shell word language.
 
 from core import base
 from core.word_node import (
-    CompoundWord, TokenWord,
     LiteralPart, EscapedLiteralPart, SingleQuotedPart, DoubleQuotedPart,
     VarSubPart, CommandSubPart, ArithSubPart, ArrayLiteralPart)
 
@@ -872,7 +871,7 @@ class WordParser(object):
     Postcondition: Looking at the token after, e.g. space or operator
     """
     #print('_ReadCompoundWord', lex_mode)
-    word = CompoundWord()
+    word = ast.CompoundWord()
 
     num_parts = 0
     done = False
@@ -973,7 +972,7 @@ class WordParser(object):
 
     elif self.token_kind == Kind.Eof:
       # Just return EOF token
-      w = TokenWord(self.cur_token)
+      w = ast.TokenWord(self.cur_token)
       return w, False
       #self.AddErrorContext("Unexpected EOF in arith context: %s",
       #    self.cur_token, token=self.cur_token)
@@ -988,7 +987,7 @@ class WordParser(object):
     elif self.token_kind in (Kind.Arith, Kind.Right):
       # Id.Right_ArithSub IS just a normal token, handled by ArithParser
       self._Next(LexMode.ARITH)
-      w = TokenWord(self.cur_token)
+      w = ast.TokenWord(self.cur_token)
       return w, False
 
     elif self.token_kind in (Kind.Lit, Kind.Left):
@@ -1002,7 +1001,7 @@ class WordParser(object):
       # TODO: Maybe consolidate with _ReadDoubleQuotedPart
       part = VarSubPart(self.cur_token.val[1:], token=self.cur_token)
       self._Next(LexMode.ARITH)
-      w = CompoundWord(parts=[part])
+      w = ast.CompoundWord([part])
       return w, False
 
     else:
@@ -1024,7 +1023,7 @@ class WordParser(object):
 
     if self.token_kind == Kind.Eof:
       # No advance
-      return TokenWord(self.cur_token), False
+      return ast.TokenWord(self.cur_token), False
 
     # Allow Arith for ) at end of for loop?
     elif self.token_kind in (Kind.Op, Kind.Redir, Kind.Arith):
@@ -1034,7 +1033,7 @@ class WordParser(object):
           #print('SKIP(nl)', self.cur_token)
           return None, True
 
-      return TokenWord(self.cur_token), False
+      return ast.TokenWord(self.cur_token), False
 
     elif self.token_kind == Kind.Right:
       #print('WordParser.Read: Kind.Right', self.cur_token)
@@ -1044,7 +1043,7 @@ class WordParser(object):
         raise AssertionError(self.cur_token)
 
       self._Next(lex_mode)
-      return TokenWord(self.cur_token), False
+      return ast.TokenWord(self.cur_token), False
 
     elif self.token_kind in (Kind.Ignored, Kind.WS):
       self._Next(lex_mode)
@@ -1136,7 +1135,7 @@ class WordParser(object):
       CompoundWord.  NOTE: We could also just use a DoubleQuotedPart for both
       cases?
     """
-    w = CompoundWord()
+    w = ast.CompoundWord()
     dq = self._ReadDoubleQuotedPart(here_doc=True)
     if not dq:
       self.AddErrorContext('Error parsing here doc body')

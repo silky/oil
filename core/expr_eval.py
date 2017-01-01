@@ -155,23 +155,11 @@ class ArithEvaluator(ExprEvaluator):
     - Error checking.  The return value should probably be success/fail, or
       cflow, and then the integer result can be ArithEval.Result()
     """
-    # Backward compat for now:
-    if hasattr(node, 'id') and node.id == Id.Word_Compound:
-      ok, val = self.word_ev.EvalCompoundWord(node, elide_empty=False)
-      if not ok:
-        raise ExprEvalError(self.word_ev.Error())
-
-      ok, i = self._ValToInteger(val)
-      if ok:
-        return i
-      else:
-        raise ExprEvalError()
-
     # NOTE: Variable NAMES cannot be formed dynamically; but INTEGERS can.
     # ${foo:-3}4 is OK.  $? will be a compound word too, so we don't have to
     # handle that as a special case.
     #if node.id == Id.Node_ArithVar:
-    elif node.tag == arith_expr_e.RightVar:
+    if node.tag == arith_expr_e.RightVar:
       defined, val = self.mem.Get(node.name)
       # By default, undefined variables are the ZERO value.  TODO: Respect
       # nounset and raise an exception.
@@ -185,7 +173,6 @@ class ArithEvaluator(ExprEvaluator):
         raise ExprEvalError()
 
     elif node.tag == arith_expr_e.ArithWord:  # constant string
-      raise AssertionError  # handled above
       ok, val = self.word_ev.EvalCompoundWord(node, elide_empty=False)
       if not ok:
         raise ExprEvalError(self.word_ev.Error())

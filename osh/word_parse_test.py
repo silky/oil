@@ -11,7 +11,7 @@ word_parse_test.py: Tests for word_parse.py
 
 import unittest
 
-from core.word_node import LiteralPart, CompoundWord, TokenWord
+from core.word_node import LiteralPart
 from core.id_kind import Id, IdName
 from core.tokens import Token
 from core import word
@@ -42,7 +42,7 @@ def _assertReadWord(test, word_str):
 
   # Next word must be \n
   w2 = w_parser.ReadWord(LexMode.OUTER)
-  test.assertEqual(TokenWord(Token(Id.Op_Newline, '\n')), w2)
+  test.assertEqual(ast.TokenWord(Token(Id.Op_Newline, '\n')), w2)
 
   return w
 
@@ -438,31 +438,31 @@ ls bar
     print('--MULTI')
     w = w_parser.ReadWord(LexMode.OUTER)
     parts = [LiteralPart(Token(Id.Lit_Chars, 'ls'))]
-    self.assertEqual(CompoundWord(parts=parts), w)
+    self.assertEqual(ast.CompoundWord(parts), w)
 
     w = w_parser.ReadWord(LexMode.OUTER)
     parts = [LiteralPart(Token(Id.Lit_Chars, 'foo'))]
-    self.assertEqual(CompoundWord(parts=parts), w)
+    self.assertEqual(ast.CompoundWord(parts), w)
 
     w = w_parser.ReadWord(LexMode.OUTER)
     t = Token(Id.Op_Newline, '\n')
-    self.assertEqual(TokenWord(t), w)
+    self.assertEqual(ast.TokenWord(t), w)
 
     w = w_parser.ReadWord(LexMode.OUTER)
     parts = [LiteralPart(Token(Id.Lit_Chars, 'ls'))]
-    self.assertEqual(CompoundWord(parts=parts), w)
+    self.assertEqual(ast.CompoundWord(parts), w)
 
     w = w_parser.ReadWord(LexMode.OUTER)
     parts = [LiteralPart(Token(Id.Lit_Chars, 'bar'))]
-    self.assertEqual(CompoundWord(parts=parts), w)
+    self.assertEqual(ast.CompoundWord(parts), w)
 
     w = w_parser.ReadWord(LexMode.OUTER)
     t = Token(Id.Op_Newline, '\n')
-    self.assertEqual(TokenWord(t), w)
+    self.assertEqual(ast.TokenWord(t), w)
 
     w = w_parser.ReadWord(LexMode.OUTER)
     t = Token(Id.Eof_Real, '')
-    self.assertEqual(TokenWord(t), w)
+    self.assertEqual(ast.TokenWord(t), w)
 
   def testParseErrorLocation(self):
     from core import word

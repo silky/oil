@@ -19,7 +19,7 @@ from core.cmd_node import (
 from core.id_kind import Id, Kind, REDIR_DEFAULT_FD
 from core.tokens import Token
 from core.word_node import (
-    EAssignScope, EAssignFlags, LiteralPart, CompoundWord, TildeSubPart)
+    EAssignScope, EAssignFlags, LiteralPart, TildeSubPart)
 
 from osh import ast 
 from osh.lex import LexMode
@@ -241,7 +241,7 @@ class CommandParser(object):
         # TODO: Add pool_index etc. to token
         tokens = [Token(Id.Lit_Chars, line) for _, line in lines]
         parts = [LiteralPart(t) for t in tokens]
-        h.arg_word = CompoundWord(parts=parts)
+        h.arg_word = ast.CompoundWord(parts)
         h.was_filled = True
 
     #print('')

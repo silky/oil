@@ -19,6 +19,7 @@ from osh import bool_parse  # module under test
 from osh.lex import LexMode
 
 bool_expr_e = ast.bool_expr_e
+word_e = ast.word_e
 
 
 def _ReadWords(w_parser):
@@ -73,7 +74,7 @@ class BoolParserTest(unittest.TestCase):
     node = p.ParseNegatedFactor()
     print(node)
     self.assertTrue(p.AtEnd())
-    self.assertEqual(Id.Word_Compound, node.id)
+    self.assertEqual(word_e.CompoundWord, node.tag)
 
     p = _MakeParser('! foo')
     node = p.ParseNegatedFactor()

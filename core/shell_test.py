@@ -72,15 +72,6 @@ class PrinterTest(unittest.TestCase):
 
     print(dq)
 
-    # Word
-
-    cw = CompoundWord()
-    cw.parts = [l1, dq]
-    print(cw)
-
-    tw = TokenWord(t2)
-    print(tw)
-
 
 class LineReaderTest(unittest.TestCase):
 
