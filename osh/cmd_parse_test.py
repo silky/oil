@@ -55,6 +55,8 @@ def _assertParseCommandListError(test, code_str):
   pool, c_parser = InitCommandParser(code_str)
   node = c_parser.ParseCommandLine()
   if node:
+    print('UNEXPECTED:')
+    print(node)
     test.fail("Exepcted %r to fail" % code_str)
     return
   err = c_parser.Error()
@@ -1150,6 +1152,13 @@ class ErrorLocationsTest(unittest.TestCase):
 
   def testNormal(self):
     err = _assertParseCommandListError(self, 'ls <')
+
+    err = _assertParseCommandListError(self, 'ls < <')
+
+    # Invalid words as here docs
+    err = _assertParseCommandListError(self, 'cat << $(invalid here end)')
+    err = _assertParseCommandListError(self, 'cat << $((1+2))')
+    err = _assertParseCommandListError(self, 'cat << a=(1 2 3)')
 
 
 if __name__ == '__main__':
