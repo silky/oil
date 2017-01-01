@@ -59,14 +59,15 @@ module osh
     ArrayLiteralPart(word* words)
   | LiteralPart(token token)
   | EscapedLiteralPart(token token)
+  | SingleQuotedPart(token* tokens)
   | DoubleQuotedPart(word_part* parts)
   | VarSubPart(string name,
-               id prefix_op,  -- prefix # or ! operators
-               bracket_op bracket_op
-               suffix_op suffix_op)
+               id? prefix_op,  -- prefix # or ! operators
+               bracket_op? bracket_op
+               suffix_op? suffix_op)
   | TildeSubPart(string prefix)
   | CommandSubPart(command c)
-  | ArithSubPart(arith_expr a)
+  | ArithSubPart(arith_expr anode)
 
   word = 
     TokenWord(token token)

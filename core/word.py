@@ -10,6 +10,7 @@ from core.id_kind import Id, Kind, LookupKind
 from core.tokens import Token
 
 word_e = ast.word_e
+word_part_e = ast.word_part_e
 
 
 def _LiteralPartId(p):
@@ -17,7 +18,7 @@ def _LiteralPartId(p):
   If the WordPart consists of a single literal token, return its Id.  Used for
   Id.KW_For, or Id.RBrace, etc.
   """
-  if p.id == Id.Lit_Chars:
+  if p.tag == word_part_e.LiteralPart:
     return p.token.id
   else:
     return Id.Undefined_Tok  # unequal to any other Id
@@ -42,26 +43,26 @@ def _EvalWordPart(part):
       value: a string (not Value)
       quoted: whether any part of the word was quoted
   """
-  if part.id == Id.Right_ArrayLiteral:
+  if part.tag == word_part_e.ArrayLiteralPart:
     # Array literals aren't good for any of our use cases.  TODO: Rename
     # EvalWordToString?
     return False, '', False
 
-  elif part.id == Id.Lit_Chars:
+  elif part.tag == word_part_e.LiteralPart:
     return True, part.token.val, False
 
-  elif part.id == Id.Lit_EscapedChar:
+  elif part.tag == word_part_e.EscapedLiteralPart:
     val = part.token.val
     assert len(val) == 2, val  # e.g. \*
     assert val[0] == '\\'
     s = val[1]
     return True, s, True
 
-  elif part.id == Id.Left_SingleQuote:
+  elif part.tag == word_part_e.SingleQuotedPart:
     s = ''.join(t.val for t in part.tokens)
     return True, s, True
 
-  elif part.id == Id.Left_DoubleQuote:
+  elif part.tag == word_part_e.DoubleQuotedPart:
     ret = ''
     for p in part.parts:
       ok, s, _ = _EvalWordPart(p)
@@ -71,13 +72,13 @@ def _EvalWordPart(part):
 
     return True, ret, True  # At least one part was quoted!
 
-  elif part.id in (
-      Id.Left_CommandSub, Id.Left_VarSub, Id.Lit_Tilde, Id.Left_ArithSub,
-      Id.Left_ArithSub2):
+  elif part.tag in (
+      word_part_e.CommandSubPart, word_part_e.VarSubPart,
+      word_part_e.TildeSubPart, word_part_e.ArithSubPart):
     return False, '', False
 
   else:
-    raise AssertionError(part.id)
+    raise AssertionError(part.tag)
 
 
 def StaticEval(w):
@@ -101,46 +102,47 @@ def _ParseErrorLocationForPart(part):
   #from core.id_kind import IdName
   #print(IdName(part.id))
 
-  if part.id == Id.Right_ArrayLiteral:
+  if part.tag == word_part_e.ArrayLiteralPart:
     return ParseErrorLocation(part.words[0])  # Hm this is a=(1 2 3)
 
-  elif part.id == Id.Lit_Chars:
+  elif part.tag == word_part_e.LiteralPart:
     # Just use the token
     return part.token
 
-  elif part.id == Id.Lit_EscapedChar:
+  elif part.tag == word_part_e.EscapedLiteralPart:
     return part.token
 
-  elif part.id == Id.Left_SingleQuote:
+  elif part.tag == word_part_e.SingleQuotedPart:
     if part.tokens:
       return part.tokens[0]
     else:
       return None
 
-  elif part.id == Id.Left_DoubleQuote:
+  elif part.tag == word_part_e.DoubleQuotedPart:
     if part.parts:
       return _ParseErrorLocationForPart(part.parts[0])
     else:
       # We need the double quote location
       return None
 
-  elif part.id == Id.Left_VarSub:
+  elif part.tag == word_part_e.VarSubPart:
     # TODO: This isn't set when we have $foo, only ${foo}.  We should probably
     # have another kind of part?
     #assert part.token
-    return part.token  # debug
-
-  elif part.id == Id.Left_CommandSub:
+    #return part.token  # debug
     return None
 
-  elif part.id == Id.Lit_Tilde:
+  elif part.tag == word_part_e.CommandSubPart:
     return None
 
-  elif part.id in (Id.Left_ArithSub, Id.Left_ArithSub2):
+  elif part.tag == word_part_e.TildeSubPart:
+    return None
+
+  elif part.tag == word_part_e.ArithSubPart:
     return None  # TODO
 
   else:
-    raise AssertionError(part.id)
+    raise AssertionError(part.tag)
 
 
 def ParseErrorLocation(w):
@@ -217,7 +219,7 @@ def TildeDetect(word):
     # Not a literal part, and we did NOT find a slash.  So there is no
     # TildeSub applied.  This would be something like ~X$var, ~$var,
     # ~$(echo), etc..  The slash is necessary.
-    if word.parts[i].id != Id.Lit_Chars:
+    if word.parts[i].tag != word_part_e.LiteralPart:
       return None
     val = word.parts[i].token.val
     p = val.find('/')
@@ -254,7 +256,7 @@ def HasArrayPart(w):
   assert w.tag == word_e.CompoundWord
 
   for part in w.parts:
-    if part.id == Id.Right_ArrayLiteral:
+    if part.tag == word_part_e.ArrayLiteralPart:
       return True
   return False
 
