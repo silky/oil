@@ -293,7 +293,6 @@ def AsArithVarName(w):
 
 
 def LooksLikeAssignment(w):
-  from core.word_node import SingleQuotedPart
   assert w.tag == word_e.CompoundWord
   if len(w.parts) == 0:
     return False
@@ -309,7 +308,7 @@ def LooksLikeAssignment(w):
   if len(w.parts) == 1:
     # NOTE: This is necesssary so that EmptyUnquoted elision isn't
     # applied.  EMPTY= is like EMPTY=''.
-    rhs.parts.append(SingleQuotedPart())
+    rhs.parts.append(ast.SingleQuotedPart())
   else:
     for p in w.parts[1:]:
       rhs.parts.append(p)

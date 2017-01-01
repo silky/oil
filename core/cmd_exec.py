@@ -72,10 +72,11 @@ from core.process import (
     FdState, Pipeline, Process,
     HereDocRedirect, DescriptorRedirect, FilenameRedirect,
     FuncThunk, ExternalThunk, SubProgramThunk, BuiltinThunk)
-from core.word_node import EAssignScope
 from core.value import Value
 
 from osh import ast
+
+assign_scope_e = ast.assign_scope
 
 
 log = util.log
@@ -734,9 +735,9 @@ class Executor(object):
           return None
         pairs.append((name, val))
 
-      if node.scope == EAssignScope.LOCAL:
+      if node.scope == assign_scope_e.Local:
         self.mem.SetLocal(pairs, node.flags)
-      elif node.scope == EAssignScope.GLOBAL:
+      elif node.scope == assign_scope_e.Global:
         self.mem.SetGlobal(pairs, node.flags)
       else:
         raise AssertionError(node.scope)

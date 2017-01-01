@@ -104,8 +104,8 @@ module osh
   | HereDoc(id op_id, word arg_word, int fd, int do_expansion,
             string here_end, int? was_filled)  -- default was_filled None
 
-  scope = Global | Local
-  var_flags = Export | Readonly
+  assign_scope = Global | Local
+  assign_flags = Export | ReadOnly
   binding = (lvalue lhs, word rhs)
 
   and_or = DAmp | DPipe
@@ -123,8 +123,8 @@ module osh
   command = 
     NoOp
   | SimpleCommand(word* words, redir* redirects, binding* more_env)
-  | Assignment(scope scope,
-               var_flags flags,
+  | Assignment(assign_scope scope,
+               assign_flags flags,
                word* names,  -- names mentioned without a binding
                binding* bindings)
   | Fork(command* commands)  -- shell only allows one command

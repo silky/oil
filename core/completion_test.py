@@ -15,7 +15,6 @@ from core import cmd_exec
 from core import lexer
 from core import cmd_node
 from core import word_eval
-from core.word_node import EAssignScope
 from core import ui
 from core import cmd_exec_test
 from core import completion  # module under test
@@ -23,6 +22,8 @@ from core.id_kind import Id
 
 from osh import ast
 from osh import parse_lib
+
+assign_scope_e = ast.assign_scope
 
 
 A1 = completion.WordsAction(['foo.py', 'foo', 'bar.py'])
@@ -63,7 +64,7 @@ class CompletionTest(unittest.TestCase):
     func_node = cmd_node.FunctionDefNode()
 
     # Set global COMPREPLY=(f1 f2)
-    body_node = cmd_node.AssignmentNode(EAssignScope.GLOBAL, 0)
+    body_node = cmd_node.AssignmentNode(assign_scope_e.Global, 0)
 
     c1 = ast.CompoundWord()
     t1 = lexer.Token(Id.Lit_Chars, 'f1')

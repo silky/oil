@@ -18,11 +18,13 @@ from core.cmd_node import (
     ForExpressionNode, WhileNode, UntilNode, FunctionDefNode, IfNode, CaseNode)
 from core.id_kind import Id, Kind, REDIR_DEFAULT_FD
 from core.tokens import Token
-from core.word_node import EAssignScope, EAssignFlags
 
 from osh import ast 
 from osh.lex import LexMode
 from osh.bool_parse import BoolParser
+
+assign_scope_e = ast.assign_scope
+assign_flags_e = ast.assign_flags
 
 
 class CommandParser(object):
@@ -520,7 +522,7 @@ class CommandParser(object):
       if redirects:  # >out.txt g=foo
         print('WARNING: Got redirects in assignment: %s', redirects)
       assign_flags = 0
-      assign_scope = EAssignScope.GLOBAL
+      assign_scope = assign_scope_e.Global
       node = AssignmentNode(assign_scope, assign_flags)
       node.bindings = prefix_bindings
       return node
@@ -528,17 +530,17 @@ class CommandParser(object):
     assign_kw = word.AssignmentBuiltinId(suffix_words[0])
 
     assign_flags = 0
-    assign_scope = EAssignScope.GLOBAL
+    assign_scope = assign_scope_e.Global
 
     if assign_kw in (Id.Assign_Declare, Id.Assign_Local):
-      assign_scope = EAssignScope.LOCAL
+      assign_scope = assign_scope_e.Local
       # TODO: Parse declare flags.  Hm is it done before or after evaluation?
 
     elif assign_kw == Id.Assign_Export:  # global
-      assign_flags |= 1 << EAssignFlags.EXPORT.value
+      assign_flags |= 1 << assign_flags_e.Export.enum_id
 
     elif assign_kw == Id.Assign_Readonly:  # global
-      assign_flags |= 1 << EAssignFlags.READONLY.value
+      assign_flags |= 1 << assign_flags_e.ReadOnly.enum_id
 
     else:  # ls foo  or  FOO=bar ls foo
       assert assign_kw == Id.Undefined_Tok
