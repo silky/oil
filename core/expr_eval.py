@@ -25,6 +25,7 @@ from osh import ast
 
 arith_expr_e = ast.arith_expr_e
 bool_expr_e = ast.bool_expr_e  # used for dispatch
+word_e = ast.word_e
 
 #from core import word_eval
 
@@ -280,15 +281,15 @@ class BoolEvaluator(ExprEvaluator):
     return s
 
   def _Eval(self, node):
-    # TODO: Switch on node.tag.
     #print('!!', node.tag)
 
-    # Backward compat for now:
-    if hasattr(node, 'id') and node.id == Id.Word_Compound:
+    # TODO: word_e.CompoundWord overlaps with other values!  Make them all distin
+    # Use WordTest.
+    if isinstance(node, ast.CompoundWord) and node.tag == word_e.CompoundWord:
       s = self._EvalCompoundWord(node)
       return bool(s)
 
-    if hasattr(node, 'tag') and node.tag == bool_expr_e.LogicalNot:
+    if node.tag == bool_expr_e.LogicalNot:
       b = self._Eval(node.child)
       return not b
 
@@ -305,13 +306,6 @@ class BoolEvaluator(ExprEvaluator):
       else:
         return self._Eval(node.right)
 
-    #raise AssertionError
-
-    #if node.id == Id.Word_Compound:
-    #  s = self._EvalCompoundWord(node)
-    #  return bool(s)
-
-    #if node.id == Id.Node_UnaryExpr:
     if node.tag == bool_expr_e.BoolUnary:
       op_id = node.op_id
       s = self._EvalCompoundWord(node.child)
