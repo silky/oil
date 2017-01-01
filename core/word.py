@@ -204,8 +204,6 @@ def TildeDetect(word):
   break the default algorithm for the definition of the user's home
   directory.
   """
-  from core.word_node import TildeSubPart, LiteralPart
-
   if not word.parts:
     return None
   part0 = word.parts[0]
@@ -232,8 +230,8 @@ def TildeDetect(word):
       # NOTE: requires downcast to LiteralPart
       pre, post = val[:p], val[p:]
       prefix += pre
-      tilde_part = TildeSubPart(prefix)
-      remainder_part = LiteralPart(Token(Id.Lit_Chars, post))
+      tilde_part = ast.TildeSubPart(prefix)
+      remainder_part = ast.LiteralPart(Token(Id.Lit_Chars, post))
       found_slash = True
       break
 
@@ -247,7 +245,7 @@ def TildeDetect(word):
       j += 1
   else:
     # The whole thing is a tilde sub, e.g. ~foo or ~foo!bar
-    w.parts.append(TildeSubPart(prefix))
+    w.parts.append(ast.TildeSubPart(prefix))
   return w
 
 

@@ -9,11 +9,11 @@ import unittest
 from asdl import py_meta
 
 from core import ui
-from core.word_node import DoubleQuotedPart
 from core.id_kind import Id
 from core.pool import Pool
 from core import word
 
+from osh import ast
 from osh import parse_lib
 from osh.cmd_parse import CommandParser  # module under test
 from osh.word_parse import WordParser
@@ -212,7 +212,7 @@ EOF
     h = node.redirects[0]
     self.assertEqual(1, len(h.arg_word.parts))  # 1 double quoted part
     dq = h.arg_word.parts[0]
-    self.assertTrue(isinstance(dq, DoubleQuotedPart))
+    self.assertTrue(isinstance(dq, ast.DoubleQuotedPart))
     # 4 literal parts: VarSub, newline, right ", "two\n"
     self.assertEqual(4, len(dq.parts))
     self.assertEqual(True, h.do_expansion)

@@ -13,9 +13,6 @@ try:
   from core import libc
 except ImportError:
   from core import fake_libc as libc
-from core.word_node import (
-    ArrayLiteralPart, LiteralPart, EscapedLiteralPart, SingleQuotedPart,
-    DoubleQuotedPart, CommandSubPart, VarSubPart, TildeSubPart, ArithSubPart)
 from core.id_kind import Id, Kind, IdName, LookupKind
 from core.value import Value
 from core.util import cast
@@ -178,7 +175,9 @@ def _GlobsAreExpanded(p):
   sub parts.
   No for TildeSubPart, and all the quoted parts.
   """
-  return p.id in (Id.Lit_Chars, Id.Left_CommandSub, Id.Left_VarSub)
+  return p.tag in (
+      word_part_e.LiteralPart, word_part_e.CommandSubPart,
+      word_part_e.VarSubPart)
 
 """
   return p.tag in (
@@ -199,8 +198,9 @@ def _IsSubst(p):
     2) To determine whether an empty string can be elided.
     3) To do globbing.  If we are NOT in a substitution or literal.
   """
-  return p.id in (
-      Id.Left_CommandSub, Id.Left_VarSub, Id.Left_ArithSub, Id.Left_ArithSub2)
+  return p.tag in (
+      word_part_e.CommandSubPart, word_part_e.VarSubPart,
+      word_part_e.ArithSubPart)
 
 
 class _Evaluator(object):
@@ -674,55 +674,46 @@ class _Evaluator(object):
     return True, Value.FromArray(array)
 
   def EvalWordPart(self, part, quoted=False):
-    if part.id == Id.Right_ArrayLiteral:
-      part = cast(ArrayLiteralPart, part)
+    if part.tag == word_part_e.ArrayLiteralPart:
       return self.EvalArrayLiteralPart(part)
 
-    elif part.id == Id.Lit_Chars:
-      part = cast(LiteralPart, part)
+    elif part.tag == word_part_e.LiteralPart:
       s = part.token.val
       return True, Value.FromString(s)
 
-    elif part.id == Id.Lit_EscapedChar:
-      part = cast(EscapedLiteralPart, part)
+    elif part.tag == word_part_e.EscapedLiteralPart:
       val = self.token.val
       assert len(val) == 2, val  # e.g. \*
       assert val[0] == '\\'
       s = val[1]
       return True, Value.FromString(s)
 
-    elif part.id == Id.Left_SingleQuote:
-      part = cast(SingleQuotedPart, part)
+    elif part.tag == word_part_e.SingleQuotedPart:
       s = ''.join(t.val for t in part.tokens)
       return True, Value.FromString(s)
 
-    elif part.id == Id.Left_DoubleQuote:
-      part = cast(DoubleQuotedPart, part)
+    elif part.tag == word_part_e.DoubleQuotedPart:
       return self.EvalDoubleQuotedPart(part)
 
-    elif part.id == Id.Left_CommandSub:
+    elif part.tag == word_part_e.CommandSubPart:
       # TODO: If token is Id.Left_ProcSubIn or Id.Left_ProcSubOut, we have to
       # supply something like /dev/fd/63.
-      part = cast(CommandSubPart, part)
       return self.EvalCommandSub(part.command_list)
 
-    elif part.id == Id.Left_VarSub:
-      part = cast(VarSubPart, part)
+    elif part.tag == word_part_e.VarSubPart:
       # This is the only one that uses quoted?
       return self.EvalVarSub(part, quoted=quoted)
 
-    elif part.id == Id.Lit_Tilde:
-      part = cast(TildeSubPart, part)
+    elif part.tag == word_part_e.TildeSubPart:
       # We never parse a quoted string into a TildeSubPart.
       assert not quoted
       return self.EvalTildeSub(part.prefix)
 
-    elif part.id in (Id.Left_ArithSub, Id.Left_ArithSub2):
-      part = cast(ArithSubPart, part)
+    elif part.tag == word_part_e.ArithSubPart:
       return self.EvalArithSub(part.anode)
 
     else:
-      raise AssertionError(part.id)
+      raise AssertionError(part.tag)
 
   def EvalDoubleQuotedPart(self, part):
     # NOTE: quoted arg isn't used

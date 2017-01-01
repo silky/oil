@@ -66,7 +66,7 @@ module osh
                bracket_op? bracket_op
                suffix_op? suffix_op)
   | TildeSubPart(string prefix)
-  | CommandSubPart(command c)
+  | CommandSubPart(command command_list)
   | ArithSubPart(arith_expr anode)
 
   word = 

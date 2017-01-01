@@ -11,7 +11,6 @@ word_parse_test.py: Tests for word_parse.py
 
 import unittest
 
-from core.word_node import LiteralPart
 from core.id_kind import Id, IdName
 from core.tokens import Token
 from core import word
@@ -437,11 +436,11 @@ ls bar
 
     print('--MULTI')
     w = w_parser.ReadWord(LexMode.OUTER)
-    parts = [LiteralPart(Token(Id.Lit_Chars, 'ls'))]
+    parts = [ast.LiteralPart(Token(Id.Lit_Chars, 'ls'))]
     self.assertEqual(ast.CompoundWord(parts), w)
 
     w = w_parser.ReadWord(LexMode.OUTER)
-    parts = [LiteralPart(Token(Id.Lit_Chars, 'foo'))]
+    parts = [ast.LiteralPart(Token(Id.Lit_Chars, 'foo'))]
     self.assertEqual(ast.CompoundWord(parts), w)
 
     w = w_parser.ReadWord(LexMode.OUTER)
@@ -449,11 +448,11 @@ ls bar
     self.assertEqual(ast.TokenWord(t), w)
 
     w = w_parser.ReadWord(LexMode.OUTER)
-    parts = [LiteralPart(Token(Id.Lit_Chars, 'ls'))]
+    parts = [ast.LiteralPart(Token(Id.Lit_Chars, 'ls'))]
     self.assertEqual(ast.CompoundWord(parts), w)
 
     w = w_parser.ReadWord(LexMode.OUTER)
-    parts = [LiteralPart(Token(Id.Lit_Chars, 'bar'))]
+    parts = [ast.LiteralPart(Token(Id.Lit_Chars, 'bar'))]
     self.assertEqual(ast.CompoundWord(parts), w)
 
     w = w_parser.ReadWord(LexMode.OUTER)

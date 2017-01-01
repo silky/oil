@@ -14,7 +14,6 @@ import unittest
 from core import cmd_exec
 from core import lexer
 from core import cmd_node
-from core.word_node import LiteralPart, ArrayLiteralPart
 from core import word_eval
 from core.word_node import EAssignScope
 from core import ui
@@ -68,13 +67,13 @@ class CompletionTest(unittest.TestCase):
 
     c1 = ast.CompoundWord()
     t1 = lexer.Token(Id.Lit_Chars, 'f1')
-    c1.parts.append(LiteralPart(t1))
+    c1.parts.append(ast.LiteralPart(t1))
 
     c2 = ast.CompoundWord()
     t2 = lexer.Token(Id.Lit_Chars, 'f2')
-    c2.parts.append(LiteralPart(t2))
+    c2.parts.append(ast.LiteralPart(t2))
 
-    a = ArrayLiteralPart()
+    a = ast.ArrayLiteralPart()
     a.words = [c1, c2]
     w = ast.CompoundWord()
     w.parts.append(a)

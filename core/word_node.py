@@ -67,7 +67,7 @@ class WordPart(_Node):
     raise NotImplementedError(self.__class__.__name__)
 
 
-class ArrayLiteralPart(WordPart):
+class XArrayLiteralPart(WordPart):
   """An Array literal is WordPart that contains other Words.
 
   In contrast, a DoubleQuotedPart is a WordPart that contains other
@@ -98,7 +98,7 @@ class _LiteralPartBase(WordPart):
     return self.token == other.token
 
 
-class LiteralPart(_LiteralPartBase):
+class XLiteralPart(_LiteralPartBase):
   """A word part written literally in the program text.
 
   It could be unquoted or quoted, depending on if it appears in a
