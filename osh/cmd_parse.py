@@ -53,6 +53,15 @@ class CommandParser(object):
   def Error(self):
     return self.error_stack
 
+  def _BadWord(self, msg, w):
+    """Helper function for errors involving a word.
+
+    Args:
+      msg: format string with a single %s token
+      w: Word
+    """
+    self.AddErrorContext(msg, w, word=w)
+
   def AddErrorContext(self, msg, *args, token=None, word=None):
     err = base.MakeError(msg, *args, token=token, word=word)
     self.error_stack.append(err)
@@ -283,9 +292,7 @@ class CommandParser(object):
       # NOTE: \EOF counts, or even E\OF
       ok, node.here_end, quoted = word.StaticEval(self.cur_word)
       if not ok:
-        self.AddErrorContext(
-            'Error evaluating here doc delimiter: %s', self.cur_word,
-            word=self.cur_word)
+        self._BadWord('Error evaluating here doc delimiter: %s', self.cur_word)
         return None
       node.do_expansion = not quoted
       self._Next()
@@ -298,8 +305,8 @@ class CommandParser(object):
 
       if not self._Peek(): return None
       if self.c_kind != Kind.Word:
-        self.AddErrorContext('Expected word after redirect operator',
-            word=self.cur_word)
+        self.AddErrorContext(
+            'Expected word after redirect operator', word=self.cur_word)
         return None
 
       node.arg_word = self.cur_word
@@ -618,8 +625,9 @@ class CommandParser(object):
     elif self.c_id == Id.KW_Do:  # missing semicolon/newline allowed
       pass
     else:
-      self.AddErrorContext("Unexpected token after for loop: %s",
-          self.cur_word)
+      self.AddErrorContext(
+          'Unexpected token after for expression: %s', self.cur_word,
+          word=self.cur_word)
       return None
 
     body_node = self.ParseDoGroup()
@@ -633,7 +641,8 @@ class CommandParser(object):
 
     ok, value, quoted = word.StaticEval(self.cur_word)
     if not ok or quoted:
-      self.AddErrorContext("Invalid for loop variable: %s", self.cur_word)
+      self.AddErrorContext(
+          "Invalid for loop variable: %s", self.cur_word, word=self.cur_word)
       return None
     node.iter_name = value
     self._Next()  # skip past name
@@ -862,12 +871,7 @@ class CommandParser(object):
       if not self.ParseElsePart(cn.children):
         return None
 
-    if self.c_id == Id.KW_Fi:
-      self._Next()
-    else:
-      self.AddErrorContext("Expected 'fi' to end if, got %s", self.cur_word)
-      return None
-    #if not self._Eat(Id.KW_Fi): return None
+    if not self._Eat(Id.KW_Fi): return None
 
     return cn
 
@@ -935,7 +939,8 @@ class CommandParser(object):
     """
     ok, name = word.AsFuncName(self.cur_word)
     if not ok:
-      self.AddErrorContext("Invalid function name: %r", self.cur_word)
+      self.AddErrorContext("Invalid function name: %r",
+          self.cur_word, word=self.cur_word)
       return None
     self._Next()  # skip function name
 

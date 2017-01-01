@@ -98,6 +98,9 @@ def StaticEval(w):
 def _ParseErrorLocationForPart(part):
   # TODO: Write unit tests in ui.py for error values
 
+  #from core.id_kind import IdName
+  #print(IdName(part.id))
+
   if part.id == Id.Right_ArrayLiteral:
     return ParseErrorLocation(part.words[0])  # Hm this is a=(1 2 3)
 
@@ -122,6 +125,9 @@ def _ParseErrorLocationForPart(part):
       return None
 
   elif part.id == Id.Left_VarSub:
+    # TODO: This isn't set when we have $foo, only ${foo}.  We should probably
+    # have another kind of part?
+    #assert part.token
     return part.token  # debug
 
   elif part.id == Id.Left_CommandSub:

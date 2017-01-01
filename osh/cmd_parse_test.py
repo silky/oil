@@ -1168,6 +1168,7 @@ class ErrorLocationsTest(unittest.TestCase):
     err = _assertParseCommandListError(self, r"cat << 'single'$(invalid)")
     err = _assertParseCommandListError(self, r'cat << "double"$(invalid)')
     err = _assertParseCommandListError(self, r'cat << ~foo/$(invalid)')
+    err = _assertParseCommandListError(self, r'cat << $var/$(invalid)')
 
     # Word parse error in command parser
     err = _assertParseCommandListError(self, r'echo foo$(ls <)bar')
@@ -1175,6 +1176,25 @@ class ErrorLocationsTest(unittest.TestCase):
     err = _assertParseCommandListError(self, r'BAD_ENV=(1 2 3) ls')
     err = _assertParseCommandListError(self, r'ls BAD_ENV=(1 2 3)')
     err = _assertParseCommandListError(self, r'ENV1=A ENV2=B local foo=bar')
+
+    # This needs more context
+    err = _assertParseCommandListError(self, 'for ((i=1; i<)); do echo $i; done')
+
+    err = _assertParseCommandListError(self,
+        'for ((i=1; i<5; ++i)) OOPS echo $i; ERR')
+
+    # After semi
+    err = _assertParseCommandListError(self,
+        'for ((i=1; i<5; ++i)); OOPS echo $i; ERR')
+
+    err = _assertParseCommandListError(self,
+        'for $bad in 1 2; do echo hi; done')
+
+    err = _assertParseCommandListError(self, 'for foo BAD')
+
+    err = _assertParseCommandListError(self, 'if foo; then echo hi; z')
+
+    err = _assertParseCommandListError(self, 'foo$(invalid) () { echo hi; }')
 
   def testErrorInHereDoc(self):
     return
