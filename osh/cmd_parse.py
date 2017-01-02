@@ -601,6 +601,10 @@ class CommandParser(object):
     """
     if not self._Eat(Id.Lit_LBrace): return None
 
+    # TODO: Fix bug.  we need a Group node, as opposed to generic Block.
+    # Because a brace group ca have REDIRECTS.
+    # { foo || bar } > out.txt
+
     node = self.ParseCommandList()
     if not node: return None
 

@@ -173,7 +173,11 @@ class CompoundObj(Obj):
     if name == '_assigned':
       self.__dict__[name] = value
       return
-    desc = self.DESCRIPTOR_LOOKUP[name]
+    try:
+      desc = self.DESCRIPTOR_LOOKUP[name]
+    except KeyError:
+      raise AttributeError('Object of type %r has no attribute %r' %
+                           (self.__class__.__name__, name))
     if False:  # Disable type checking for now
     #if not _CheckType(value, desc):
       raise AssertionError("Field %r should be of type %s, got %r" %
