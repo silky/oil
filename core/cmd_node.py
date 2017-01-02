@@ -53,7 +53,7 @@ class CNode(_Node):
       f.write('>\n')
 
 
-def _GetHereDocsToFill(redirects):
+def _UnfilledHereDocs(redirects):
   return [
       r for r in redirects
       if r.op_id in (Id.Redir_DLess, Id.Redir_DLessDash) and not r.was_filled
@@ -77,7 +77,7 @@ def GetHereDocsToFill(node):
   # These have redirectsb ut not children.
   if node.tag in (
       command_e.SimpleCommand, command_e.DParen, command_e.DBracket):
-    return _GetHereDocsToFill(node.redirects)
+    return _UnfilledHereDocs(node.redirects)
 
   # Everything else has chidlren.
   # TODO: This must dispatch on the individual heterogeneous children.  Some
@@ -88,7 +88,7 @@ def GetHereDocsToFill(node):
 
   # && || and | don't have their own redirects, but have children that may.
   if node.tag not in (command_e.AndOr, command_e.Pipeline):
-    here_docs.extend(_GetHereDocsToFill(node.redirects))  # parent
+    here_docs.extend(_UnfilledHereDocs(node.redirects))  # parent
 
   return here_docs
 
