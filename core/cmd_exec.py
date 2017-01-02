@@ -507,7 +507,7 @@ class Executor(object):
     """
     Assume we will run the node in another process.  Return a process.
     """
-    if node.id == Id.Node_Command:
+    if node.tag == command_e.SimpleCommand:
       argv = self.ev.EvalWords(node.words)
       if argv is None:
         err = self.ev.Error()
@@ -824,7 +824,7 @@ class Executor(object):
       raise NotImplementedError
 
     else:
-      raise AssertionError(node.id)
+      raise AssertionError(node.tag)
 
     if self.exec_opts.errexit:
       if status != 0:
