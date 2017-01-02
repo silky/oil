@@ -18,6 +18,8 @@ from osh import parse_lib
 from osh.cmd_parse import CommandParser  # module under test
 from osh.word_parse import WordParser
 
+command_e = ast.command_e
+
 
 # TODO: Use parse_lib instead
 def InitCommandParser(code_str):
@@ -132,19 +134,19 @@ class SimpleCommandTest(unittest.TestCase):
 
   def testMultipleGlobalAssignments(self):
     node = assertParseCommandList(self, 'ONE=1 TWO=2')
-    self.assertEqual(Id.Node_Assign, node.id)
+    self.assertEqual(command_e.Assignment, node.tag)
     self.assertEqual(2, len(node.bindings))
     self.assertEqual(0, len(node.words))
 
   def testExport(self):
     node = assertParseCommandList(self, 'export ONE=1 TWO=2 THREE')
-    self.assertEqual(Id.Node_Assign, node.id)
+    self.assertEqual(command_e.Assignment, node.tag)
     self.assertEqual(2, len(node.bindings))
     self.assertEqual(1, len(node.words))
 
   def testReadonly(self):
     node = assertParseCommandList(self, 'readonly ONE=1 TWO=2 THREE')
-    self.assertEqual(Id.Node_Assign, node.id)
+    self.assertEqual(command_e.Assignment, node.tag)
     self.assertEqual(2, len(node.bindings))
     self.assertEqual(1, len(node.words))
 
@@ -380,14 +382,14 @@ class ArrayTest(unittest.TestCase):
         'empty=()')
     self.assertEqual(['empty'], [k for k, v in node.bindings])
     self.assertEqual([], node.bindings[0][1].parts[0].words)  # No words
-    self.assertEqual(Id.Node_Assign, node.id)
+    self.assertEqual(command_e.Assignment, node.tag)
 
     # Array with 3 elements
     node = assertParseCommandList(self,
         'array=(a b c)')
     self.assertEqual(['array'], [k for k, v in node.bindings])
     self.assertEqual(3, len(node.bindings[0][1].parts[0].words))
-    self.assertEqual(Id.Node_Assign, node.id)
+    self.assertEqual(command_e.Assignment, node.tag)
 
     # Array literal can't come after word
     assertFailCommandList(self,
