@@ -161,7 +161,7 @@ module osh
   | Block(command* children, redir* redirects)
   | Subshell(command* children, redir* redirects)
   | DParen(arith_expr child, redir* redirects)
-  | DBracket(bool_expr bnode, redir* redirects)
+  | DBracket(bool_expr expr, redir* redirects)
   -- do_arg_iter: whether to implicitly loop over "$@"
   | ForEach(string iter_name, word* iter_words, int do_arg_iter,
             command* children, redir* redirects)

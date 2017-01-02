@@ -703,7 +703,7 @@ class Executor(object):
 
     elif node.tag == command_e.DBracket:
       bool_ev = expr_eval.BoolEvaluator(self.mem, self.ev)
-      ok = bool_ev.Eval(node.bnode)
+      ok = bool_ev.Eval(node.expr)
       if ok:
         status = 0 if bool_ev.Result() else 1
       else:
