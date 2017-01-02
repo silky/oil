@@ -156,7 +156,7 @@ module osh
                binding* bindings)  -- empty redirects for polymorphism?
   | Fork(command* children)  -- shell only allows one command
   | Pipeline(command* children, int negated, int* stderr_indices)
-  | AndOr(command* children, and_or* ops, redir* redirects)
+  | AndOr(command* children, and_or* ops)
   | Block(command* children, redir* redirects)
   | Subshell(command* children, redir* redirects)
   | DParen(arith_expr child, redir* redirects)

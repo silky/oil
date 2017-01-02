@@ -71,7 +71,9 @@ def GetHereDocsToFill(node):
   # EOF2
 
   # Default, for assignment node, etc.
-  if node.tag in (command_e.Assignment, command_e.NoOp):
+  if node.tag in (
+      command_e.Assignment, command_e.NoOp, command_e.Pipeline,
+      command_e.AndOr):
     return []
 
   if node.tag == command_e.SimpleCommand:

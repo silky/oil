@@ -539,7 +539,7 @@ class CommandParserTest(unittest.TestCase):
 
     _, c_parser = InitCommandParser('ls foo|wc -l || die; ls /')
     node = c_parser.ParseCommandLine()
-    self.assertEqual(Id.Op_Semi, node.id)
+    self.assertEqual(command_e.Block, node.tag)
     self.assertEqual(2, len(node.children))  # two top level things
     print(node.DebugString())
 
@@ -548,14 +548,14 @@ class CommandParserTest(unittest.TestCase):
     self.assertEqual(2, len(node.words))
 
     node = assertParseCommandList(self, 'ls foo|wc -l || die; ls /')
-    self.assertEqual(Id.Op_Semi, node.id)
+    self.assertEqual(command_e.Block, node.tag)
     self.assertEqual(2, len(node.children))
 
     node = assertParseCommandList(self, """\
 ls foo | wc -l || echo fail ;
 echo bar | wc -c || echo f2
 """)
-    self.assertEqual(Id.Op_Semi, node.id)
+    self.assertEqual(command_e.Block, node.tag)
     self.assertEqual(2, len(node.children))
 
     # TODO: Check that we get (LIST (AND_OR (PIPELINE (COMMAND ...)))) here.
@@ -811,13 +811,13 @@ class NestedParensTest(unittest.TestCase):
     node = assertParseCommandLine(self,
         '(cd /; echo PWD 1); echo PWD 2')
     self.assertEqual(2, len(node.children))
-    self.assertEqual(Id.Op_Semi, node.id)
+    self.assertEqual(command_e.Block, node.tag)
 
   def testParseBraceGroup(self):
     node = assertParseCommandLine(self,
         '{ cd /; echo PWD; }; echo PWD')
     self.assertEqual(2, len(node.children))
-    self.assertEqual(Id.Op_Semi, node.id)
+    self.assertEqual(command_e.Block, node.tag)
 
   def testUnquotedComSub(self):
     # CommandSubPart with two LiteralPart instances surrounding it
@@ -840,7 +840,7 @@ class NestedParensTest(unittest.TestCase):
     # Within subshell
     node = assertParseCommandList(self,
         '(echo $((1+2)))')
-    self.assertEqual(Id.Node_Subshell, node.id)
+    self.assertEqual(command_e.Subshell, node.tag)
     self.assertEqual(1, len(node.children))
 
   def testArithGroupingWithin(self):
@@ -853,7 +853,7 @@ class NestedParensTest(unittest.TestCase):
     # Within subshell
     node = assertParseCommandList(self,
         '(echo $((1*(2+3))) )')
-    self.assertEqual(Id.Node_Subshell, node.id)
+    self.assertEqual(command_e.Subshell, node.tag)
     self.assertEqual(1, len(node.children))
 
   def testLhsArithGroupingWithin(self):
@@ -872,7 +872,7 @@ class NestedParensTest(unittest.TestCase):
 
     node = assertParseCommandList(self,
         '(func() { echo hi; }; func)')
-    self.assertEqual(Id.Node_Subshell, node.id)
+    self.assertEqual(command_e.Subshell, node.tag)
     self.assertEqual(1, len(node.children))
 
   def testArrayLiteralWithin(self):
@@ -883,13 +883,13 @@ class NestedParensTest(unittest.TestCase):
 
     node = assertParseCommandList(self,
         '(array=(a b c))')
-    self.assertEqual(Id.Node_Subshell, node.id)
+    self.assertEqual(command_e.Subshell, node.tag)
     self.assertEqual(1, len(node.children))
 
   def testSubshellWithinComSub(self):
     node = assertParseCommandList(self,
         'echo one; echo $( (cd /; echo subshell_PWD); echo comsub_PWD); echo two')
-    self.assertEqual(Id.Op_Semi, node.id)
+    self.assertEqual(command_e.Block, node.tag)
     self.assertEqual(3, len(node.children))   # 3 echo statements
 
     # TODO: Need a way to test the literal value of a word
@@ -913,7 +913,7 @@ case bar in two) echo comsub2;; esac
     # Comsub within case within comsub
     node = assertParseCommandList(self,
         'echo one; echo $( case one in $(echo one)) echo $(comsub);; esac ); echo two')
-    self.assertEqual(Id.Op_Semi, node.id)
+    self.assertEqual(command_e.Block, node.tag)
     # Top level should have 3 echo statements
     self.assertEqual(3, len(node.children))
 
@@ -929,7 +929,7 @@ case bar in two) echo comsub2;; esac
   esac
 )
 """)
-    self.assertEqual(Id.Node_Subshell, node.id)
+    self.assertEqual(command_e.Subshell, node.tag)
 
   def testBalancedCaseWithin(self):
     # With leading ( in case.  This one doesn't cause problems!   We don't need
@@ -948,7 +948,7 @@ $( case foo in
   esac
 )
 """)
-    self.assertEqual(Id.Node_Subshell, node.id)
+    self.assertEqual(command_e.Subshell, node.tag)
 
   def testUnbalancedCaseWithin(self):
     # With leading ( in case.  This one doesn't cause problems!   We don't need
@@ -967,7 +967,7 @@ $( case foo in
   esac
 )
 """)
-    self.assertEqual(Id.Node_Subshell, node.id)
+    self.assertEqual(command_e.Subshell, node.tag)
 
   def testForExpressionWithin(self):
     # With leading ( in case.  This one doesn't cause problems!   We don't need
@@ -986,7 +986,7 @@ $( for ((i=0; i<3; ++i)); do
   done
 )
 """)
-    self.assertEqual(Id.Node_Subshell, node.id)
+    self.assertEqual(command_e.Subshell, node.tag)
 
 
 class RealBugsTest(unittest.TestCase):
@@ -1004,7 +1004,7 @@ class RealBugsTest(unittest.TestCase):
   done
 )
 """)
-    self.assertEqual(Id.Node_Subshell, node.id)
+    self.assertEqual(command_e.Subshell, node.tag)
 
   def testParseCase3(self):
     # Bug from git codebase.  NOT a comment token.
@@ -1061,7 +1061,7 @@ if true; then (
 )
 fi
 """)
-    self.assertEqual(Id.KW_If, node.id)
+    self.assertEqual(command_e.If, node.tag)
 
     node = assertParseCommandList(self, """\
 while true; do {
@@ -1069,14 +1069,14 @@ while true; do {
   break
 } done
 """)
-    self.assertEqual(Id.KW_While, node.id)
+    self.assertEqual(command_e.While, node.tag)
 
     node = assertParseCommandList(self, """\
 if true; then (
   echo hi
 ) fi
 """)
-    self.assertEqual(Id.KW_If, node.id)
+    self.assertEqual(command_e.If, node.tag)
 
     # Related: two fi's in a row, found in Chrome configure.  Compound commands
     # are special; don't need newlines.
@@ -1087,7 +1087,7 @@ if true; then
   fi fi
 echo hi
 """)
-    self.assertEqual(Id.Op_Semi, node.id)
+    self.assertEqual(command_e.Block, node.tag)
 
   def testBackticks(self):
     #return
