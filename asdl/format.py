@@ -80,9 +80,16 @@ INDENT = 2
 # if (not ok):
 #   indent
 #   PrintTree()
+#
+# And PrintTree should take a list of Substitutions on node_type to make it
+# shorter?
+# - CompoundWord
+# - SimpleCommand
+# - Lit_Chars for tokens
+
 
 class _Obj:
-  def __init__(self, node_type, fields):
+  def __init__(self, node_type):
     self.node_type = node_type
     self.fields = []  # list of 2-tuples
 
@@ -190,17 +197,6 @@ def MakeTree(obj, max_col=80):
       t = MakeTree(field_val, max_col=max_col-INDENT)
       parts.append(t)
 
-  def RecursiveStringLength(pnode):
-    if isinstance(pnode, list):
-      total_len = 0
-      for child in pnode:
-        total_len += RecursiveStringLength(child)
-      return total_len
-    elif isinstance(pnode, str):
-      return len(pnode)
-    else:
-      raise AssertionError(node)
-
   # All strings
   total_len = RecursiveStringLength(parts)
   #print('TOTAL LEN', total_len)
@@ -211,6 +207,18 @@ def MakeTree(obj, max_col=80):
     return f.getvalue()  # a single string
 
   return parts
+
+
+def RecursiveStringLength(pnode):
+  if isinstance(pnode, list):
+    total_len = 0
+    for child in pnode:
+      total_len += RecursiveStringLength(child)
+    return total_len
+  elif isinstance(pnode, str):
+    return len(pnode)
+  else:
+    raise AssertionError(node)
 
 
 def PrintTree(node, f, indent=0):
