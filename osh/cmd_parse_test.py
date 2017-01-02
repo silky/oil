@@ -504,11 +504,11 @@ class CommandParserTest(unittest.TestCase):
 
     node = assertParseAndOr(self, 'ls foo || die')
     self.assertEqual(2, len(node.children))
-    self.assertEqual(Id.Node_AndOr, node.id)
+    self.assertEqual(command_e.AndOr, node.tag)
 
     node = assertParseAndOr(self, 'ls foo|wc -l || die')
     self.assertEqual(2, len(node.children))
-    self.assertEqual(Id.Node_AndOr, node.id)
+    self.assertEqual(command_e.AndOr, node.tag)
 
   def testParseCommand(self):
     _, c_parser = InitCommandParser('ls foo')
@@ -519,7 +519,7 @@ class CommandParserTest(unittest.TestCase):
     _, c_parser = InitCommandParser('func() { echo hi; }')
     node = c_parser.ParseCommand()
     print(node.DebugString())
-    self.assertEqual(Id.Node_FuncDef, node.id)
+    self.assertEqual(command_e.FuncDef, node.tag)
 
   def testParseCommandLine(self):
     _, c_parser = InitCommandParser('ls foo 2>/dev/null')
@@ -534,7 +534,7 @@ class CommandParserTest(unittest.TestCase):
 
     _, c_parser = InitCommandParser('ls foo|wc -l || die')
     node = c_parser.ParseCommandLine()
-    self.assertEqual(Id.Node_AndOr, node.id)
+    self.assertEqual(command_e.AndOr, node.tag)
     print(node.DebugString())
 
     _, c_parser = InitCommandParser('ls foo|wc -l || die; ls /')

@@ -70,19 +70,20 @@ def GetHereDocsToFill(node):
   # while
   # EOF2
 
-  # Default, for assignment node, etc.
+  # These have no redirects at all.
   if node.tag in (
-      command_e.Assignment, command_e.NoOp, command_e.Pipeline,
+      command_e.NoOp, command_e.Assignment, command_e.Pipeline,
       command_e.AndOr):
     return []
 
-  if node.tag == command_e.SimpleCommand:
+  # These have redirectsb ut not children.
+  if node.tag in (
+      command_e.SimpleCommand, command_e.DParen, command_e.DBracket):
     return _GetHereDocsToFill(node.redirects)
 
-  # Everything else has redirects.
-  # TODO: This must dispatch on the individual heterogeneous children.
-  # Some nodes don't have redirects.
-
+  # Everything else has chidlren.
+  # TODO: This must dispatch on the individual heterogeneous children.  Some
+  # nodes don't have redirects.
   here_docs = []
   for child in node.children:
     here_docs.extend(GetHereDocsToFill(child))
