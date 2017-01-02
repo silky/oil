@@ -156,11 +156,12 @@ module osh
                binding* bindings)  -- empty redirects for polymorphism?
   | Fork(command* children)  -- shell only allows one command
   | Pipeline(command* children, int negated, int* stderr_indices)
-  | AndOr(command* children, and_or* ops)
+  -- | AndOr(command* children, and_or* ops)
+  | AndOr(command* children, int op_id)
   | Block(command* children, redir* redirects)
   | Subshell(command* children, redir* redirects)
   | DParen(arith_expr child, redir* redirects)
-  | DBracket(bool_expr child, redir* redirects)
+  | DBracket(bool_expr bnode, redir* redirects)
   -- do_arg_iter: whether to implicitly loop over "$@"
   | ForEach(string iter_name, word* iter_words, int do_arg_iter,
             command* children, redir* redirects)

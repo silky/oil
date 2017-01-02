@@ -1195,7 +1195,8 @@ class CommandParser(object):
 
     node = ast.AndOr()
     node.children = [left, right]
-    node.ops = [op]
+    #node.ops = [op]
+    node.op_id = op
     return node
 
   def ParseCommandLine(self):
