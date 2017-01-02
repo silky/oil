@@ -57,7 +57,7 @@ def _GetHereDocsToFill(node):
     here_docs.extend(_GetHereDocsToFill(child))
 
   # && || and | don't have their own redirects, but have children that may.
-  if node.tag not in (command_e.AndOr, command_e.Pipeline):
+  if node.tag not in (command_e.AndOr, command_e.Pipeline, command_e.Fork):
     here_docs.extend(_UnfilledHereDocs(node.redirects))  # parent
 
   return here_docs
@@ -1103,21 +1103,16 @@ class CommandParser(object):
       return self.ParseKshFunctionDef()
 
     if self.c_id == Id.KW_DLeftBracket:
-      node = self.ParseDBracket()
-      if not node: return None
-      return node
+      return self.ParseDBracket()
 
     if self.c_id == Id.Op_DLeftParen:
-      node = self.ParseDParen()
-      if not node: return None
-      return node
+      return self.ParseDParen()
 
     if self.c_id in (
         Id.Op_LParen, Id.Lit_LBrace, Id.KW_For, Id.KW_While, Id.KW_Until,
         Id.KW_If, Id.KW_Case):
       node = self.ParseCompoundCommand()
-      if not node:
-        return None
+      if not node: return None
       redirects = self._ParseRedirectList()
       if redirects is None:
         return None
