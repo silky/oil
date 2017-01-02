@@ -65,7 +65,29 @@ class AnsiOutput(ColorOutput):
 
 INDENT = 2
 
-def MakeTree(obj, max_col=80, depth=0):
+# TODO: Change algorithm
+# - MakeTree makes it homogeneous:
+#   - strings for primitives, or ? for unset
+#   - (field, value) tuple
+#   - [] for arrays
+#   - _Obj(name, fields)
+#
+# And then PrintTree(max_col) does 
+# temporary buffer
+#
+# if it fails, then print the tree
+# ok = TryPrintLine(child, max_col)
+# if (not ok):
+#   indent
+#   PrintTree()
+
+class _Obj:
+  def __init__(self, node_type, fields):
+    self.node_type = node_type
+    self.fields = []  # list of 2-tuples
+
+
+def MakeTree(obj, max_col=80):
   """
   Args:
     obj: py_meta.Obj
@@ -152,7 +174,7 @@ def MakeTree(obj, max_col=80, depth=0):
       obj_list = field_val
       #parts.append('[')  # TODO: How to indicate list?
       for child_obj in obj_list:
-        t = MakeTree(child_obj, max_col, depth)
+        t = MakeTree(child_obj, max_col)
         parts.append(t)
       #parts.append(']')
 
@@ -165,7 +187,7 @@ def MakeTree(obj, max_col=80, depth=0):
 
       # Children can't be written directly to 'out'.  We have to know if they
       # will fit first.
-      t = MakeTree(field_val, max_col=max_col-INDENT, depth=depth+1)
+      t = MakeTree(field_val, max_col=max_col-INDENT)
       parts.append(t)
 
   def RecursiveStringLength(pnode):
