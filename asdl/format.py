@@ -235,16 +235,6 @@ def PrintTree(node, f, indent=0, max_col=80):
 
     f.write(ind + ')')
 
-  elif isinstance(node, list):
-    # Assume the first entry is always a string.
-    # We could also insert patterns here... e.g. if it is a word, then use {},
-    # and WordPart, use [], without any qualifier?
-    # But I will have StaticWord/DynamicWord/UnsafeWord.
-
-    print(ind + '[', file=f)
-    for child in node:
-      PrintTree(child, f, indent=indent+INDENT)
-    print(ind + ']', file=f)
   else:
     raise AssertionError(node)
 
