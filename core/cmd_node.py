@@ -11,12 +11,14 @@ cmd_node.py -- AST Nodes for the command language
 
 import io
 
-from osh import ast
-
 from asdl import py_meta
 from core import util
 from core.id_kind import Id, IdName
 from core.base import _Node
+
+from osh import ast
+
+command_e = ast.command_e
 
 
 class CNode(_Node):
@@ -67,25 +69,25 @@ def GetHereDocsToFill(node):
   # EOF1
   # while
   # EOF2
-  if isinstance(node, ast.DBracket):
-    return []
+  #if isinstance(node, ast.DBracket):
+  #  return []
 
-  if isinstance(node, SimpleCommandNode):
+  if node.tag == command_e.SimpleCommand:
     return _GetHereDocsToFill(node.redirects)
 
-  if isinstance(node, _CompoundCNode):
-    # TODO: This must dispatch on the individual heterogeneous children.
-    # Some nodes don't have redirects.
-
-    here_docs = []
-    for child in node.children:
-      here_docs.extend(GetHereDocsToFill(child))
-    here_docs.extend(_GetHereDocsToFill(node.redirects))  # parent
-    return here_docs
-
   # Default, for assignment node, etc.
-  return []
-  #raise AssertionError(node)
+  if node.tag == command_e.Assignment:
+    return []
+
+  # Everything else has redirects.
+  # TODO: This must dispatch on the individual heterogeneous children.
+  # Some nodes don't have redirects.
+
+  here_docs = []
+  for child in node.children:
+    here_docs.extend(GetHereDocsToFill(child))
+  here_docs.extend(_GetHereDocsToFill(node.redirects))  # parent
+  return here_docs
 
 
 class SimpleCommandNode(CNode):

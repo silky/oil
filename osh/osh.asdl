@@ -153,8 +153,7 @@ module osh
   | Assignment(assign_scope scope,
                assign_flags flags,
                word* names,  -- names mentioned without a binding
-               binding* bindings,
-               redir* redirects)  -- empty redirects for polymorphism?
+               binding* bindings)  -- empty redirects for polymorphism?
   | Fork(command* children)  -- shell only allows one command
   | Pipeline(command* children, int negated, int* stderr_indices)
   | AndOr(command* children, and_or* ops)
