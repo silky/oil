@@ -203,7 +203,7 @@ def MakeTree(obj, max_col=80):
 
   if total_len < 100:  # Could use a better heuristic to account for ()
     f = io.StringIO()
-    PrintSingle(parts, f)
+    TrySingleLine(parts, f)
     return f.getvalue()  # a single string
 
   return parts
@@ -221,7 +221,11 @@ def RecursiveStringLength(pnode):
     raise AssertionError(node)
 
 
-def PrintTree(node, f, indent=0):
+def PrintTree(node, f, indent=0, max_col=80):
+  """
+    node: homogeneous tree node
+    f: output file. TODO: Should take ColorOutput?
+  """
   ind = ' ' * indent
   if isinstance(node, str):
     print(ind + node, file=f)
@@ -239,10 +243,19 @@ def PrintTree(node, f, indent=0):
     raise AssertionError(node)
 
 
-# TODO: Should take ColorOutput instead of a file?
+def TrySingleLine(parts, f, indent=0, max_col=80):
+  """Try printing on a single line.
 
-def PrintSingle(parts, f, indent=0):
-  """Print to a single line, used in MakeTree."""
+  Args:
+    node: homogeneous tree node
+    f: output file. TODO: Should take ColorOutput?
+    max_col: maximum length of the line
+    indent: current indent level
+
+  Returns:
+    ok: whether it fit on the line of the given size.
+      If False, you can't use the value of f.
+  """
   ind = ' ' * indent
   f.write('(')
   n = len(parts)
@@ -254,7 +267,7 @@ def PrintSingle(parts, f, indent=0):
       f.write(ind + p[0])
       tail = p[1:]
       if tail:
-        PrintSingle(tail, f)
+        TrySingleLine(tail, f)
     else:
       raise AssertionError(p)
     if i != n - 1:
