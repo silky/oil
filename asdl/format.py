@@ -94,7 +94,7 @@ class _Obj:
     self.fields = []  # list of 2-tuples
 
 
-def MakeTree(obj, max_col=80):
+def MakeTree(obj):
   """
   Args:
     obj: py_meta.Obj
@@ -180,7 +180,7 @@ def MakeTree(obj, max_col=80):
       out_val = []
       obj_list = field_val
       for child_obj in obj_list:
-        t = MakeTree(child_obj, max_col)
+        t = MakeTree(child_obj)
         out_val.append(t)
 
     elif isinstance(desc, asdl.MaybeType):
@@ -192,7 +192,7 @@ def MakeTree(obj, max_col=80):
 
       # Children can't be written directly to 'out'.  We have to know if they
       # will fit first.
-      out_val = MakeTree(field_val, max_col=max_col-INDENT)
+      out_val = MakeTree(field_val)
 
     out_node.fields.append((field_name, out_val))
 
@@ -224,11 +224,13 @@ def PrintTree(node, f, indent=0, max_col=80):
       if isinstance(val, list):
         f.write('%s%s: [\n' % (ind1, name))
         for child in val:
+          # TODO: Add max_col here
           PrintTree(child, f, indent=indent+INDENT+INDENT)
           f.write('\n')
         f.write('%s]' % ind1)
       else:
         f.write('%s%s:\n' % (ind1, name))
+        # TODO: Add max_col here, taking into account the field name
         PrintTree(val, f, indent=indent+INDENT+INDENT)
         i += 1
       f.write('\n')  # separate fields
@@ -239,7 +241,7 @@ def PrintTree(node, f, indent=0, max_col=80):
     raise AssertionError(node)
 
 
-def TrySingleLine(node, f, indent=0, max_col=80):
+def TrySingleLine(node, f, max_col=80):
   """Try printing on a single line.
 
   Args:
@@ -252,7 +254,6 @@ def TrySingleLine(node, f, indent=0, max_col=80):
     ok: whether it fit on the line of the given size.
       If False, you can't use the value of f.
   """
-  ind = ' ' * indent
   if isinstance(node, str):
     f.write(node)
 
