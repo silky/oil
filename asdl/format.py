@@ -197,28 +197,12 @@ def MakeTree(obj, max_col=80):
       t = MakeTree(field_val, max_col=max_col-INDENT)
       parts.append(t)
 
-  # All strings
-  total_len = RecursiveStringLength(parts)
-  #print('TOTAL LEN', total_len)
-
-  if total_len < 100:  # Could use a better heuristic to account for ()
-    f = io.StringIO()
-    TrySingleLine(parts, f)
+  # Try printing on a single line
+  f = io.StringIO()
+  if TrySingleLine(parts, f, max_col=max_col):
     return f.getvalue()  # a single string
 
   return parts
-
-
-def RecursiveStringLength(pnode):
-  if isinstance(pnode, list):
-    total_len = 0
-    for child in pnode:
-      total_len += RecursiveStringLength(child)
-    return total_len
-  elif isinstance(pnode, str):
-    return len(pnode)
-  else:
-    raise AssertionError(node)
 
 
 def PrintTree(node, f, indent=0, max_col=80):
@@ -267,9 +251,25 @@ def TrySingleLine(parts, f, indent=0, max_col=80):
       f.write(ind + p[0])
       tail = p[1:]
       if tail:
-        TrySingleLine(tail, f)
+        if not TrySingleLine(tail, f):
+          return False
     else:
       raise AssertionError(p)
     if i != n - 1:
       f.write(' ')
+
+    # For efficient, try to make an early exit at every loop iteration.
+    num_chars_so_far = len(f.getvalue()) 
+    if num_chars_so_far > max_col:
+      #raise AssertionError
+      return False
+
   f.write(')')
+
+  # Take into account the last char.
+  num_chars_so_far = len(f.getvalue()) 
+  if num_chars_so_far > max_col:
+    return False
+
+  return True
+
