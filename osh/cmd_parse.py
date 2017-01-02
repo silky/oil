@@ -12,9 +12,6 @@ cmd_parse.py - Parse high level shell commands.
 from core import base
 from core import cmd_node
 from core import word
-from core.cmd_node import (
-    DBracketNode, DParenNode, SubshellNode, ForkNode, ForNode,
-    ForExpressionNode, WhileNode, UntilNode, FunctionDefNode, IfNode, CaseNode)
 from core.id_kind import Id, Kind, REDIR_DEFAULT_FD
 from core.tokens import Token
 
@@ -636,7 +633,7 @@ class CommandParser(object):
     return node
 
   def _ParseCommandForLoop(self):
-    node = ForNode()
+    node = ast.ForEach()
 
     ok, value, quoted = word.StaticEval(self.cur_word)
     if not ok or quoted:
@@ -702,7 +699,7 @@ class CommandParser(object):
     body_node = self.ParseDoGroup()
     if not body_node: return None
 
-    return WhileNode([cond_node, body_node])
+    return ast.While([cond_node, body_node])
 
   def ParseUntil(self):
     """
@@ -716,7 +713,7 @@ class CommandParser(object):
     body_node = self.ParseDoGroup()
     if not body_node: return None
 
-    return UntilNode([cond_node, body_node])
+    return ast.Until([cond_node, body_node])
 
   def ParseCaseItem(self):
     """
@@ -790,7 +787,7 @@ class CommandParser(object):
     """
     case_clause      : Case WORD newline_ok in newline_ok case_list? Esac ;
     """
-    cn = CaseNode()
+    cn = ast.Case()
     self._Next()  # skip case
 
     if not self._Peek(): return None
@@ -852,7 +849,7 @@ class CommandParser(object):
     """
     if_clause        : If command_list Then command_list else_part? Fi ;
     """
-    cn = IfNode()
+    cn = ast.If()
     self._Next()  # skip if
 
     cond = self.ParseCommandList()
@@ -954,7 +951,7 @@ class CommandParser(object):
 
     if not self._NewlineOk(): return None
 
-    func = FunctionDefNode()
+    func = ast.FuncDef()
     func.name = name
     if not self.ParseFunctionBody(func):
       return None
@@ -983,7 +980,7 @@ class CommandParser(object):
 
     if not self._NewlineOk(): return None
 
-    func = FunctionDefNode()
+    func = ast.FuncDef()
     func.name = name
     if not self.ParseFunctionBody(func):
       return None
@@ -997,7 +994,7 @@ class CommandParser(object):
     raise NotImplementedError
 
   def ParseSubshell(self):
-    cn = SubshellNode()
+    cn = ast.Subshell()
 
     self._Next()  # skip past (
 
@@ -1033,7 +1030,6 @@ class CommandParser(object):
       self.AddErrorContext("Error parsing [[", word=maybe_error_word)
       return None
     return ast.DBracket(bnode)
-    #return DBracketNode(bnode)
 
   def ParseDParen(self):
     maybe_error_word = self.cur_word
@@ -1047,7 +1043,7 @@ class CommandParser(object):
       return None
 
     #print('2 ((', self.cur_word)
-    return DParenNode(anode)
+    return ast.DParen(anode)
 
   def ParseCommand(self):
     """
@@ -1319,7 +1315,7 @@ class CommandParser(object):
 
       elif self.c_id in (Id.Op_Semi, Id.Op_Amp):
         if self.c_id == Id.Op_Amp:
-          child = ForkNode()
+          child = ast.Fork()
           child.children = [and_or]
         self._Next()
 

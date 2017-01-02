@@ -162,9 +162,6 @@ def MakeTree(obj, max_col=80, depth=0):
       t = MakeTree(field_val, max_col=max_col-INDENT, depth=depth+1)
       parts.append(t)
 
-  # TODO: Add up all the length of child_parts
-  # And consolidate it into a single one if it fits in max_col?
-
   # I think it should be [head, ...tail] format.  Maybe (head, ...tail)
   # head, tail = foo[0], foo[1:]
   #
@@ -177,16 +174,19 @@ def MakeTree(obj, max_col=80, depth=0):
 
   # If any part is a tuple, then put everything on its own separate line.
 
+  # TODO: This is to aggressive?
   has_multiline = any(isinstance(p, list) for p in parts)
   if has_multiline:
     return parts
 
   # All strings
   total_len = sum(len(p) for p in parts)
-  if total_len < 70:  # Could use a better heuristic to account for ()
+  #print('TOTAL LEN', total_len)
+  if total_len < 200:  # Could use a better heuristic to account for ()
     f = io.StringIO()
     PrintSingle(parts, f)
-    return f.getvalue()
+    #print('RETURNING', f.getvalue())
+    return f.getvalue()  # a single string
 
   return parts
 
@@ -212,6 +212,7 @@ def PrintTree(node, f, indent=0):
 # TODO: Should take ColorOutput instead of a file?
 
 def PrintSingle(parts, f):
+  """Print to a single line, used in MakeTree."""
   f.write('(')
   n = len(parts)
   for i, p in enumerate(parts):

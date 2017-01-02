@@ -357,6 +357,7 @@ PIPE 1
 PIPE 2
 EOF
 """)
+    #print(node.children)
     self.assertEqual(2, len(node.children))
     assertHereDocToken(self, 'PIPE 1\n', node.children[0])
 

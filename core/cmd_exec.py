@@ -643,18 +643,8 @@ class Executor(object):
     # and exits 1, and shows traceback.
     cflow = EBuiltin.NONE
 
-    command_e = ast.command_e
-    if hasattr(node, 'tag') and node.tag == command_e.DBracket:
-      bool_ev = expr_eval.BoolEvaluator(self.mem, self.ev)
-      ok = bool_ev.Eval(node.child)
-      if ok:
-        status = 0 if bool_ev.Result() else 1
-      else:
-        raise AssertionError('Error evaluating boolean: %s' % bool_ev.Error())
-
     # TODO: Only eval argv[0] once.  It can have side effects!
-
-    elif node.tag == command_e.SimpleCommand:
+    if node.tag == command_e.SimpleCommand:
       argv = self.ev.EvalWords(node.words)
       if argv is None:
         err = self.ev.Error()
@@ -700,12 +690,12 @@ class Executor(object):
     elif node.tag == command_e.Pipeline:
       status, cflow = self._RunPipeline(node)
 
-    elif node.id == Id.Node_Subshell:
+    elif node.tag == command_e.Subshell:
       # This makes sure we don't waste a process if we'd launch one anyway.
       p = self._GetProcessForNode(node.children[0])
       status = p.Run()
 
-    elif node.id == Id.KW_DLeftBracket:
+    elif node.tag == command_e.DBracket:
       bool_ev = expr_eval.BoolEvaluator(self.mem, self.ev)
       ok = bool_ev.Eval(node.bnode)
       if ok:
@@ -713,7 +703,7 @@ class Executor(object):
       else:
         raise AssertionError('Error evaluating boolean: %s' % bool_ev.Error())
 
-    elif node.id == Id.Op_DLeftParen:
+    elif node.tag == command_e.DParen:
       arith_ev = expr_eval.ArithEvaluator(self.mem, self.ev)
       ok = arith_ev.Eval(node.anode)
       if ok:
@@ -724,7 +714,7 @@ class Executor(object):
       else:
         raise AssertionError('Error evaluating (( )): %s' % arith_ev.Error())
 
-    elif node.id == Id.Node_Assign:
+    elif node.tag == command_e.Assignment:
       # TODO: Respect flags: readonly, export, sametype, etc.
       # Just pass the Value
       pairs = []
@@ -746,14 +736,14 @@ class Executor(object):
       # TODO: This should be eval of RHS, unlike bash!
       status = 0
 
-    elif node.id == Id.Op_Semi:
+    elif node.tag == command_e.Block:
       status = 0  # for empty list
       for child in node.children:
         status, cflow = self.Execute(child)  # last status wins
         if cflow in (EBuiltin.BREAK, EBuiltin.CONTINUE):
           break
 
-    elif node.id == Id.Node_AndOr:
+    elif node.tag == command_e.AndOr:
       #print(node.children)
       left, right = node.children
       status, cflow = self.Execute(left)
@@ -767,7 +757,7 @@ class Executor(object):
       else:
         raise AssertionError
 
-    elif node.id == Id.KW_While:
+    elif node.tag == command_e.While:
       cond, action = node.children
 
       while True:
@@ -781,7 +771,7 @@ class Executor(object):
         if cflow == EBuiltin.CONTINUE:
           cflow = EBuiltin.NONE  # reset since we respected it
 
-    elif node.id == Id.Node_ForEach:
+    elif node.tag == command_e.ForEach:
       iter_name = node.iter_name
       if node.do_arg_iter:
         iter_list = self.mem.GetArgv()
@@ -806,11 +796,11 @@ class Executor(object):
         if cflow == EBuiltin.CONTINUE:
           cflow = EBuiltin.NONE  # reset since we respected it
 
-    elif node.id == Id.Node_FuncDef:
+    elif node.tag == command_e.FuncDef:
       self.funcs[node.name] = node
       status = 0
 
-    elif node.id == Id.KW_If:
+    elif node.tag == command_e.If:
       i = 0
       while i < len(node.children):
         cond = node.children[i]
@@ -821,10 +811,10 @@ class Executor(object):
           break
         i += 2
 
-    elif node.id == Id.Node_NoOp:
+    elif node.tag == command_eNoOp:
       status = 0  # make it true
 
-    elif node.id == Id.KW_Case:
+    elif node.tag == command_e.Case:
       raise NotImplementedError
 
     else:
