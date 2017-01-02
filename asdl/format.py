@@ -156,26 +156,6 @@ def MakeTree(obj, max_col=80, depth=0):
       t = MakeTree(field_val, max_col=max_col-INDENT, depth=depth+1)
       parts.append(t)
 
-  # I think it should be [head, ...tail] format.  Maybe (head, ...tail)
-  # head, tail = foo[0], foo[1:]
-  #
-  # And then you CHOOSE between indentatino or parens to denote structure (())
-  #
-  # return (string or tuple)
-  # string means: I can be combined with other strings
-  # tuple: I already determined that one of my children is too long.  So the
-  # whole structure must be kept in tact.  no wrapping.
-
-  # If any part is a tuple, then put everything on its own separate line.
-
-  # TODO: This is to aggressive?
-  #has_multiline = any(isinstance(p, list) for p in parts)
-  #for p in parts:
-  #  if isinstance(p, list):
-  #    print('LIST', p)
-  #if has_multiline:
-  #  return parts
-
   def RecursiveStringLength(pnode):
     if isinstance(pnode, list):
       total_len = 0
@@ -188,14 +168,12 @@ def MakeTree(obj, max_col=80, depth=0):
       raise AssertionError(node)
 
   # All strings
-  #total_len = sum(len(p) for p in parts)
   total_len = RecursiveStringLength(parts)
   #print('TOTAL LEN', total_len)
 
   if total_len < 100:  # Could use a better heuristic to account for ()
     f = io.StringIO()
     PrintSingle(parts, f)
-    #print('RETURNING', f.getvalue())
     return f.getvalue()  # a single string
 
   return parts
@@ -232,7 +210,9 @@ def PrintSingle(parts, f, indent=0):
     elif isinstance(p, list):
       # Assume the first entry is always a string
       f.write(ind + p[0])
-      PrintSingle(p[1:], f)
+      tail = p[1:]
+      if tail:
+        PrintSingle(tail, f)
     else:
       raise AssertionError(p)
     if i != n - 1:
