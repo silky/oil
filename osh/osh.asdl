@@ -152,16 +152,16 @@ module osh
   | SimpleCommand(word* words, redir* redirects, binding* more_env)
   | Assignment(assign_scope scope,
                assign_flags flags,
-               word* names,  -- names mentioned without a binding
+               word* words,  -- names mentioned without a binding
                binding* bindings)  -- empty redirects for polymorphism?
   | Fork(command* children)  -- shell only allows one command
   | Pipeline(command* children, int negated, int* stderr_indices)
-  | AndOr(command* children, and_or* ops)
+  | AndOr(command* children, and_or* ops, redir* redirects)
   | Block(command* children, redir* redirects)
   | Subshell(command* children, redir* redirects)
   | DParen(arith_expr child, redir* redirects)
   | DBracket(bool_expr child, redir* redirects)
-  | ForEach(string var, word* words, command* children, redir* redirects)
+  | ForEach(string iter_name, word* iter_words, command* children, redir* redirects)
   -- C-style for loop
   | ForExpr(arith_expr init, arith_expr cond, arith_expr update, command* children,
             redir* redirects)
