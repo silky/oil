@@ -69,8 +69,8 @@ def MakeTree(obj, max_col=80, depth=0):
   """
   Args:
     obj: py_meta.Obj
-    params
-    out: Print a single line, or multiple lines an indents?
+  Returns:
+    A tree of strings and lists.
 
   NOTES:
 
@@ -82,9 +82,7 @@ def MakeTree(obj, max_col=80, depth=0):
   Or use color for this?
 
   (ArithBinary Plus (ArithBinary Plus (Const 1) (Const 2)) (Const 3))
-
   vs.
-
   ArithBinary
     Plus
     ArithBinary
@@ -93,9 +91,20 @@ def MakeTree(obj, max_col=80, depth=0):
       Const 2
     Const 3
 
-  Algorithm:
-  - Create a parts list, like ['ArithUnary', '1', '2']
-  - If any of the children are lists themselves...
+  What about field names?
+
+  Inline:
+  (Node children:[() () ()])
+
+  Indented
+  (Node
+    children:[
+      () 
+      ()
+      ()
+    ]
+  )
+
 
   """
   # HACK to incorporate old AST nodes.  Remove when the whole thing is
@@ -111,11 +120,14 @@ def MakeTree(obj, max_col=80, depth=0):
   parts = [obj.__class__.__name__]
 
   for name in obj.FIELDS:
+    # Need a different data model.  Pairs?
+    parts.append('%s:' % name)
     #print(name)
     try:
       field_val = getattr(obj, name)
     except AttributeError:
-      parts.append('%s=?' % name)
+      #parts.append('%s=?' % name)
+      parts.append('?')
       continue
 
     desc = obj.DESCRIPTOR_LOOKUP[name]
