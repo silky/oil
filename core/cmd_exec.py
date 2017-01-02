@@ -632,7 +632,13 @@ class Executor(object):
     Args:
       node: of type AstNode
     """
-    redirects = self._EvalRedirects(node.redirects)
+    # No redirects
+    if node.tag in (
+        command_e.Assignment, command_e.Pipeline, command_e.AndOr,
+        command_e.Fork):
+      redirects = []
+    else:
+      redirects = self._EvalRedirects(node.redirects)
 
     # TODO: Change this to its own enum?
     # or add EBuiltin.THROW     _throw?  For testing.

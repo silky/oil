@@ -13,7 +13,6 @@ import unittest
 
 from core import cmd_exec
 from core import lexer
-from core import cmd_node
 from core import word_eval
 from core import ui
 from core import cmd_exec_test
@@ -61,7 +60,7 @@ class CompletionTest(unittest.TestCase):
 
   def testShellFuncExecution(self):
     ex = cmd_exec_test.InitExecutor()
-    func_node = cmd_node.FunctionDefNode()
+    func_node = ast.FuncDef()
 
     # Set global COMPREPLY=(f1 f2)
     body_node = ast.Assignment(assign_scope_e.Global, 0)
