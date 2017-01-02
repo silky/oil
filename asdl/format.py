@@ -141,49 +141,47 @@ def MakeTree(obj, max_col=80):
   from asdl import py_meta
   if not isinstance(obj, py_meta.CompoundObj):
     #raise AssertionError(obj)
-    parts = [repr(obj)]
-    return parts
+    return repr(obj)
 
   # These lines can be possibly COMBINED all into one.  () can replace
   # indentation?
-  parts = [obj.__class__.__name__]
+  out_node = _Obj(obj.__class__.__name__)
+  fields = out_node.fields
 
-  for name in obj.FIELDS:
+  for field_name in obj.FIELDS:
     # Need a different data model.  Pairs?
-    parts.append('%s:' % name)
     #print(name)
     try:
-      field_val = getattr(obj, name)
+      field_val = getattr(obj, field_name)
     except AttributeError:
       #parts.append('%s=?' % name)
-      parts.append('?')
+      out_val = '?'
       continue
 
-    desc = obj.DESCRIPTOR_LOOKUP[name]
+    desc = obj.DESCRIPTOR_LOOKUP[field_name]
     if isinstance(desc, asdl.IntType):
       # TODO: How to check for overflow?
-      parts.append(str(field_val))
+      out_val = str(field_val)
 
     elif isinstance(desc, asdl.Sum) and asdl.is_simple(desc):
       # HACK for now to reflect that Id is an integer.
       if isinstance(field_val, int):
-        parts.append(str(field_val))
+        out_val = str(field_val)
       else:
-        parts.append(field_val.name)
+        out_val = field_val.name
 
     elif isinstance(desc, asdl.StrType):
-      parts.append(field_val)
+      out_val = field_val
 
     elif isinstance(desc, asdl.ArrayType):
       # Hm does an array need the field name?  I can have multiple arrays like
       # redirects, more_env, and words.  Is there a way to make "words"
       # special?
+      out_val = []
       obj_list = field_val
-      #parts.append('[')  # TODO: How to indicate list?
       for child_obj in obj_list:
         t = MakeTree(child_obj, max_col)
-        parts.append(t)
-      #parts.append(']')
+        out_val.append(t)
 
     elif isinstance(desc, asdl.MaybeType):
       # Because it's optional, print the name.  Same with bool?
@@ -194,15 +192,11 @@ def MakeTree(obj, max_col=80):
 
       # Children can't be written directly to 'out'.  We have to know if they
       # will fit first.
-      t = MakeTree(field_val, max_col=max_col-INDENT)
-      parts.append(t)
+      out_val = MakeTree(field_val, max_col=max_col-INDENT)
 
-  # Try printing on a single line
-  f = io.StringIO()
-  if TrySingleLine(parts, f, max_col=max_col):
-    return f.getvalue()  # a single string
+    out_node.fields.append((field_name, out_val))
 
-  return parts
+  return out_node
 
 
 def PrintTree(node, f, indent=0, max_col=80):
@@ -210,24 +204,52 @@ def PrintTree(node, f, indent=0, max_col=80):
     node: homogeneous tree node
     f: output file. TODO: Should take ColorOutput?
   """
+  # Try printing on a single line
+  #single_f = io.StringIO()
+  #if TrySingleLine(node, single_f, max_col=max_col):
+  #  f.write(single_f.getvalue())
+  #  return
+
   ind = ' ' * indent
   if isinstance(node, str):
-    print(ind + node, file=f)
+    f.write(ind + node)
+
+  elif isinstance(node, _Obj):
+    f.write(ind + '(')
+    f.write(node.node_type)
+    f.write('\n')
+    i = 0
+    for name, val in node.fields:
+      ind1 = ' ' * (indent+INDENT)
+      if isinstance(val, list):
+        f.write('%s%s: [\n' % (ind1, name))
+        for child in val:
+          PrintTree(child, f, indent=indent+INDENT+INDENT)
+          f.write('\n')
+        f.write('%s]' % ind1)
+      else:
+        f.write('%s%s:\n' % (ind1, name))
+        PrintTree(val, f, indent=indent+INDENT+INDENT)
+        i += 1
+      f.write('\n')  # separate fields
+
+    f.write(ind + ')')
+
   elif isinstance(node, list):
     # Assume the first entry is always a string.
     # We could also insert patterns here... e.g. if it is a word, then use {},
     # and WordPart, use [], without any qualifier?
     # But I will have StaticWord/DynamicWord/UnsafeWord.
 
-    print(ind + '(' + node[0], file=f)
-    for child in node[1:]:
+    print(ind + '[', file=f)
+    for child in node:
       PrintTree(child, f, indent=indent+INDENT)
-    print(ind + ')', file=f)
+    print(ind + ']', file=f)
   else:
     raise AssertionError(node)
 
 
-def TrySingleLine(parts, f, indent=0, max_col=80):
+def TrySingleLine(node, f, indent=0, max_col=80):
   """Try printing on a single line.
 
   Args:
@@ -241,30 +263,27 @@ def TrySingleLine(parts, f, indent=0, max_col=80):
       If False, you can't use the value of f.
   """
   ind = ' ' * indent
-  f.write('(')
-  n = len(parts)
-  for i, p in enumerate(parts):
-    if isinstance(p, str):
-      f.write(p)
-    elif isinstance(p, list):
-      # Assume the first entry is always a string
-      f.write(ind + p[0])
-      tail = p[1:]
-      if tail:
-        if not TrySingleLine(tail, f):
-          return False
-    else:
-      raise AssertionError(p)
-    if i != n - 1:
-      f.write(' ')
+  if isinstance(node, str):
+    f.write(node)
 
-    # For efficient, try to make an early exit at every loop iteration.
-    num_chars_so_far = len(f.getvalue()) 
-    if num_chars_so_far > max_col:
-      #raise AssertionError
-      return False
+  elif isinstance(node, _Obj):
+    f.write('(')
+    f.write(node.node_type)
+    for name, val in node.fields:
+      f.write('%s:' % name)
+      if not TrySingleLine(val, f):
+        return False
 
-  f.write(')')
+    f.write(')')
+
+  elif isinstance(node, list):
+    f.write('[')
+    for item in node:
+      if not TrySingleLine(item, f):
+        return False
+    f.write(']')
+  else:
+    raise AssertionError(p)
 
   # Take into account the last char.
   num_chars_so_far = len(f.getvalue()) 
@@ -272,4 +291,3 @@ def TrySingleLine(parts, f, indent=0, max_col=80):
     return False
 
   return True
-
