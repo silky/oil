@@ -53,46 +53,6 @@ class CNode(_Node):
       f.write('>\n')
 
 
-def _UnfilledHereDocs(redirects):
-  return [
-      r for r in redirects
-      if r.op_id in (Id.Redir_DLess, Id.Redir_DLessDash) and not r.was_filled
-  ]
-
-
-def GetHereDocsToFill(node):
-  """For CommandParser to fill here docs"""
-  # Has to be a POST ORDER TRAVERSAL of here docs, e.g.
-  #
-  # while read line; do cat <<EOF1; done <<EOF2
-  # body
-  # EOF1
-  # while
-  # EOF2
-
-  # These have no redirects at all.
-  if node.tag in (command_e.NoOp, command_e.Assignment):
-    return []
-
-  # These have redirectsb ut not children.
-  if node.tag in (
-      command_e.SimpleCommand, command_e.DParen, command_e.DBracket):
-    return _UnfilledHereDocs(node.redirects)
-
-  # Everything else has chidlren.
-  # TODO: This must dispatch on the individual heterogeneous children.  Some
-  # nodes don't have redirects.
-  here_docs = []
-  for child in node.children:
-    here_docs.extend(GetHereDocsToFill(child))
-
-  # && || and | don't have their own redirects, but have children that may.
-  if node.tag not in (command_e.AndOr, command_e.Pipeline):
-    here_docs.extend(_UnfilledHereDocs(node.redirects))  # parent
-
-  return here_docs
-
-
 class SimpleCommandNode(CNode):
   def __init__(self):
     CNode.__init__(self, Id.Node_Command)

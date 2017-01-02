@@ -10,7 +10,6 @@ cmd_parse.py - Parse high level shell commands.
 """
 
 from core import base
-from core import cmd_node
 from core import word
 from core.id_kind import Id, Kind, REDIR_DEFAULT_FD
 from core.tokens import Token
@@ -21,6 +20,47 @@ from osh.bool_parse import BoolParser
 
 assign_scope_e = ast.assign_scope
 assign_flags_e = ast.assign_flags
+command_e = ast.command_e
+
+
+def _UnfilledHereDocs(redirects):
+  return [
+      r for r in redirects
+      if r.op_id in (Id.Redir_DLess, Id.Redir_DLessDash) and not r.was_filled
+  ]
+
+
+def _GetHereDocsToFill(node):
+  """For CommandParser to fill here docs"""
+  # Has to be a POST ORDER TRAVERSAL of here docs, e.g.
+  #
+  # while read line; do cat <<EOF1; done <<EOF2
+  # body
+  # EOF1
+  # while
+  # EOF2
+
+  # These have no redirects at all.
+  if node.tag in (command_e.NoOp, command_e.Assignment):
+    return []
+
+  # These have redirectsb ut not children.
+  if node.tag in (
+      command_e.SimpleCommand, command_e.DParen, command_e.DBracket):
+    return _UnfilledHereDocs(node.redirects)
+
+  # Everything else has chidlren.
+  # TODO: This must dispatch on the individual heterogeneous children.  Some
+  # nodes don't have redirects.
+  here_docs = []
+  for child in node.children:
+    here_docs.extend(_GetHereDocsToFill(child))
+
+  # && || and | don't have their own redirects, but have children that may.
+  if node.tag not in (command_e.AndOr, command_e.Pipeline):
+    here_docs.extend(_UnfilledHereDocs(node.redirects))  # parent
+
+  return here_docs
 
 
 class CommandParser(object):
@@ -192,7 +232,7 @@ class CommandParser(object):
     return new_words
 
   def _MaybeReadHereDocs(self, node):
-    here_docs = cmd_node.GetHereDocsToFill(node)
+    here_docs = _GetHereDocsToFill(node)
     #print('')
     #print('--> FILLING', here_docs)
     #print('')
