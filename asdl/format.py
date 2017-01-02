@@ -94,10 +94,11 @@ class _Obj:
     self.fields = []  # list of 2-tuples
 
 
-def MakeTree(obj):
+def MakeTree(obj, omit_empty=True):
   """
   Args:
     obj: py_meta.Obj
+    omit_empty: Whether to omit empty lists
   Returns:
     A tree of strings and lists.
 
@@ -133,8 +134,6 @@ def MakeTree(obj):
       ()
     ]
   )
-
-
   """
   # HACK to incorporate old AST nodes.  Remove when the whole thing is
   # converted.
@@ -149,6 +148,8 @@ def MakeTree(obj):
   fields = out_node.fields
 
   for field_name in obj.FIELDS:
+    show_field = True
+
     # Need a different data model.  Pairs?
     #print(name)
     try:
@@ -183,6 +184,9 @@ def MakeTree(obj):
         t = MakeTree(child_obj)
         out_val.append(t)
 
+      if omit_empty and not obj_list:
+        show_field = False
+
     elif isinstance(desc, asdl.MaybeType):
       # Because it's optional, print the name.  Same with bool?
       pass
@@ -194,12 +198,13 @@ def MakeTree(obj):
       # will fit first.
       out_val = MakeTree(field_val)
 
-    out_node.fields.append((field_name, out_val))
+    if show_field:
+      out_node.fields.append((field_name, out_val))
 
   return out_node
 
 
-def PrintTree(node, f, indent=0, max_col=80):
+def PrintTree(node, f, indent=0, max_col=100):
   """
     node: homogeneous tree node
     f: output file. TODO: Should take ColorOutput?
