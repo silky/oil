@@ -69,15 +69,13 @@ def GetHereDocsToFill(node):
   # EOF1
   # while
   # EOF2
-  #if isinstance(node, ast.DBracket):
-  #  return []
+
+  # Default, for assignment node, etc.
+  if node.tag in (command_e.Assignment, command_e.NoOp):
+    return []
 
   if node.tag == command_e.SimpleCommand:
     return _GetHereDocsToFill(node.redirects)
-
-  # Default, for assignment node, etc.
-  if node.tag == command_e.Assignment:
-    return []
 
   # Everything else has redirects.
   # TODO: This must dispatch on the individual heterogeneous children.
