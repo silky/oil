@@ -600,7 +600,7 @@ class CommandParser(object):
       self._Next()
     return words
 
-  def _ParseExpressionForLoop(self):
+  def _ParseForExprLoop(self):
     """
     for (( init; cond; update )) for_sep? do_group
     """
@@ -632,8 +632,9 @@ class CommandParser(object):
     node.children.append(body_node)
     return node
 
-  def _ParseCommandForLoop(self):
+  def _ParseForEachLoop(self):
     node = ast.ForEach()
+    node.do_arg_iter = False
 
     ok, value, quoted = word.StaticEval(self.cur_word)
     if not ok or quoted:
@@ -683,9 +684,9 @@ class CommandParser(object):
 
     if not self._Peek(): return None
     if self.c_id == Id.Op_DLeftParen:
-      return self._ParseExpressionForLoop()
+      return self._ParseForExprLoop()
     else:
-      return self._ParseCommandForLoop()
+      return self._ParseForEachLoop()
 
   def ParseWhile(self):
     """
