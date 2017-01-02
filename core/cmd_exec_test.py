@@ -19,7 +19,6 @@ from core.id_kind import Id
 from core import ui
 from core import word_eval
 from core.value import Value
-from core.cmd_node import SimpleCommandNode
 from core.lexer import Token
 
 from osh import ast
@@ -109,19 +108,19 @@ class ExecutorTest(unittest.TestCase):
     # Simulating subshell for each command
     w1 = ast.CompoundWord()
     w1.parts.append(ast.LiteralPart(Token(Id.Lit_Chars, 'ls')))
-    node1 = SimpleCommandNode()
+    node1 = ast.SimpleCommand()
     node1.words = [w1]
 
     w2 = ast.CompoundWord()
     w2.parts.append(ast.LiteralPart(Token(Id.Lit_Chars, 'head')))
-    node2 = SimpleCommandNode()
+    node2 = ast.SimpleCommand()
     node2.words = [w2]
 
     w3 = ast.CompoundWord()
     w3.parts.append(ast.LiteralPart(Token(Id.Lit_Chars, 'sort')))
     w4 = ast.CompoundWord()
     w4.parts.append(ast.LiteralPart(Token(Id.Lit_Chars, '--reverse')))
-    node3 = SimpleCommandNode()
+    node3 = ast.SimpleCommand()
     node3.words = [w3, w4]
 
     p = Pipeline()

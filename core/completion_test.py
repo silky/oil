@@ -64,7 +64,7 @@ class CompletionTest(unittest.TestCase):
     func_node = cmd_node.FunctionDefNode()
 
     # Set global COMPREPLY=(f1 f2)
-    body_node = cmd_node.AssignmentNode(assign_scope_e.Global, 0)
+    body_node = ast.Assignment(assign_scope_e.Global, 0)
 
     c1 = ast.CompoundWord()
     t1 = lexer.Token(Id.Lit_Chars, 'f1')

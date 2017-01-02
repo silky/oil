@@ -13,8 +13,7 @@ from core import base
 from core import cmd_node
 from core import word
 from core.cmd_node import (
-    SimpleCommandNode, NoOpNode, AssignmentNode, DBracketNode, DParenNode,
-    ListNode, SubshellNode, ForkNode, PipelineNode, AndOrNode, ForNode,
+    DBracketNode, DParenNode, SubshellNode, ForkNode, ForNode,
     ForExpressionNode, WhileNode, UntilNode, FunctionDefNode, IfNode, CaseNode)
 from core.id_kind import Id, Kind, REDIR_DEFAULT_FD
 from core.tokens import Token
@@ -407,10 +406,10 @@ class CommandParser(object):
     # of the initial word.
     words3 = self._TildeDetectAll(words2)
 
-    node = SimpleCommandNode()
-    node.more_env = prefix_bindings
+    node = ast.SimpleCommand()
     node.words = words3
     node.redirects = redirects
+    node.more_env = prefix_bindings
     return node
 
   def _MakeAssignment(self, assign_scope, assign_flags, suffix_words):
@@ -431,10 +430,9 @@ class CommandParser(object):
       else:
         var_words.append(w)
 
-    node = AssignmentNode(assign_scope, assign_flags)
+    node = ast.Assignment(
+        assign_scope, assign_flags, var_words, bindings)
 
-    node.bindings = bindings
-    node.words = var_words
     return node
 
   def ParseSimpleCommand(self):
@@ -511,7 +509,7 @@ class CommandParser(object):
     redirects, words = result
 
     if not words:  # e.g.  >out.txt  # redirect without words
-      node = SimpleCommandNode()
+      node = ast.SimpleCommand()
       node.redirects = redirects
       return node
 
@@ -523,7 +521,7 @@ class CommandParser(object):
         print('WARNING: Got redirects in assignment: %s', redirects)
       assign_flags = 0
       assign_scope = assign_scope_e.Global
-      node = AssignmentNode(assign_scope, assign_flags)
+      node = ast.Assignment(assign_scope, assign_flags)
       node.bindings = prefix_bindings
       return node
 
@@ -750,7 +748,7 @@ class CommandParser(object):
       if not node:
         return None
     else:
-      node = NoOpNode()  # TODO: rename to noop node?
+      node = ast.NoOp()
 
     if not self._Peek(): return None
     if self.c_id == Id.KW_Esac:
@@ -841,7 +839,7 @@ class CommandParser(object):
 
     if self.c_id == Id.KW_Else:
       self._Next()
-      dummy_cond = NoOpNode()
+      dummy_cond = ast.NoOp()
       children.append(dummy_cond)
       body = self.ParseCommandList()
       if not body:
@@ -1125,7 +1123,7 @@ class CommandParser(object):
     if not self._Peek(): return None
     if self.c_id not in (Id.Op_Pipe, Id.Op_PipeAmp):
       if negated:
-        node = PipelineNode(children, negated)
+        node = ast.Pipeline(children, negated)
         return node
       else:
         return child
@@ -1166,7 +1164,7 @@ class CommandParser(object):
       for child in children:
         self._MaybeReadHereDocs(child)
 
-    node = PipelineNode(children, negated)
+    node = ast.Pipeline(children, negated)
     node.stderr_indices = stderr_indices
     return node
 
@@ -1197,8 +1195,9 @@ class CommandParser(object):
     right = self.ParseAndOr()
     if not right: return None
 
-    node = AndOrNode(op)
+    node = ast.AndOr()
     node.children = [left, right]
+    node.ops = [op]
     return node
 
   def ParseCommandLine(self):
@@ -1264,8 +1263,7 @@ class CommandParser(object):
     if len(children) == 1:
       return children[0]
     else:
-      node = ListNode()
-      node.children = children
+      node = ast.Block(children)
       return node
 
   def ParseCommandTerm(self):
@@ -1358,8 +1356,7 @@ class CommandParser(object):
     if len(children) == 1:
       return children[0]
     else:
-      node = ListNode()
-      node.children = children
+      node = ast.Block(children)
       return node
 
   def ParseCommandList(self):
@@ -1390,7 +1387,7 @@ class CommandParser(object):
     #print('ParseFile', self.c_kind, self.cur_word)
     # An empty node to execute
     if self.c_kind == Kind.Eof:
-      return ListNode()
+      return ast.Block()
 
     node = self.ParseCommandTerm()
     if not node:

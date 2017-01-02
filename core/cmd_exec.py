@@ -77,6 +77,7 @@ from core.value import Value
 from osh import ast
 
 assign_scope_e = ast.assign_scope
+command_e = ast.command_e
 
 
 log = util.log
@@ -653,7 +654,7 @@ class Executor(object):
 
     # TODO: Only eval argv[0] once.  It can have side effects!
 
-    elif node.id == Id.Node_Command:
+    elif node.tag == command_e.SimpleCommand:
       argv = self.ev.EvalWords(node.words)
       if argv is None:
         err = self.ev.Error()
@@ -696,7 +697,7 @@ class Executor(object):
         else:
           self.fd_state.ForgetAll()
 
-    elif node.id == Id.Op_Pipe:
+    elif node.tag == command_e.Pipeline:
       status, cflow = self._RunPipeline(node)
 
     elif node.id == Id.Node_Subshell:

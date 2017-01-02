@@ -190,6 +190,10 @@ class CompoundObj(Obj):
     fmt.PrintTree(tree, f)
     return f.getvalue()
 
+  # For backward compatibility.  TODO: Get rid of this.
+  def DebugString(self):
+    return self.__repr__()
+
 
 def _MakeFieldDescriptors(module, fields):
   desc_lookup = {}

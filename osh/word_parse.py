@@ -15,7 +15,6 @@ from core.id_kind import Id, Kind, IdName
 from core.tokens import Token
 from core import word
 from core import tdop
-from core.cmd_node import ForExpressionNode
 
 from osh import arith_parse
 from osh.lex import LexMode
@@ -846,7 +845,7 @@ class WordParser(object):
       return None
     self._Next(LexMode.OUTER)
 
-    return ForExpressionNode(init_node, cond_node, update_node)
+    return ast.ForExpr(init_node, cond_node, update_node)
 
   def _ReadArrayLiteralPart(self):
     array_part = ast.ArrayLiteralPart()
