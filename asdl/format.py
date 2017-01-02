@@ -204,13 +204,15 @@ def PrintTree(node, f, indent=0, max_col=80):
     node: homogeneous tree node
     f: output file. TODO: Should take ColorOutput?
   """
-  # Try printing on a single line
-  #single_f = io.StringIO()
-  #if TrySingleLine(node, single_f, max_col=max_col):
-  #  f.write(single_f.getvalue())
-  #  return
-
   ind = ' ' * indent
+
+  # Try printing on a single line
+  single_f = io.StringIO()
+  single_f.write(ind)
+  if TrySingleLine(node, single_f, max_col=max_col-indent):
+    f.write(single_f.getvalue())
+    return
+
   if isinstance(node, str):
     f.write(ind + node)
 
@@ -260,10 +262,18 @@ def TrySingleLine(node, f, max_col=80):
   elif isinstance(node, _Obj):
     f.write('(')
     f.write(node.node_type)
+    n = len(node.fields)
+    i = 0
     for name, val in node.fields:
+      #if i != n-1:
+      #  f.write(' ')  # space to separate
+      f.write(' ')  # space to separate
+
       f.write('%s:' % name)
       if not TrySingleLine(val, f):
         return False
+
+      i += 1
 
     f.write(')')
 
