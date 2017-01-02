@@ -63,15 +63,6 @@ class AnsiOutput(ColorOutput):
     ColorOutput.__init__(self, f)
 
 
-def PrintArray(obj_list, lines, max_col=80, indent=0):
-  """
-  Args:
-    obj_list: py_meta.Obj
-  """
-  for obj in reversed(obj_list):
-    PrintObj(obj, lines, max_col, indent)
-
-
 INDENT = 2
 
 def MakeTree(obj, max_col=80, depth=0):
@@ -101,6 +92,11 @@ def MakeTree(obj, max_col=80, depth=0):
       Const 1
       Const 2
     Const 3
+
+  Algorithm:
+  - Create a parts list, like ['ArithUnary', '1', '2']
+  - If any of the children are lists themselves...
+
   """
   # HACK to incorporate old AST nodes.  Remove when the whole thing is
   # converted.
@@ -114,7 +110,6 @@ def MakeTree(obj, max_col=80, depth=0):
   # indentation?
   parts = [obj.__class__.__name__]
 
-  # Reverse order since we are appending to lines and then reversing.
   for name in obj.FIELDS:
     #print(name)
     try:
@@ -142,13 +137,12 @@ def MakeTree(obj, max_col=80, depth=0):
       # Hm does an array need the field name?  I can have multiple arrays like
       # redirects, more_env, and words.  Is there a way to make "words"
       # special?
-      #child_parts = []
-      #PrintArray(field_val, child_parts, max_col=max_col-INDENT,
-      #    indent=indent+INDENT)
       obj_list = field_val
-      for child_obj in reversed(obj_list):
+      #parts.append('[')  # TODO: How to indicate list?
+      for child_obj in obj_list:
         t = MakeTree(child_obj, max_col, depth)
         parts.append(t)
+      #parts.append(']')
 
     elif isinstance(desc, asdl.MaybeType):
       # Because it's optional, print the name.  Same with bool?
@@ -175,14 +169,30 @@ def MakeTree(obj, max_col=80, depth=0):
   # If any part is a tuple, then put everything on its own separate line.
 
   # TODO: This is to aggressive?
-  has_multiline = any(isinstance(p, list) for p in parts)
-  if has_multiline:
-    return parts
+  #has_multiline = any(isinstance(p, list) for p in parts)
+  #for p in parts:
+  #  if isinstance(p, list):
+  #    print('LIST', p)
+  #if has_multiline:
+  #  return parts
+
+  def RecursiveStringLength(pnode):
+    if isinstance(pnode, list):
+      total_len = 0
+      for child in pnode:
+        total_len += RecursiveStringLength(child)
+      return total_len
+    elif isinstance(pnode, str):
+      return len(pnode)
+    else:
+      raise AssertionError(node)
 
   # All strings
-  total_len = sum(len(p) for p in parts)
+  #total_len = sum(len(p) for p in parts)
+  total_len = RecursiveStringLength(parts)
   #print('TOTAL LEN', total_len)
-  if total_len < 200:  # Could use a better heuristic to account for ()
+
+  if total_len < 100:  # Could use a better heuristic to account for ()
     f = io.StringIO()
     PrintSingle(parts, f)
     #print('RETURNING', f.getvalue())
@@ -211,8 +221,9 @@ def PrintTree(node, f, indent=0):
 
 # TODO: Should take ColorOutput instead of a file?
 
-def PrintSingle(parts, f):
+def PrintSingle(parts, f, indent=0):
   """Print to a single line, used in MakeTree."""
+  ind = ' ' * indent
   f.write('(')
   n = len(parts)
   for i, p in enumerate(parts):
@@ -220,10 +231,10 @@ def PrintSingle(parts, f):
       f.write(p)
     elif isinstance(p, list):
       # Assume the first entry is always a string
-      f.write(ind + node[0])
-      PrintSingle(node[1:], f)
+      f.write(ind + p[0])
+      PrintSingle(p[1:], f)
     else:
-      raise AssertionError(node)
+      raise AssertionError(p)
     if i != n - 1:
       f.write(' ')
   f.write(')')
