@@ -71,9 +71,7 @@ def GetHereDocsToFill(node):
   # EOF2
 
   # These have no redirects at all.
-  if node.tag in (
-      command_e.NoOp, command_e.Assignment, command_e.Pipeline,
-      command_e.AndOr):
+  if node.tag in (command_e.NoOp, command_e.Assignment):
     return []
 
   # These have redirectsb ut not children.
@@ -87,7 +85,11 @@ def GetHereDocsToFill(node):
   here_docs = []
   for child in node.children:
     here_docs.extend(GetHereDocsToFill(child))
-  here_docs.extend(_GetHereDocsToFill(node.redirects))  # parent
+
+  # && || and | don't have their own redirects, but have children that may.
+  if node.tag not in (command_e.AndOr, command_e.Pipeline):
+    here_docs.extend(_GetHereDocsToFill(node.redirects))  # parent
+
   return here_docs
 
 

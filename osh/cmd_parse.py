@@ -279,6 +279,7 @@ class CommandParser(object):
     if self.c_id in (Id.Redir_DLess, Id.Redir_DLessDash):  # here
       node = ast.HereDoc()
       node.op_id = self.c_id
+      node.arg_word = None  # not read yet
       node.fd = fd
       self._Next()
 
