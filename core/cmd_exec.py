@@ -66,7 +66,6 @@ from core import word_eval
 from core import util
 
 from core.builtin import EBuiltin
-from core.cmd_node import ListNode
 from core.id_kind import Id, RedirType, REDIR_TYPE
 from core.process import (
     FdState, Pipeline, Process,

@@ -19,7 +19,6 @@ from osh import parse_lib
 from osh.word_parse import *
 from osh.cmd_parse import CommandParser
 
-from core.cmd_node import *
 from core import cmd_exec_test  # for InitExecutor.  TODO: testutil?
 from core import util
 
