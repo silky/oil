@@ -149,13 +149,13 @@ def MakeTree(obj, omit_empty=True):
 
   for field_name in obj.FIELDS:
     show_field = True
+    out_val = ''
 
     # Need a different data model.  Pairs?
     #print(name)
     try:
       field_val = getattr(obj, field_name)
     except AttributeError:
-      #parts.append('%s=?' % name)
       out_val = '?'
       continue
 
@@ -188,8 +188,10 @@ def MakeTree(obj, omit_empty=True):
         show_field = False
 
     elif isinstance(desc, asdl.MaybeType):
-      # Because it's optional, print the name.  Same with bool?
-      pass
+      if field_val is None:
+        show_field = False
+      else:
+        out_val = MakeTree(field_val)
 
     else:
       # Recursive call for child records.  Write children before parents.
