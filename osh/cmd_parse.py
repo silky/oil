@@ -44,21 +44,22 @@ def _GetHereDocsToFill(node):
   if node.tag in (command_e.NoOp, command_e.Assignment):
     return []
 
-  # These have redirectsb ut not children.
+  # These have redirects but not children.
   if node.tag in (
       command_e.SimpleCommand, command_e.DParen, command_e.DBracket):
     return _UnfilledHereDocs(node.redirects)
 
-  # Everything else has chidlren.
-  # TODO: This must dispatch on the individual heterogeneous children.  Some
-  # nodes don't have redirects.
+  # Everything else has children.
+  # NOTE: When we change to heterogeneous children, we need to do something
+  # smarter.
   here_docs = []
   for child in node.children:
     here_docs.extend(_GetHereDocsToFill(child))
 
   # && || and | don't have their own redirects, but have children that may.
   if node.tag not in (
-      command_e.AndOr, command_e.Pipeline, command_e.Fork, command_e.CommandList):
+      command_e.AndOr, command_e.Pipeline, command_e.Fork,
+      command_e.CommandList):
     here_docs.extend(_UnfilledHereDocs(node.redirects))  # parent
 
   return here_docs
@@ -601,10 +602,6 @@ class CommandParser(object):
     brace_group      : LBrace command_list RBrace ;
     """
     if not self._Eat(Id.Lit_LBrace): return None
-
-    # TODO: Fix bug.  we need a Group node, as opposed to generic Block.
-    # Because a brace group ca have REDIRECTS.
-    # { foo || bar } > out.txt
 
     node = self.ParseCommandList()
     if not node: return None
