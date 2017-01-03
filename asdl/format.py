@@ -272,11 +272,7 @@ def TrySingleLine(node, f, max_col=80):
     n = len(node.fields)
     i = 0
     for name, val in node.fields:
-      #if i != n-1:
-      #  f.write(' ')  # space to separate
-      f.write(' ')  # space to separate
-
-      f.write('%s:' % name)
+      f.write(' %s:' % name)
       if not TrySingleLine(val, f):
         return False
 
