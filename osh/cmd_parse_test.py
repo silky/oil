@@ -539,7 +539,7 @@ class CommandParserTest(unittest.TestCase):
 
     _, c_parser = InitCommandParser('ls foo|wc -l || die; ls /')
     node = c_parser.ParseCommandLine()
-    self.assertEqual(command_e.Block, node.tag)
+    self.assertEqual(command_e.CommandList, node.tag)
     self.assertEqual(2, len(node.children))  # two top level things
     print(node.DebugString())
 
@@ -548,14 +548,14 @@ class CommandParserTest(unittest.TestCase):
     self.assertEqual(2, len(node.words))
 
     node = assertParseCommandList(self, 'ls foo|wc -l || die; ls /')
-    self.assertEqual(command_e.Block, node.tag)
+    self.assertEqual(command_e.CommandList, node.tag)
     self.assertEqual(2, len(node.children))
 
     node = assertParseCommandList(self, """\
 ls foo | wc -l || echo fail ;
 echo bar | wc -c || echo f2
 """)
-    self.assertEqual(command_e.Block, node.tag)
+    self.assertEqual(command_e.CommandList, node.tag)
     self.assertEqual(2, len(node.children))
 
     # TODO: Check that we get (LIST (AND_OR (PIPELINE (COMMAND ...)))) here.
@@ -811,13 +811,18 @@ class NestedParensTest(unittest.TestCase):
     node = assertParseCommandLine(self,
         '(cd /; echo PWD 1); echo PWD 2')
     self.assertEqual(2, len(node.children))
-    self.assertEqual(command_e.Block, node.tag)
+    self.assertEqual(command_e.CommandList, node.tag)
 
   def testParseBraceGroup(self):
     node = assertParseCommandLine(self,
+        '{ cd /; echo PWD; }')
+    self.assertEqual(2, len(node.children))
+    self.assertEqual(command_e.BraceGroup, node.tag)
+
+    node = assertParseCommandLine(self,
         '{ cd /; echo PWD; }; echo PWD')
     self.assertEqual(2, len(node.children))
-    self.assertEqual(command_e.Block, node.tag)
+    self.assertEqual(command_e.CommandList, node.tag)
 
   def testUnquotedComSub(self):
     # CommandSubPart with two LiteralPart instances surrounding it
@@ -889,7 +894,7 @@ class NestedParensTest(unittest.TestCase):
   def testSubshellWithinComSub(self):
     node = assertParseCommandList(self,
         'echo one; echo $( (cd /; echo subshell_PWD); echo comsub_PWD); echo two')
-    self.assertEqual(command_e.Block, node.tag)
+    self.assertEqual(command_e.CommandList, node.tag)
     self.assertEqual(3, len(node.children))   # 3 echo statements
 
     # TODO: Need a way to test the literal value of a word
@@ -913,7 +918,7 @@ case bar in two) echo comsub2;; esac
     # Comsub within case within comsub
     node = assertParseCommandList(self,
         'echo one; echo $( case one in $(echo one)) echo $(comsub);; esac ); echo two')
-    self.assertEqual(command_e.Block, node.tag)
+    self.assertEqual(command_e.CommandList, node.tag)
     # Top level should have 3 echo statements
     self.assertEqual(3, len(node.children))
 
@@ -1087,7 +1092,7 @@ if true; then
   fi fi
 echo hi
 """)
-    self.assertEqual(command_e.Block, node.tag)
+    self.assertEqual(command_e.CommandList, node.tag)
 
   def testBackticks(self):
     #return

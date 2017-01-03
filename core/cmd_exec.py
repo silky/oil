@@ -634,7 +634,7 @@ class Executor(object):
     # No redirects
     if node.tag in (
         command_e.NoOp, command_e.Assignment, command_e.Pipeline,
-        command_e.AndOr, command_e.Fork):
+        command_e.AndOr, command_e.Fork, command_e.CommandList):
       redirects = []
     else:
       redirects = self._EvalRedirects(node.redirects)
@@ -741,7 +741,7 @@ class Executor(object):
       # TODO: This should be eval of RHS, unlike bash!
       status = 0
 
-    elif node.tag == command_e.Block:
+    elif node.tag == command_e.CommandList:
       status = 0  # for empty list
       for child in node.children:
         status, cflow = self.Execute(child)  # last status wins

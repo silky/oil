@@ -158,7 +158,10 @@ module osh
   | Pipeline(command* children, int negated, int* stderr_indices)
   -- | AndOr(command* children, and_or* ops)
   | AndOr(command* children, int op_id)
-  | Block(command* children, redir* redirects)
+  -- A command list is used for for/if/while conditions and bodies.  No redirects.
+  | CommandList(command* children)
+  -- A compound command, with redirects
+  | BraceGroup(command* children, redir* redirects)
   | Subshell(command* children, redir* redirects)
   | DParen(arith_expr child, redir* redirects)
   | DBracket(bool_expr expr, redir* redirects)

@@ -472,7 +472,7 @@ def _GetCompletionType(w_parser, c_parser, ev, status_lines):
       print(argv)
       com_node = node
 
-    elif node.tag == command_e.Block:  # echo a; echo b
+    elif node.tag == command_e.CommandList:  # echo a; echo b
       com_node = _FindLastSimpleCommand(node)
     elif node.tag == command_e.AndOr:  # echo a && echo b
       com_node = _FindLastSimpleCommand(node)

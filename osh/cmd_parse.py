@@ -57,7 +57,8 @@ def _GetHereDocsToFill(node):
     here_docs.extend(_GetHereDocsToFill(child))
 
   # && || and | don't have their own redirects, but have children that may.
-  if node.tag not in (command_e.AndOr, command_e.Pipeline, command_e.Fork):
+  if node.tag not in (
+      command_e.AndOr, command_e.Pipeline, command_e.Fork, command_e.CommandList):
     here_docs.extend(_UnfilledHereDocs(node.redirects))  # parent
 
   return here_docs
@@ -609,7 +610,12 @@ class CommandParser(object):
     if not node: return None
 
     if not self._Eat(Id.Lit_RBrace): return None
-    return node
+
+    # CommandList has no redirects; BraceGroup may have redirects.
+    if node.tag == command_e.CommandList:
+      return ast.BraceGroup(node.children)
+    else:
+      return node
 
   def ParseDoGroup(self):
     """
@@ -1301,7 +1307,7 @@ class CommandParser(object):
     if len(children) == 1:
       return children[0]
     else:
-      node = ast.Block(children)
+      node = ast.CommandList(children)
       return node
 
   def ParseCommandTerm(self):
@@ -1394,7 +1400,7 @@ class CommandParser(object):
     if len(children) == 1:
       return children[0]
     else:
-      node = ast.Block(children)
+      node = ast.CommandList(children)
       return node
 
   def ParseCommandList(self):
