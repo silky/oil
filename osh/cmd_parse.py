@@ -615,7 +615,7 @@ class CommandParser(object):
     if node.tag == command_e.CommandList:
       return ast.BraceGroup(node.children)
     else:
-      return node
+      return ast.BraceGroup([node])
 
   def ParseDoGroup(self):
     """
