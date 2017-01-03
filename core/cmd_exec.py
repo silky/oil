@@ -633,8 +633,8 @@ class Executor(object):
     """
     # No redirects
     if node.tag in (
-        command_e.Assignment, command_e.Pipeline, command_e.AndOr,
-        command_e.Fork):
+        command_e.NoOp, command_e.Assignment, command_e.Pipeline,
+        command_e.AndOr, command_e.Fork):
       redirects = []
     else:
       redirects = self._EvalRedirects(node.redirects)
@@ -816,7 +816,7 @@ class Executor(object):
           break
         i += 2
 
-    elif node.tag == command_eNoOp:
+    elif node.tag == command_e.NoOp:
       status = 0  # make it true
 
     elif node.tag == command_e.Case:

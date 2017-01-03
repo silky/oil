@@ -1425,7 +1425,7 @@ class CommandParser(object):
     #print('ParseFile', self.c_kind, self.cur_word)
     # An empty node to execute
     if self.c_kind == Kind.Eof:
-      return ast.Block()
+      return ast.NoOp()
 
     node = self.ParseCommandTerm()
     if not node:

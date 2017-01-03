@@ -210,7 +210,7 @@ def OshMain(argv):
     if e.errno != errno.ENOENT:
       raise
 
-  if opts.command:
+  if opts.command is not None:
     pool.AddSourcePath('<-c arg>')
     line_reader = reader.StringLineReader(opts.command, pool=pool)
     interactive = False
