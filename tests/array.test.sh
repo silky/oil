@@ -224,6 +224,16 @@ a=(_tmp/*.Y)
 argv.py "${a[@]}"
 # stdout: ['_tmp/y.Y', '_tmp/yy.Y']
 
+### quoted glob within array does not expand
+a=("_tmp/*.Y")
+argv.py "${a[@]}"
+# stdout: ['_tmp/*.Y']
+
+### quoted glob and unquoted expansion
+a=("_tmp/*.Y")
+argv.py ${a[@]}
+# stdout: ['_tmp/y.Y', '_tmp/yy.Y']
+
 ### declare array and then append
 declare -a array
 array+=(a)
