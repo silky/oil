@@ -754,16 +754,18 @@ class _Evaluator(object):
       argv: list of string arguments, or None if there was an eval error
     """
     # Parse time:
-    # 1. brace expansion.  TODO: Do at parse time.
-    # 2. Tilde detection.  DONE at parse time.  Only if Id.Lit_Tilde is the
+    # 1. Tilde detection.  DONE at parse time.  Only if Id.Lit_Tilde is the
     # first WordPart.
     #
     # Run time:
+    # 2. brace expansion.  Could be done at parse time, but we're preserving
+    #    the LST?  Or maybe we should be doing BraceWord detection at parse
+    #    time?
     # 3. tilde sub, var sub, command sub, arith sub.  These are all
     # "concurrent" on WordParts.  (optional process sub with <() )
-    # 4. word splitting.  Can turn this off with a shell option?  Definitely
-    # off for oil.
-    # 5. globbing -- several exec_opts affect this: nullglob, safeglob, etc.
+    # 4. Word splitting and elision.  Can turn this off with a shell option?
+    # Definitely off for oil.
+    # 5. Globbing.
 
     argv = []
     ifs = _GetIfs(self.mem)
