@@ -11,7 +11,8 @@ except ImportError:
 # Pipeline sketch:
 #
 # data: CompoundWord ->
-#       BraceExpand(words, out) ->
+#       BraceExpand(words, out) uses words.LooksLikeBraceExpansion(w) ->
+
 # data: [CompoundWord] ->
 #       ev.EvalCompoundWord()  # does both substitution and splitting 
 #                              # should we separate these things?
@@ -19,6 +20,8 @@ except ImportError:
 #                              # get rid of IsSubst
 #       heterogeneous WordPart to homogeneous Value
 # data: WordValue!  -> 
+#   LooksLikeGlob(word_val) -- echo \? vs ? -- the first is NOT a glob.
+#    This is a WordPart like '?'
 #
 #   WordFramer(ifs).JoinSplitElide(out)
 #     Appends to the given array of WordValue
@@ -28,6 +31,12 @@ except ImportError:
 #       globber.Expand() ->
 #
 # data: argv array
+
+# Key point: none of these algorithms operate on strings?
+# - LooksLikeBraceExpansion, BraceExpand: operates on array of WordPart
+# - Split(): operates on array of PartValue?
+# - LooksLikeGlob(), GlobExpand(): operates on INDIVIDUAL PartValue ?
+#   - it has flags
 
 # Splitting happens before globbing:
 #
@@ -101,6 +110,56 @@ def _GlobUnescape(s):  # used by cmd_exec
 
 
 class Globber:
+  """Expand glob patterns into a list of filenames.
+
+  Issues:
+
+  1. Unicode encoding of file system.  On Unix, filenames are just bytes.  The
+    encoding is "out of line"
+
+    Have a global var that will set LOCALE environment variable and other libc
+    global options before glob?
+    @glob('*.py', encoding='foo')
+
+    Default is utf-8 or what?
+
+    set fs-encoding = 'f'
+    echo *.py
+    set fs-encoding = 'f'
+
+  2. Telling whether a word looks like a glob or not.
+
+    TODO: Only try to glob if there are any glob metacharacters.
+    Or maybe it is a conservative "avoid glob" heuristic?
+   
+    Non-glob but with glob characters:
+    echo ][
+    echo []  # empty
+    echo []LICENSE  # empty
+    echo [L]ICENSE  # this one is good
+    So yeah you need to test the validity somehow.
+   
+    PROBLEM: nullglob forces us to know exactly what's a glob and what's
+    not?  Same with faillglob;
+    Write a test for nullglob!  It will tell you what is not
+   
+    Other shells don't need this code -- you can't tell from the outside
+    whether they call glob() or not!
+   
+    No other shells have it, but I want it in oil.  How does bash do the
+    detection?
+
+    ANSWER: INTERNAL_GLOB_PATTERN_P in lib/glob/globloop.c
+    Tests for ? * a single instance of [], and any instance of 
+    +( @( or !(.  And skips over \x
+    I don't need to do that because I tokenized.  OK this is good: the
+    algorithm is pretty easy.
+   
+    compiled to internal_glob_pattern_p
+    and internal_glob_wpattern_p
+    glob_pattern_p
+    there is also an unquoted_glob_pattern_p, extglob_pattern_p,
+  """
   def __init__(self, exec_opts):
     # TODO: separate into set_opts.glob_opts, and sh_opts.glob_opts?  Only if
     # other shels use the same options as bash though.
@@ -122,16 +181,6 @@ class Globber:
   def Expand(self, argv):
     result = []
     for arg in argv:
-      # TODO: Only try to glob if there are any glob metacharacters.
-      # Or maybe it is a conservative "avoid glob" heuristic?
-      #
-      # Non-glob but with glob characters:
-      # echo ][
-      # echo []  # empty
-      # echo []LICENSE  # empty
-      # echo [L]ICENSE  # this one is good
-      # So yeah you need to test the validity somehow.
-
       try:
         #g = glob.glob(arg)  # Bad Python glob
         # PROBLEM: / is significant and can't be escaped!  Hav eto avoid globbing it.
