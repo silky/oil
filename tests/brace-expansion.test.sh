@@ -16,12 +16,12 @@ echo {a,b}_{c,d}
 echo {'a',b}_{c,"d"}
 # stdout: a_c a_d b_c b_d
 
-### expansion with variable
+### expansion with simple var
 a=A
 echo -{$a,b}-
 # stdout: -A- -b-
 
-### double expansion with variable -- bash bug
+### double expansion with simple var -- bash bug
 # bash is inconsistent with the above
 a=A
 echo {$a,b}_{c,d}
@@ -34,11 +34,26 @@ a=A
 echo {${a},b}_{c,d}
 # stdout: A_c A_d b_c b_d
 
-### double expansion with literal and variable
+### double expansion with literal and simple var
 a=A
 echo {_$a,b}_{c,d}
 # stdout: _A_c _A_d b_c b_d
 # BUG bash stdout: _ _ b_c b_d
+
+### expansion with command sub
+a=A
+echo -{$(echo a),b}-
+# stdout: -a- -b-
+
+### expansion with arith sub
+a=A
+echo -{$((1 + 2)),b}-
+# stdout: -3- -b-
+
+### double expansion with escaped literals
+a=A
+echo -{\$,\[,\]}-
+# stdout: -$- -[- -]-
 
 ### { in expansion
 # bash and mksh treat this differently.  bash treats the
