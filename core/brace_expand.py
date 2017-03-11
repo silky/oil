@@ -46,18 +46,50 @@ def BraceDetect(w):
     Just like ArrayLiteralPart.
 
 
-  Write a grammar for it?  Does it need a stack?  O
+  Grammar:
 
-  # an alternative is a literal, possibly empty, or another brace_expr
-  alt = lit* | brace_expr
+    # an alternative is a literal, possibly empty, or another brace_expr
 
-  # a brace_expr is group of at least 2 braced and comma-separated
-  # alternatives, with optional prefix and suffix.
-  brace_expr = lit* '{' alt ',' alt (',' alt)* '}' lit*
+    part = <any part except LiteralPart>
+
+    alt = part* | brace_expr
+
+    # a brace_expr is group of at least 2 braced and comma-separated
+    # alternatives, with optional prefix and suffix.
+    brace_expr = part* '{' alt ',' alt (',' alt)* '}' part*
 
   Problem this grammar: it's not LL(1) 
+
+  Is it indirect left-recursive?
+
   What's the best way to handle it?  LR(1) parser?
 
+  Doesn't submit to Pratt parsing because it's not
+
+  Try ANTLR or what?  Does this have indirect left recursion?
+
+  Maybe do lookahead?  You can use recursive descent if you are OK with a lot
+  of lookahead.  quadratic algorithm?
+
+  Not good for PEG: left recursion
+
+  TODO:
+  - Try yacc?
+  - or ply?  just use strings like ab{ab,cd,e}de
+
+  Iterative algorithm:
+
+  Parse it with a stack?
+    It's a stack that asserts there is at least one , in between {}
+
+  Yeah just go through and when you see {, push another list.
+  When you get ,  append to list
+  When you get } and at least one ',', appendt o list
+  When you get } without, then pop
+
+  If there is no matching }, then abort with error
+
+  if not balanced, return error too?
   """
   for i, part in enumerate(w.parts):
     if part.tag == word_part_e.LiteralPart:

@@ -4,7 +4,19 @@
 echo {foo}
 # stdout: {foo}
 
-### expansion
+### incomplete trailing expansion
+echo {a,b}_{
+# stdout: a_{ b_{
+
+### partial leading expansion
+echo }_{a,b}
+# stdout: }_a }_b
+
+### partial leading expansion 2
+echo {x}_{a,b}
+# stdout: {x}_a {x}_b
+
+### single expansion
 echo {foo,bar}
 # stdout: foo bar
 
