@@ -81,7 +81,7 @@ echo -{\$,\[,\]}-
 # required.
 echo {{a,b}
 # stdout: {{a,b}
-# BUG bash stdout: {a {b
+# BUG bash/zsh stdout: {a {b
 
 ### quoted { in expansion
 echo \{{a,b}
@@ -92,6 +92,9 @@ echo \{{a,b}
 # there is another } as the postfix.
 echo {a,b}}
 # stdout: a} b}
+# status 0
+# OK zsh stdout-json: ""
+# OK zsh status: 1
 
 ### Empty expansion
 echo a{X,,Y}b
@@ -105,6 +108,10 @@ echo -{A,={a,b}=,B}-
 echo -{A,={a,.{x,y}.,b}=,B}-
 # stdout: -A- -=a=- -=.x.=- -=.y.=- -=b=- -B-
 
+### nested and double brace expansion
+echo -{A,={a,b}{c,d}=,B}-
+# stdout: -A- -=ac=- -=ad=- -=bc=- -=bd=- -B-
+
 ### expansion on RHS of assignment
 # I think bash's behavior is more consistent.  No splitting either.
 v={X,Y}
@@ -115,6 +122,8 @@ echo $v
 ### no expansion with RHS assignment
 {v,x}=X
 # status: 127
+# stdout-json: ""
+# OK zsh status: 1
 
 ### Tilde expansion
 HOME=/home/foo
@@ -151,7 +160,65 @@ echo $foo
 # comes after tilde expansion, it is NOT tried again.
 # stdout-json: "/home/bob\n~\n"
 
-### Number expansion
+### Number range expansion
 echo -{1..8..3}-
 # stdout: -1- -4- -7-
 # N-I mksh stdout: -{1..8..3}-
+
+### Ascending number range expansion with negative step
+echo -{1..8..-3}-
+# stdout: -1- -4- -7-
+# OK zsh stdout: -7- -4- -1-
+# N-I mksh stdout: -{1..8..-3}-
+
+### Descending number range expansion
+echo -{8..1..3}-
+# stdout: -8- -5- -2-
+# N-I mksh stdout: -{8..1..3}-
+
+### Descending number range expansion with negative step
+echo -{8..1..-3}-
+# stdout: -8- -5- -2-
+# OK zsh stdout: -2- -5- -8-
+# N-I mksh stdout: -{8..1..-3}-
+
+### Char range expansion
+echo -{a..e}-
+# stdout: -a- -b- -c- -d- -e-
+# N-I mksh/zsh stdout: -{a..e}-
+
+### Char range expansion with step
+echo -{a..e..2}- -{a..e..-2}-
+# stdout: -a- -c- -e- -a- -c- -e-
+# N-I mksh/zsh stdout: -{a..e..2}- -{a..e..-2}-
+
+### Descending char range expansion
+echo -{e..a..2}- -{e..a..-2}-
+# stdout: -e- -c- -a- -e- -c- -a-
+# N-I mksh/zsh stdout: -{e..a..2}- -{e..a..-2}-
+
+### Fixed width number range expansion
+echo -{01..03}-
+# stdout: -01- -02- -03-
+# N-I mksh stdout: -{01..03}-
+
+### Inconsistent fixed width number range expansion
+# zsh uses the first one, bash uses the max width?
+echo -{01..003}-
+# stdout: -001- -002- -003-
+# OK zsh stdout: -01- -02- -03-
+# N-I mksh stdout: -{01..003}-
+
+### Inconsistent fixed width number range expansion
+# zsh uses the first width, bash uses the max width?
+echo -{01..3}-
+# stdout: -01- -02- -03-
+# N-I mksh stdout: -{01..3}-
+
+### Side effect in expansion
+# bash is the only one that does it first.  I guess since this is
+# non-POSIX anyway, follow bash?
+i=0
+echo {a,b,c}-$((i++))
+# stdout: a-0 b-1 c-2
+# OK mksh/zsh stdout: a-0 b-0 c-0
