@@ -12,6 +12,34 @@ echo {foo,bar}
 echo {a,b}_{c,d}
 # stdout: a_c a_d b_c b_d
 
+### double expansion with single and double quotes
+echo {'a',b}_{c,"d"}
+# stdout: a_c a_d b_c b_d
+
+### expansion with variable
+a=A
+echo -{$a,b}-
+# stdout: -A- -b-
+
+### double expansion with variable -- bash bug
+# bash is inconsistent with the above
+a=A
+echo {$a,b}_{c,d}
+# stdout: A_c A_d b_c b_d
+# BUG bash stdout: b_c b_d
+
+### double expansion with braced variable
+# This fixes it
+a=A
+echo {${a},b}_{c,d}
+# stdout: A_c A_d b_c b_d
+
+### double expansion with literal and variable
+a=A
+echo {_$a,b}_{c,d}
+# stdout: _A_c _A_d b_c b_d
+# BUG bash stdout: _ _ b_c b_d
+
 ### { in expansion
 # bash and mksh treat this differently.  bash treats the
 # first { is a prefix.  I think it's harder to read, and \{{a,b} should be
