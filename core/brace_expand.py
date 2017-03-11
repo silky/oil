@@ -44,12 +44,31 @@ def BraceDetect(w):
   And then mutate the parts list?  The invariant can be that the opening {
     always turns into a CartesianPart(word* word) list?
     Just like ArrayLiteralPart.
+
+
+  Write a grammar for it?  Does it need a stack?  O
+
+  # an alternative is a literal, possibly empty, or another brace_expr
+  alt = lit* | brace_expr
+
+  # a brace_expr is group of at least 2 braced and comma-separated
+  # alternatives, with optional prefix and suffix.
+  brace_expr = lit* '{' alt ',' alt (',' alt)* '}' lit*
+
+  Problem this grammar: it's not LL(1) 
+  What's the best way to handle it?  LR(1) parser?
+
   """
-  for part in w.parts:
+  for i, part in enumerate(w.parts):
     if part.tag == word_part_e.LiteralPart:
       id_ = part.token.id
       if id_ == Id.Lit_LBrace:
         print('{')
+        #alt_part, end_index = ParseAlternatives(i, w.parts)
+        #if alt_part:
+        #  w.parts[i] == alt_part
+          # clear until end_index?
+
       elif id_ == Id.Lit_RBrace:
         print('}')
       elif id_ == Id.Lit_Comma:
