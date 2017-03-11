@@ -126,3 +126,8 @@ echo $foo
 # In the second instance, we expand into a literal ~, and since var expansion
 # comes after tilde expansion, it is NOT tried again.
 # stdout-json: "/home/bob\n~\n"
+
+### Number expansion
+echo -{1..8..3}-
+# stdout: -1- -4- -7-
+# N-I mksh stdout: -{1..8..3}-
