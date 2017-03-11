@@ -5,7 +5,10 @@ brace_expand.py
 NOTE: bash implements in the braces.c file (835 lines).  It uses goto!  Gah.
 
 TODO: {1..7..3} as well.
-
+  Problem: '.' is a Lit_Chars character.  I think you can reshape it only if
+  there's a { and } ?
+  Actually you can probably use a regex: 
+  digit+ '..' digit+  ( '..' digit+ )?
 """
 
 import sys
@@ -19,6 +22,25 @@ def Cartesian(tuples):
     for x in tuples[0]:
       for y in Cartesian(tuples[1:]):
         yield (x,) + y  # join tuples
+
+
+def BraceDetect(parts):
+  """
+  Args:
+    list of WordPart
+
+  Returns:
+    CartesianWord
+
+  Another option:
+
+  Take CompoundWord
+
+  And then mutate the parts list?  The invariant can be that the opening {
+    always turns into a CartesianPart(word* word) list?
+    Just like ArrayLiteralPart.
+  """
+  pass
 
 
 def BraceExpand(parts):

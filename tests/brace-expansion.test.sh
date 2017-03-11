@@ -20,6 +20,10 @@ echo {0,1}{0,1}{0,1}
 echo {'a',b}_{c,"d"}
 # stdout: a_c a_d b_c b_d
 
+### expansion with mixed quotes
+echo -{\X"b",'cd'}-
+# stdout: -Xb- -cd-
+
 ### expansion with simple var
 a=A
 echo -{$a,b}-
