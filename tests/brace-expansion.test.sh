@@ -12,6 +12,10 @@ echo {foo,bar}
 echo {a,b}_{c,d}
 # stdout: a_c a_d b_c b_d
 
+### triple expansion
+echo {0,1}{0,1}{0,1}
+# stdout: 000 001 010 011 100 101 110 111
+
 ### double expansion with single and double quotes
 echo {'a',b}_{c,"d"}
 # stdout: a_c a_d b_c b_d
@@ -80,6 +84,10 @@ echo a{X,,Y}b
 ### nested brace expansion
 echo -{A,={a,b}=,B}-
 # stdout: -A- -=a=- -=b=- -B-
+
+### triple nested brace expansion
+echo -{A,={a,.{x,y}.,b}=,B}-
+# stdout: -A- -=a=- -=.x.=- -=.y.=- -=b=- -B-
 
 ### expansion on RHS of assignment
 # I think bash's behavior is more consistent.  No splitting either.
