@@ -36,7 +36,12 @@ def main(argv):
 
   print('Hello from brace_expand.py')
 
+  # TODO: How to represent the adjacent strings?
+
   for t in Cartesian([('a', 'b'), ('c', 'd', 'e'), ('f', 'g')]):
+    print(t)
+
+  for t in Cartesian([('a', 'b')]):
     print(t)
 
 # Algorithm for cartesian product:
