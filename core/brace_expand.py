@@ -13,6 +13,11 @@ TODO: {1..7..3} as well.
 
 import sys
 
+from core.id_kind import Id
+from osh import ast_ as ast
+
+word_part_e = ast.word_part_e
+
 
 def Cartesian(tuples):
   if len(tuples) == 1:
@@ -24,7 +29,7 @@ def Cartesian(tuples):
         yield (x,) + y  # join tuples
 
 
-def BraceDetect(parts):
+def BraceDetect(w):
   """
   Args:
     list of WordPart
@@ -40,7 +45,15 @@ def BraceDetect(parts):
     always turns into a CartesianPart(word* word) list?
     Just like ArrayLiteralPart.
   """
-  pass
+  for part in w.parts:
+    if part.tag == word_part_e.LiteralPart:
+      id_ = part.token.id
+      if id_ == Id.Lit_LBrace:
+        print('{')
+      elif id_ == Id.Lit_RBrace:
+        print('}')
+      elif id_ == Id.Lit_Comma:
+        print(',')
 
 
 def BraceExpand(parts):
