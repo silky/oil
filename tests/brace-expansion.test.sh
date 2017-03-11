@@ -4,13 +4,76 @@
 echo {foo}
 # stdout: {foo}
 
-### expansion
+### incomplete trailing expansion
+echo {a,b}_{
+# stdout: a_{ b_{
+
+### partial leading expansion
+echo }_{a,b}
+# stdout: }_a }_b
+
+### partial leading expansion 2
+echo {x}_{a,b}
+# stdout: {x}_a {x}_b
+
+### single expansion
 echo {foo,bar}
 # stdout: foo bar
 
 ### double expansion
 echo {a,b}_{c,d}
 # stdout: a_c a_d b_c b_d
+
+### triple expansion
+echo {0,1}{0,1}{0,1}
+# stdout: 000 001 010 011 100 101 110 111
+
+### double expansion with single and double quotes
+echo {'a',b}_{c,"d"}
+# stdout: a_c a_d b_c b_d
+
+### expansion with mixed quotes
+echo -{\X"b",'cd'}-
+# stdout: -Xb- -cd-
+
+### expansion with simple var
+a=A
+echo -{$a,b}-
+# stdout: -A- -b-
+
+### double expansion with simple var -- bash bug
+# bash is inconsistent with the above
+a=A
+echo {$a,b}_{c,d}
+# stdout: A_c A_d b_c b_d
+# BUG bash stdout: b_c b_d
+
+### double expansion with braced variable
+# This fixes it
+a=A
+echo {${a},b}_{c,d}
+# stdout: A_c A_d b_c b_d
+
+### double expansion with literal and simple var
+a=A
+echo {_$a,b}_{c,d}
+# stdout: _A_c _A_d b_c b_d
+# BUG bash stdout: _ _ b_c b_d
+
+### expansion with command sub
+a=A
+echo -{$(echo a),b}-
+# stdout: -a- -b-
+
+### expansion with arith sub
+a=A
+echo -{$((1 + 2)),b}-
+# stdout: -3- -b-
+
+### double expansion with escaped literals
+a=A
+echo -{\$,\[,\]}-
+# stdout: -$- -[- -]-
 
 ### { in expansion
 # bash and mksh treat this differently.  bash treats the
@@ -35,8 +98,12 @@ echo a{X,,Y}b
 # stdout: aXb ab aYb
 
 ### nested brace expansion
-echo X{A,x{a,b}y,B}Y
-# stdout: XAY XxayY XxbyY XBY
+echo -{A,={a,b}=,B}-
+# stdout: -A- -=a=- -=b=- -B-
+
+### triple nested brace expansion
+echo -{A,={a,.{x,y}.,b}=,B}-
+# stdout: -A- -=a=- -=.x.=- -=.y.=- -=b=- -B-
 
 ### expansion on RHS of assignment
 # I think bash's behavior is more consistent.  No splitting either.
@@ -83,3 +150,8 @@ echo $foo
 # In the second instance, we expand into a literal ~, and since var expansion
 # comes after tilde expansion, it is NOT tried again.
 # stdout-json: "/home/bob\n~\n"
+
+### Number expansion
+echo -{1..8..3}-
+# stdout: -1- -4- -7-
+# N-I mksh stdout: -{1..8..3}-
