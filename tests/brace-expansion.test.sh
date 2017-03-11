@@ -78,8 +78,8 @@ echo a{X,,Y}b
 # stdout: aXb ab aYb
 
 ### nested brace expansion
-echo X{A,x{a,b}y,B}Y
-# stdout: XAY XxayY XxbyY XBY
+echo -{A,={a,b}=,B}-
+# stdout: -A- -=a=- -=b=- -B-
 
 ### expansion on RHS of assignment
 # I think bash's behavior is more consistent.  No splitting either.
