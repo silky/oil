@@ -91,11 +91,28 @@ def BraceDetect(w):
 
   if not balanced, return error too?
   """
+  # Errors:
+  # }a{    - stack depth dips below 0
+  # {a,b}{ - Stack depth doesn't end at 0
+
+  alternatives = []
+  stack = [alternatives]  # stack of alternatives
+  cur_parts = []
+
+  state = 0  # 0: 
+
   for i, part in enumerate(w.parts):
+    print(i, part)
     if part.tag == word_part_e.LiteralPart:
       id_ = part.token.id
       if id_ == Id.Lit_LBrace:
         print('{')
+        stack[-1].append(ast.CompoundWord(cur_parts))
+        cur_parts = []
+
+        alternatives = ['ALT']
+        stack.append(alternatives)
+
         #alt_part, end_index = ParseAlternatives(i, w.parts)
         #if alt_part:
         #  w.parts[i] == alt_part
@@ -103,8 +120,25 @@ def BraceDetect(w):
 
       elif id_ == Id.Lit_RBrace:
         print('}')
+        stack[-1].append(ast.CompoundWord(cur_parts))
+        cur_parts = []
+        alternatives = stack.pop()
+        cur_parts.append(alternatives)
+
       elif id_ == Id.Lit_Comma:
         print(',')
+        # Top of stack
+        stack[-1].append(ast.CompoundWord(cur_parts))
+        cur_parts = []
+
+      else:
+        cur_parts.append(part)
+
+    else:
+      cur_parts.append(part)
+
+  assert len(stack) == 1
+  return cur_parts
 
 
 def BraceExpand(parts):

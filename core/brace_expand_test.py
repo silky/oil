@@ -22,8 +22,10 @@ class BraceExpandTest(unittest.TestCase):
     pass
 
   def testFoo(self):
-    w = _assertReadWord(self, '{a,b,c}')
-    brace_expand.BraceDetect(w)
+    w = _assertReadWord(self, '-{a,b,c}-')
+    stack = brace_expand.BraceDetect(w)
+    from pprint import pprint
+    pprint(stack)
 
     #w = _assertReadWord(self, '{{a,b}')
 
