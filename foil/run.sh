@@ -13,11 +13,13 @@ readonly DIFF=${DIFF:-diff -u}
 copy() {
   # The 2to3 grammar supports both Python 2 and Python 3.
   # - it has the old print statement.  Well I guess you still want that!  Gah.
+  cp -v $PY/Parser/Python.asdl .
+
   cp -v $PY/Grammar/Grammar $PY/Lib/lib2to3/Grammar.txt .
   # For comparison
   cp -v $PY/Lib/{token,tokenize}.py .
   mkdir -p pgen2
-  cp -v $PY/Lib/lib2to3/pgen2/{__init__,driver,pgen,token,tokenize}.py pgen2
+  cp -v $PY/Lib/lib2to3/pgen2/{__init__,driver,grammar,parse,token,tokenize,pgen}.py pgen2
 }
 
 compare-grammar() {
