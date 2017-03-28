@@ -1,0 +1,18 @@
+-- AST for pgen grammar.
+-- Constrast with asdl.asdl
+
+module pgen
+{
+  term = 
+    Const(string s)             -- '(', etc.
+  | RuleName(string s)          -- expr_stmt
+  | Group(term t)               -- (expr stmt)
+  | Repeat(term t, int times)   -- foo+, foo* (';' small_stmt)*
+  | Optional(term t)            -- ['=' test]
+  | Alt(term*  t)               -- '+=' | '-='
+
+  -- Terms are concatenated
+  rule = (string lhs, term* rhs)
+
+  grammar = (rule* rules)
+}
