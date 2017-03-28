@@ -1,8 +1,9 @@
+#!/usr/bin/env python3
 # Copyright 2004-2005 Elemental Security, Inc. All Rights Reserved.
 # Licensed to PSF under a Contributor Agreement.
 
 # Pgen imports
-from . import grammar, token, tokenize
+import grammar, token, tokenize
 
 class PgenGrammar(grammar.Grammar):
     pass
@@ -382,5 +383,10 @@ class DFAState(object):
     __hash__ = None # For Py3 compatibility.
 
 def generate_grammar(filename="Grammar.txt"):
+    # NOTE: This builds the dfa/nfa on the fly.  It doesn't make an AST.
+    # I think I want pgen.asdl, and then I can interpret that.
     p = ParserGenerator(filename)
     return p.make_grammar()
+
+if __name__ == '__main__':
+    print(generate_grammar())

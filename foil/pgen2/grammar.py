@@ -17,7 +17,7 @@ import collections
 import pickle
 
 # Local imports
-from . import token, tokenize
+import token, tokenize
 
 
 class Grammar(object):
