@@ -1,9 +1,6 @@
 #!/usr/bin/env python3
 """
-foil/pgen_ast.py -- Parse pgen.asdl and dynamically create classes on this
-module.
-
-Similar to osh/ast_.py.
+Wrapper for Python.asdl.
 """
 
 import os
@@ -24,7 +21,7 @@ def _ParseAndMakeTypes(schema_path, root):
 
 
 bin_dir = os.path.dirname(os.path.abspath(sys.argv[0]))  # ~/git/oil/bin
-schema_path = os.path.join(bin_dir, '../foil/pgen.asdl')  # ~/git/oil/osh
+schema_path = os.path.join(bin_dir, '../foil/Python.asdl')  # ~/git/oil/osh
 
 root = sys.modules[__name__]
 
