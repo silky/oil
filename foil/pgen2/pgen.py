@@ -422,7 +422,8 @@ class PgenParser:
     def parse_rhs(self):
         """
         Returns:
-          pgen_ast.term
+          Alt
+          term
 
         RHS: ALT ('|' ALT)*
         """
@@ -439,9 +440,6 @@ class PgenParser:
 
     def parse_alt(self):
         """
-        Returns:
-          list of rule?
-
         ALT: ITEM+
         """
         seq = pgen_ast.Seq()
@@ -450,12 +448,18 @@ class PgenParser:
         while (self.value in ("(", "[") or
                self.type in (token.NAME, token.STRING)):
             seq.terms.append(self.parse_item())
-        return seq
+
+        if len(seq.terms) == 1:
+          return seq.terms[0]
+        else: 
+          return seq
 
     def parse_item(self):
         """
         Returns:
-          pgen_ast.term
+          Optional
+          Repeat
+          term
 
         ITEM: '[' RHS ']' | ATOM ['+' | '*']
         """
@@ -485,6 +489,7 @@ class PgenParser:
         ATOM: '(' RHS ')' | NAME | STRING
         """
         if self.value == "(":
+            # TODO: Don't need Group?  It is implicit in the tree?
             self.gettoken()
             rhs = self.parse_rhs()
             self.expect(token.OP, ")")
