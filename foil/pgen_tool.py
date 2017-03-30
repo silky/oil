@@ -17,8 +17,11 @@ def main(argv):
     f= open(grammar_path)
 
   p = pgen.PgenParser(f)
-  t = p.parse()
+  t, start_symbol = p.parse()
   print(t)
+  print(start_symbol)
+
+  # TODO: Now interpret the grammar somehow.
 
 
 if __name__ == '__main__':

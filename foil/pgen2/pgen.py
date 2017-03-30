@@ -499,7 +499,10 @@ class PgenParser:
             self.gettoken()
             return pgen_ast.Name(v)
         elif self.type == token.STRING:
-            v = self.value
+            # Tokenizer doesn't strip this
+            assert self.value.startswith("'"), self.value
+            assert self.value.endswith("'"), self.value
+            v = self.value[1:-1]
             self.gettoken()
             return pgen_ast.String(v)
         else:

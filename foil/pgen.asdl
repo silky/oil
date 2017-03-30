@@ -5,7 +5,7 @@ module pgen
 {
   term = 
     String(string s)            -- '(', etc.
-  | Name(string s)              -- expr_stmt
+  | Name(string n)              -- expr_stmt
   | Group(term t)               -- (expr stmt)
   | Repeat(term t, int times)   -- foo+, foo* (';' small_stmt)*
   | Optional(term t)            -- ['=' test]
