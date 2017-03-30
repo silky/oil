@@ -17,7 +17,7 @@ import collections
 import pickle
 
 # Local imports
-import token, tokenize
+from foil.pgen2 import token, tokenize
 
 
 class Grammar(object):

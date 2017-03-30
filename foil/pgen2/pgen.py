@@ -3,7 +3,8 @@
 # Licensed to PSF under a Contributor Agreement.
 
 # Pgen imports
-import grammar, token, tokenize
+#import grammar, token, tokenize
+from foil.pgen2 import grammar, token, tokenize
 
 class PgenGrammar(grammar.Grammar):
     pass
@@ -383,6 +384,8 @@ class DFAState(object):
     __hash__ = None # For Py3 compatibility.
 
 
+from foil import pgen_ast
+
 # Extracted from above
 class PgenParser:
 
@@ -503,9 +506,6 @@ def generate_grammar(filename="Grammar.txt"):
 
 def main():
     print(generate_grammar())
-    with open('Grammar.txt') as f:
-        p = PgenParser(f)
-        p.parse()
 
 
 if __name__ == '__main__':
