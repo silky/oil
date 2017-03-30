@@ -382,11 +382,131 @@ class DFAState(object):
 
     __hash__ = None # For Py3 compatibility.
 
+
+# Extracted from above
+class PgenParser:
+
+    def __init__(self, f):
+        self.generator = tokenize.generate_tokens(f.readline)
+        self.gettoken() # Initialize lookahead
+
+    def parse(self):
+        dfas = {}
+        startsymbol = None
+        # MSTART: (NEWLINE | RULE)* ENDMARKER
+        while self.type != token.ENDMARKER:
+            while self.type == token.NEWLINE:
+                self.gettoken()
+            # RULE: NAME ':' RHS NEWLINE
+            name = self.expect(token.NAME)
+            self.expect(token.OP, ":")
+            a, z = self.parse_rhs()
+            self.expect(token.NEWLINE)
+            #self.dump_nfa(name, a, z)
+            dfa = self.make_dfa(a, z)
+            #self.dump_dfa(name, dfa)
+            oldlen = len(dfa)
+            self.simplify_dfa(dfa)
+            newlen = len(dfa)
+            dfas[name] = dfa
+            #print name, oldlen, newlen
+            if startsymbol is None:
+                startsymbol = name
+        return dfas, startsymbol
+
+    def parse_rhs(self):
+        # RHS: ALT ('|' ALT)*
+        a, z = self.parse_alt()
+        if self.value != "|":
+            return a, z
+        else:
+            aa = NFAState()
+            zz = NFAState()
+            aa.addarc(a)
+            z.addarc(zz)
+            while self.value == "|":
+                self.gettoken()
+                a, z = self.parse_alt()
+                aa.addarc(a)
+                z.addarc(zz)
+            return aa, zz
+
+    def parse_alt(self):
+        # ALT: ITEM+
+        a, b = self.parse_item()
+        while (self.value in ("(", "[") or
+               self.type in (token.NAME, token.STRING)):
+            c, d = self.parse_item()
+            b.addarc(c)
+            b = d
+        return a, b
+
+    def parse_item(self):
+        # ITEM: '[' RHS ']' | ATOM ['+' | '*']
+        if self.value == "[":
+            self.gettoken()
+            a, z = self.parse_rhs()
+            self.expect(token.OP, "]")
+            a.addarc(z)
+            return a, z
+        else:
+            a, z = self.parse_atom()
+            value = self.value
+            if value not in ("+", "*"):
+                return a, z
+            self.gettoken()
+            z.addarc(a)
+            if value == "+":
+                return a, z
+            else:
+                return a, a
+
+    def parse_atom(self):
+        # ATOM: '(' RHS ')' | NAME | STRING
+        if self.value == "(":
+            self.gettoken()
+            a, z = self.parse_rhs()
+            self.expect(token.OP, ")")
+            return a, z
+        elif self.type in (token.NAME, token.STRING):
+            a = NFAState()
+            z = NFAState()
+            a.addarc(z, self.value)
+            self.gettoken()
+            return a, z
+        else:
+            self.raise_error("expected (...) or NAME or STRING, got %s/%s",
+                             self.type, self.value)
+
+    def expect(self, type, value=None):
+        if self.type != type or (value is not None and self.value != value):
+            self.raise_error("expected %s/%s, got %s/%s",
+                             type, value, self.type, self.value)
+        value = self.value
+        self.gettoken()
+        return value
+
+    def gettoken(self):
+        tup = next(self.generator)
+        while tup[0] in (tokenize.COMMENT, tokenize.NL):
+            tup = next(self.generator)
+        self.type, self.value, self.begin, self.end, self.line = tup
+        #print token.tok_name[self.type], repr(self.value)
+
+
 def generate_grammar(filename="Grammar.txt"):
     # NOTE: This builds the dfa/nfa on the fly.  It doesn't make an AST.
     # I think I want pgen.asdl, and then I can interpret that.
     p = ParserGenerator(filename)
     return p.make_grammar()
 
-if __name__ == '__main__':
+
+def main():
     print(generate_grammar())
+    with open('Grammar.txt') as f:
+        p = PgenParser(f)
+        p.parse()
+
+
+if __name__ == '__main__':
+    main()
