@@ -426,14 +426,15 @@ class PgenParser:
 
         RHS: ALT ('|' ALT)*
         """
-        a = pgen_ast.Alt()
-        a.alternatives.append(self.parse_alt())
+        seq = self.parse_alt()
         if self.value != "|":
-            return a
+            return seq
         else:
+            a = pgen_ast.Alt()
+            a.alts.append(seq)
             while self.value == "|":
                 self.gettoken()
-                a.alternatives.append(self.parse_alt())
+                a.alts.append(self.parse_alt())
             return a
 
     def parse_alt(self):
@@ -443,13 +444,13 @@ class PgenParser:
 
         ALT: ITEM+
         """
-        alt = pgen_ast.alt()
-        alt.terms.append(self.parse_item())
+        seq = pgen_ast.Seq()
+        seq.terms.append(self.parse_item())
 
         while (self.value in ("(", "[") or
                self.type in (token.NAME, token.STRING)):
-            alt.terms.append(self.parse_item())
-        return alt
+            seq.terms.append(self.parse_item())
+        return seq
 
     def parse_item(self):
         """

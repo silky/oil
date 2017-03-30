@@ -9,10 +9,9 @@ module pgen
   | Group(term t)               -- (expr stmt)
   | Repeat(term t, int times)   -- foo+, foo* (';' small_stmt)*
   | Optional(term t)            -- ['=' test]
-  | Alt(alt* alternatives)      -- '+=' X | '-=' X Y
+  | Seq(term* terms)            -- A B
+  | Alt(term* alts)             -- '+=' X | '-=' X Y
                                 -- | has low precedence
-
-  alt = (term* terms)
 
   -- Terms are concatenated
   rule = (string lhs, term rhs)
