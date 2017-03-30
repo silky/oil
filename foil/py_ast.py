@@ -9,10 +9,48 @@ import sys
 from asdl import py_meta
 from asdl import asdl_ as asdl
 
+# Dummy types for now
+class Identifier:
+  pass
+
+class Bytes:
+  pass
+
+class PyObject:
+  pass
+
+class Constant:
+  pass
+
+class Singleton:
+  pass
+
+
+  # TODO: Fill these in:
+  #
+  # Num(object n) -- a number as a PyObject.
+  # Bytes(bytes s)
+  # Constant(constant value)
+  # NameConstant(singleton value)
+  #
+  # singleton: None, True or False
+  # constant can be None, whereas None means "no value" for object.
+  #
+  # Hm do I want an LST?  Then it shouldn't have these typed values?  That
+  # comes later?
+  #
+  # identifier: this one is used a lot.  Why not string?
+
 def _ParseAndMakeTypes(schema_path, root):
   module = asdl.parse(schema_path)
 
-  app_types = {}
+  app_types = {
+      'identifier': asdl.UserType(Identifier),
+      'bytes': asdl.UserType(Bytes),
+      'object': asdl.UserType(PyObject),
+      'constant': asdl.UserType(Constant),
+      'singleton': asdl.UserType(Singleton),
+  }
 
   # Check for type errors
   if not asdl.check(module, app_types):
