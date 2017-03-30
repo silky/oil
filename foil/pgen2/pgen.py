@@ -395,6 +395,10 @@ class PgenParser:
         self.gettoken() # Initialize lookahead
 
     def parse(self):
+        """
+        Returns:
+          pgen_ast.grammar
+        """
         dfas = {}
         startsymbol = None
         # MSTART: (NEWLINE | RULE)* ENDMARKER
@@ -419,7 +423,12 @@ class PgenParser:
         return dfas, startsymbol
 
     def parse_rhs(self):
-        # RHS: ALT ('|' ALT)*
+        """
+        Returns:
+          pgen_ast.term
+
+        RHS: ALT ('|' ALT)*
+        """
         a, z = self.parse_alt()
         if self.value != "|":
             return a, z
@@ -436,7 +445,12 @@ class PgenParser:
             return aa, zz
 
     def parse_alt(self):
-        # ALT: ITEM+
+        """
+        Returns:
+          list of rule?
+
+        ALT: ITEM+
+        """
         a, b = self.parse_item()
         while (self.value in ("(", "[") or
                self.type in (token.NAME, token.STRING)):
@@ -446,7 +460,12 @@ class PgenParser:
         return a, b
 
     def parse_item(self):
-        # ITEM: '[' RHS ']' | ATOM ['+' | '*']
+        """
+        Returns:
+          pgen_ast.term
+
+        ITEM: '[' RHS ']' | ATOM ['+' | '*']
+        """
         if self.value == "[":
             self.gettoken()
             a, z = self.parse_rhs()
@@ -466,7 +485,14 @@ class PgenParser:
                 return a, a
 
     def parse_atom(self):
-        # ATOM: '(' RHS ')' | NAME | STRING
+        """
+        Returns:
+          Group
+          Name
+          String
+
+        ATOM: '(' RHS ')' | NAME | STRING
+        """
         if self.value == "(":
             self.gettoken()
             a, z = self.parse_rhs()

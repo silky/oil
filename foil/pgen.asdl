@@ -4,8 +4,8 @@
 module pgen
 {
   term = 
-    Const(string s)             -- '(', etc.
-  | RuleName(string s)          -- expr_stmt
+    String(string s)            -- '(', etc.
+  | Name(string s)              -- expr_stmt
   | Group(term t)               -- (expr stmt)
   | Repeat(term t, int times)   -- foo+, foo* (';' small_stmt)*
   | Optional(term t)            -- ['=' test]
