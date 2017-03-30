@@ -9,10 +9,16 @@ from foil.pgen2 import pgen
 
 
 def main(argv):
-  grammar_path = argv[1]
-  with open(grammar_path) as f:
-    p = pgen.PgenParser(f)
-    p.parse()
+  try:
+    grammar_path = argv[1]
+  except IndexError:
+    f = sys.stdin
+  else:
+    f= open(grammar_path)
+
+  p = pgen.PgenParser(f)
+  t = p.parse()
+  print(t)
 
 
 if __name__ == '__main__':

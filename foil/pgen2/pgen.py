@@ -399,7 +399,7 @@ class PgenParser:
         Returns:
           pgen_ast.grammar
         """
-        dfas = {}
+        rules = []
         startsymbol = None
         # MSTART: (NEWLINE | RULE)* ENDMARKER
         while self.type != token.ENDMARKER:
@@ -408,19 +408,16 @@ class PgenParser:
             # RULE: NAME ':' RHS NEWLINE
             name = self.expect(token.NAME)
             self.expect(token.OP, ":")
-            a, z = self.parse_rhs()
+            rhs = self.parse_rhs()
             self.expect(token.NEWLINE)
-            #self.dump_nfa(name, a, z)
-            dfa = self.make_dfa(a, z)
-            #self.dump_dfa(name, dfa)
-            oldlen = len(dfa)
-            self.simplify_dfa(dfa)
-            newlen = len(dfa)
-            dfas[name] = dfa
+
+            r = pgen_ast.rule(name, rhs)
+            rules.append(r)
+
             #print name, oldlen, newlen
             if startsymbol is None:
                 startsymbol = name
-        return dfas, startsymbol
+        return pgen_ast.grammar(rules), startsymbol
 
     def parse_rhs(self):
         """
@@ -429,20 +426,15 @@ class PgenParser:
 
         RHS: ALT ('|' ALT)*
         """
-        a, z = self.parse_alt()
+        a = pgen_ast.Alt()
+        a.alternatives.append(self.parse_alt())
         if self.value != "|":
-            return a, z
+            return a
         else:
-            aa = NFAState()
-            zz = NFAState()
-            aa.addarc(a)
-            z.addarc(zz)
             while self.value == "|":
                 self.gettoken()
-                a, z = self.parse_alt()
-                aa.addarc(a)
-                z.addarc(zz)
-            return aa, zz
+                a.alternatives.append(self.parse_alt())
+            return a
 
     def parse_alt(self):
         """
@@ -451,13 +443,13 @@ class PgenParser:
 
         ALT: ITEM+
         """
-        a, b = self.parse_item()
+        alt = pgen_ast.alt()
+        alt.terms.append(self.parse_item())
+
         while (self.value in ("(", "[") or
                self.type in (token.NAME, token.STRING)):
-            c, d = self.parse_item()
-            b.addarc(c)
-            b = d
-        return a, b
+            alt.terms.append(self.parse_item())
+        return alt
 
     def parse_item(self):
         """
@@ -468,21 +460,19 @@ class PgenParser:
         """
         if self.value == "[":
             self.gettoken()
-            a, z = self.parse_rhs()
+            rhs = self.parse_rhs()
             self.expect(token.OP, "]")
-            a.addarc(z)
-            return a, z
+            return pgen_ast.Optional(rhs)
         else:
-            a, z = self.parse_atom()
+            atom = self.parse_atom()
             value = self.value
             if value not in ("+", "*"):
-                return a, z
+                return atom
             self.gettoken()
-            z.addarc(a)
             if value == "+":
-                return a, z
+                return pgen_ast.Repeat(atom, 1)
             else:
-                return a, a
+                return pgen_ast.Repeat(atom, 0)
 
     def parse_atom(self):
         """
@@ -497,13 +487,16 @@ class PgenParser:
             self.gettoken()
             a, z = self.parse_rhs()
             self.expect(token.OP, ")")
-            return a, z
-        elif self.type in (token.NAME, token.STRING):
-            a = NFAState()
-            z = NFAState()
-            a.addarc(z, self.value)
+            #return a, z
+            raise NotImplementedError
+        elif self.type == token.NAME:
+            v = self.value
             self.gettoken()
-            return a, z
+            return pgen_ast.Name(v)
+        elif self.type == token.STRING:
+            v = self.value
+            self.gettoken()
+            return pgen_ast.String(v)
         else:
             self.raise_error("expected (...) or NAME or STRING, got %s/%s",
                              self.type, self.value)
