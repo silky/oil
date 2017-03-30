@@ -485,10 +485,9 @@ class PgenParser:
         """
         if self.value == "(":
             self.gettoken()
-            a, z = self.parse_rhs()
+            rhs = self.parse_rhs()
             self.expect(token.OP, ")")
-            #return a, z
-            raise NotImplementedError
+            return pgen_ast.Group(rhs)
         elif self.type == token.NAME:
             v = self.value
             self.gettoken()
