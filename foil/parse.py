@@ -25,6 +25,7 @@ def main(argv):
   print(type(tree))
   for c in tree.children:
     print(repr(c))
+  print('\tChildren: %d' % len(tree.children), file=sys.stderr)
 
 
 if __name__ == '__main__':
