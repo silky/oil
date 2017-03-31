@@ -18,6 +18,11 @@ test-parse() {
   done
 }
 
+clear-tokens() {
+  rm token.py tokenize.py
+  rm -rf --verbose __pycache ../__pycache__
+}
+
 copy() {
   # TODO: Get rid of this vs. pgen2.tokenize.
   # I get a "bad magic number" error.
