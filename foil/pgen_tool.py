@@ -11,7 +11,7 @@ from foil import py_ast
 import tokenize  # from stdlib?
 
 
-class Parser:
+class GrammarInterpreter:
   def __init__(self, grammar):
     self.grammar = grammar  # string name -> pgen_ast.term
 
@@ -44,7 +44,7 @@ def main(argv):
   else:
     prog_f = open(prog_path)
 
-  pg = pgen.PgenParser(f)
+  pg = pgen.GrammarParser(f)
   lang_grammar, start_symbol = pg.parse()
   print(lang_grammar)
   print(start_symbol)
@@ -66,10 +66,8 @@ def main(argv):
   lexer = Lexer(prog_f)
   for i in range(10):
     print(lexer.Read())
-  return
 
-
-  py = Parser(lang_grammar)
+  py = GrammarInterpreter(lang_grammar)
   print(py)
   py.Parse(start_symbol, lexer)
 

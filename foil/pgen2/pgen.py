@@ -388,7 +388,7 @@ class DFAState(object):
 from foil import pgen_ast
 
 # Extracted from above
-class PgenParser:
+class GrammarParser:
 
     def __init__(self, f):
         self.generator = tokenize.generate_tokens(f.readline)
