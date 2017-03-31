@@ -22,6 +22,28 @@ def main(argv):
   grammar = pygram.python_grammar_no_print_statement
   #grammar = pygram.python_grammar
 
+  # TODO: Now hook convert to generate Python.asdl?
+  #
+  # or foil.asdl
+  #
+  # then maybe -> ovm.asdl to flatten loops?  Make .append special?
+  #
+  # YES: modules, classes, functions (kwargs), exceptions, generators, strings,
+  # int list comprehensions, generator expressions, % string formatting,
+  #   dicts/list runtime (append/extend)
+  # assert
+  #
+  # metaprogramming: setattr() for core/id_kind.py.
+  #
+  # sparingly:
+  #   I don't think lambda
+  #   yield in asdl, tdop, and completion.  Hm.
+  #
+  # NO: complex numbers, async/await, global/nonlocal, I don't see any use of
+  # with
+  # 
+  # Libraries: optparse, etc.
+
   d = driver.Driver(grammar, convert=pytree.convert)
 
   py_path = argv[1]
@@ -29,9 +51,7 @@ def main(argv):
     tokens = tokenize.generate_tokens(f.readline)
     tree = d.parse_tokens(tokens)
   print(tree)
-  print(type(tree))
-  for c in tree.children:
-    print(repr(c))
+  #print(type(tree))
   print('\tChildren: %d' % len(tree.children), file=sys.stderr)
 
 
