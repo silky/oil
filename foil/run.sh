@@ -12,7 +12,8 @@ readonly DIFF=${DIFF:-diff -u}
 
 test-parse() {
   set +o errexit
-  for py in *.py ../osh/*.py; do
+  #for py in *.py ../osh/*.py; do
+  for py in *.py; do
     PYTHONPATH=.. ./parse.py $py >/dev/null #2>&1
     echo $? $py
   done
