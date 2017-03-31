@@ -11,6 +11,8 @@ readonly PY=~/src/Python-3.6.1
 readonly DIFF=${DIFF:-diff -u}
 
 copy() {
+  cp -v $PY/Lib/{token,tokenize}.py .
+  return
   cp -v $PY/Lib/lib2to3/{pytree,pygram,refactor,main}.py .
 
   #cp -v $PY/Lib/lib2to3/pgen2/{__init__,driver,grammar,parse,token,tokenize,pgen}.py pgen2
@@ -22,7 +24,6 @@ copy() {
 
   cp -v $PY/Grammar/Grammar $PY/Lib/lib2to3/Grammar.txt .
   # For comparison
-  cp -v $PY/Lib/{token,tokenize}.py .
   mkdir -p pgen2
 }
 
