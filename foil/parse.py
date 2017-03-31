@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """
 parse.py
+
 """
 
 import sys
@@ -13,7 +14,13 @@ from foil import pygram
 
 def main(argv):
 
-  grammar = pygram.python_grammar
+  # NOTE: Parsing tables are cached with pickle.
+  # For Python 3.
+
+  # lib2to3 had a flag for the print statement!  Don't use it with Python 3.
+
+  grammar = pygram.python_grammar_no_print_statement
+  #grammar = pygram.python_grammar
 
   d = driver.Driver(grammar, convert=pytree.convert)
 
