@@ -10,7 +10,17 @@ set -o errexit
 readonly PY=~/src/Python-3.6.1
 readonly DIFF=${DIFF:-diff -u}
 
+test-parse() {
+  set +o errexit
+  for py in *.py; do
+    PYTHONPATH=.. ./parse.py $py >/dev/null #2>&1
+    echo $? $py
+  done
+}
+
 copy() {
+  # TODO: Get rid of this vs. pgen2.tokenize.
+  # I get a "bad magic number" error.
   cp -v $PY/Lib/{token,tokenize}.py .
   return
   cp -v $PY/Lib/lib2to3/{pytree,pygram,refactor,main}.py .
