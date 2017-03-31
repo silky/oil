@@ -399,7 +399,7 @@ class GrammarParser:
         Returns:
           pgen_ast.grammar
         """
-        rules = []
+        rules = {}
         startsymbol = None
         # MSTART: (NEWLINE | RULE)* ENDMARKER
         while self.type != token.ENDMARKER:
@@ -411,13 +411,13 @@ class GrammarParser:
             rhs = self.parse_rhs()
             self.expect(token.NEWLINE)
 
-            r = pgen_ast.rule(name, rhs)
-            rules.append(r)
+            #r = pgen_ast.rule(name, rhs)
+            rules[name] = rhs
 
             #print name, oldlen, newlen
             if startsymbol is None:
                 startsymbol = name
-        return pgen_ast.grammar(rules), startsymbol
+        return rules, startsymbol
 
     def parse_rhs(self):
         """
