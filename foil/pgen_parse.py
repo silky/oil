@@ -264,6 +264,7 @@ def main(argv):
   gp = GrammarParser(f)
   lang_grammar, start_symbol = gp.parse()
   print(lang_grammar)
+  return
   print(start_symbol)
 
   print(py_ast)
