@@ -49,6 +49,11 @@ count() {
   wc -l *.asdl
 }
 
+test-pgen-parse() {
+  # Parse itself
+  PYTHONPATH=.. ./pgen_parse.py Grammar.txt pgen_parse.py
+}
+
 compare-grammar() {
   $DIFF Grammar Grammar.txt
 }
