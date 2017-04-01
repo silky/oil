@@ -10,13 +10,22 @@ set -o errexit
 readonly PY=~/src/Python-3.6.1
 readonly DIFF=${DIFF:-diff -u}
 
-test-parse() {
+parse-with-pgen2() {
   set +o errexit
-  for py in *.py ../*.py ../osh/*.py ../core/*.py ../asdl/*.py; do
-  #for py in *.py; do
+  for py in "$@"; do
     PYTHONPATH=.. ./parse.py $py >/dev/null #2>&1
     echo $? $py
   done
+}
+
+parse-oil() {
+  parse-with-pgen2 *.py ../*.py ../osh/*.py ../core/*.py ../asdl/*.py
+}
+
+# As a test of bootstrapping
+parse-pycompiler() {
+  # parse print statement
+  PYTHON2=1 parse-with-pgen2 ~/src/Python-2.7.6/Lib/compiler/*.py
 }
 
 clear-tokens() {

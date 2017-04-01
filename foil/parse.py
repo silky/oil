@@ -4,6 +4,7 @@ parse.py
 
 """
 
+import os
 import sys
 
 from foil.pgen2 import driver
@@ -19,8 +20,10 @@ def main(argv):
 
   # lib2to3 had a flag for the print statement!  Don't use it with Python 3.
 
-  grammar = pygram.python_grammar_no_print_statement
-  #grammar = pygram.python_grammar
+  if 'PYTHON2' in os.environ:
+    grammar = pygram.python_grammar
+  else:
+    grammar = pygram.python_grammar_no_print_statement
 
   # TODO: Now hook convert to generate Python.asdl?
   #
@@ -52,6 +55,7 @@ def main(argv):
     tree = d.parse_tokens(tokens)
 
   tree.PrettyPrint(sys.stdout)
+  print('\tChildren: %d' % len(tree.children), file=sys.stderr)
   return
   print(tree)
   print(repr(tree))
@@ -61,7 +65,6 @@ def main(argv):
   for c in tree.children:
     print(repr(c))
     print()
-  print('\tChildren: %d' % len(tree.children), file=sys.stderr)
 
 
 
