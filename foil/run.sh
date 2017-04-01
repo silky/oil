@@ -25,22 +25,28 @@ clear-tokens() {
 }
 
 copy() {
-  # TODO: Get rid of this vs. pgen2.tokenize.
-  # I get a "bad magic number" error.
-  cp -v $PY/Lib/{token,tokenize}.py .
-  return
-  cp -v $PY/Lib/lib2to3/{pytree,pygram,refactor,main}.py .
+  #cp -v $PY/Lib/{token,tokenize}.py .
+  #return
 
-  #cp -v $PY/Lib/lib2to3/pgen2/{__init__,driver,grammar,parse,token,tokenize,pgen}.py pgen2
-  return
-
-  # The 2to3 grammar supports both Python 2 and Python 3.
-  # - it has the old print statement.  Well I guess you still want that!  Gah.
-  cp -v $PY/Parser/Python.asdl .
-
-  cp -v $PY/Grammar/Grammar $PY/Lib/lib2to3/Grammar.txt .
   # For comparison
   mkdir -p pgen2
+
+  cp -v $PY/Lib/lib2to3/{pytree,pygram}.py .
+  cp -v $PY/Lib/lib2to3/pgen2/{__init__,driver,grammar,parse,token,tokenize,pgen}.py pgen2
+  # The 2to3 grammar supports both Python 2 and Python 3.
+  # - it has the old print statement.  Well I guess you still want that!  Gah.
+  cp -v $PY/Lib/lib2to3/Grammar.txt .
+  return
+
+  cp -v $PY/Parser/Python.asdl .
+
+  # For comparison
+  #cp -v $PY/Grammar/Grammar .
+}
+
+count() {
+  wc -l *.py pgen2/*.py | sort -n
+  wc -l *.asdl
 }
 
 compare-grammar() {
