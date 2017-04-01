@@ -50,9 +50,29 @@ def main(argv):
   with open(py_path) as f:
     tokens = tokenize.generate_tokens(f.readline)
     tree = d.parse_tokens(tokens)
+
+  tree.PrettyPrint(sys.stdout)
+  return
   print(tree)
+  print(repr(tree))
+  return
+
   #print(type(tree))
+  for c in tree.children:
+    print(repr(c))
+    print()
   print('\tChildren: %d' % len(tree.children), file=sys.stderr)
+
+
+
+  # Examples of nodes Leaf(type, value):
+  #   Leaf(1, 'def')
+  #   Leaf(4, '\n')
+  #   Leaf(8, ')')
+  # Oh are these just tokens?
+  # yes.
+
+  # Node(prefix, children)
 
 
 if __name__ == '__main__':
