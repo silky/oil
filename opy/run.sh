@@ -330,7 +330,8 @@ compile-osh-tree() {
 
 compare-osh-tree() {
   #diff -u _tmp/opy-{stdlib,stdlib2}/SIZES.txt || true
-  compare-files _tmp/osh-{ccompile,compile2}/core/id_kind_test.pyc
+  #compare-files _tmp/osh-{ccompile,compile2}/core/id_kind_test.pyc
+  compare-files _tmp/osh-{ccompile,compile2}/core/testdbg.pyc
 }
 
 fill-osh-tree() {
@@ -396,28 +397,29 @@ unit-osh() {
 # byterun.  That would be a good comparison.
 
 compile-run-one() {
-  local t=${1:-core/id_kind_test.py}
-  local compiler=${2:-ccompile}  # or compile2
-  local vm=${3:-byterun}  # or cpython
+  local compiler=${1:-ccompile}  # or compile2
+  local vm=${2:-byterun}  # or cpython
+  shift 2
 
-  local pyc
-  if test $compiler = ccompile; then
-    dir=_tmp/osh-ccompile
-    pyc=$dir/${t}c
-    _ccompile-one ../$t $pyc
-  elif test $compiler = compile2; then
-    dir=_tmp/osh-compile2
-    pyc=$dir/${t}c
-    _compile2-one ../$t $pyc
-  else
-    die $compiler
+  local to_compile=(core/id_kind_test.py core/id_kind.py core/testdbg.py)
+
+  if ! { test $compiler = ccompile || test $compiler = compile2; } then
+    die "Invalid compiler $compiler"
   fi
+
+  dir=_tmp/osh-$compiler
+  for t in "${to_compile[@]}"; do
+    pyc=$dir/${t}c
+    _$compiler-one ../$t $pyc
+  done
+
+  local main="$dir/${to_compile[2]}c"
 
   export PYTHONPATH=$dir 
   if test $vm = cpython; then
-    python $pyc
+    python $main "$@"
   elif test $vm = byterun; then
-    byterun -c $pyc
+    byterun -c $main "$@"
   else
     die $vm
   fi
