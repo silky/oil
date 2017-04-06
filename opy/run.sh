@@ -11,6 +11,11 @@ source compare.sh
 
 readonly PY=$PY36
 
+die() {
+  echo "FATAL: $@" 1>&2
+  exit 1
+}
+
 _parse-one() {
   PYTHONPATH=. ./opy_main.py 2to3.grammar parse "$@"
 }
@@ -384,15 +389,32 @@ unit-osh() {
 # Oh you don't have a method of compling with the python VM.  Then run with
 # byterun.  That would be a good comparison.
 
-pyc-byterun() {
+compile-run-one() {
   local t=${1:-core/id_kind_test.py}
-  pushd ..
+  local compiler=${2:-ccompile}  # or compile2
+  local vm=${3:-byterun}  # or cpython
 
-  python -c 'from core import id_kind_test' || true
-  ls -l ${t}c
+  local pyc
+  if test $compiler = ccompile; then
+    dir=_tmp/osh-ccompile
+    pyc=$dir/${t}c
+    _ccompile-one ../$t $pyc
+  elif test $compiler = compile2; then
+    dir=_tmp/osh-compile2
+    pyc=$dir/${t}c
+    _compile2-one ../$t $pyc
+  else
+    die $compiler
+  fi
 
-  PYTHONPATH=. byterun -c ${t}c
-  popd
+  export PYTHONPATH=$dir 
+  if test $vm = cpython; then
+    python $pyc
+  elif test $vm = byterun; then
+    byterun -c $pyc
+  else
+    die $vm
+  fi
 }
 
 byterun() {
