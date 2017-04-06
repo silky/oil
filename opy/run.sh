@@ -314,6 +314,7 @@ compare-opy-tree() {
   compare-files _tmp/opy-{stdlib,compile2}/opy_main.pyc
 }
 
+
 compile-osh-tree() {
   local src=$(cd .. && echo $PWD)
   local files=( $(find $src \
@@ -325,6 +326,11 @@ compile-osh-tree() {
   _compile-tree $src _tmp/osh-ccompile/ ccompile "${files[@]}"
   _compile-tree $src _tmp/osh-stdlib/ stdlib "${files[@]}"
   _compile-tree $src _tmp/osh-compile2/ compiler2 "${files[@]}"
+}
+
+compare-osh-tree() {
+  #diff -u _tmp/opy-{stdlib,stdlib2}/SIZES.txt || true
+  compare-files _tmp/osh-{ccompile,compile2}/core/id_kind_test.pyc
 }
 
 fill-osh-tree() {
